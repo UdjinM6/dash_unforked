@@ -3734,7 +3734,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CTransac
                             strFailReason = _("Signing transaction failed");
                             return false;
                         } else {
-                            UpdateTransaction(txNew, nIn, sigdata);
+                            UpdateInput(txNew.vin.at(nIn), sigdata);
                         }
 
                         nIn++;
@@ -3924,7 +3924,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CTransac
                     strFailReason = _("Signing transaction failed");
                     return false;
                 } else {
-                    UpdateTransaction(txNew, nIn, sigdata);
+                    UpdateInput(txNew.vin.at(nIn), sigdata);
                 }
 
                 nIn++;
