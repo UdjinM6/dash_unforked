@@ -290,12 +290,16 @@ struct PSBTInput
                 case PSBT_IN_NON_WITNESS_UTXO:
                     if (non_witness_utxo) {
                         throw std::ios_base::failure("Duplicate Key, input non-witness utxo already provided");
+                    } else if (key.size() != 1) {
+                        throw std::ios_base::failure("Non-witness utxo key is more than one byte type");
                     }
                     UnserializeFromVector(s, non_witness_utxo);
                     break;
                 case PSBT_IN_WITNESS_UTXO:
                     if (!witness_utxo.IsNull()) {
                         throw std::ios_base::failure("Duplicate Key, input witness utxo already provided");
+                    } else if (key.size() != 1) {
+                        throw std::ios_base::failure("Witness utxo key is more than one byte type");
                     }
                     UnserializeFromVector(s, witness_utxo);
                     break;
@@ -325,6 +329,8 @@ struct PSBTInput
                 case PSBT_IN_SIGHASH:
                     if (sighash_type > 0) {
                         throw std::ios_base::failure("Duplicate Key, input sighash type already provided");
+                    } else if (key.size() != 1) {
+                        throw std::ios_base::failure("Sighash type key is more than one byte type");
                     }
                     UnserializeFromVector(s, sighash_type);
                     break;
@@ -332,6 +338,8 @@ struct PSBTInput
                 {
                     if (!redeem_script.empty()) {
                         throw std::ios_base::failure("Duplicate Key, input redeemScript already provided");
+                    } else if (key.size() != 1) {
+                        throw std::ios_base::failure("Input redeemScript key is more than one byte type");
                     }
                     s >> redeem_script;
                     break;
@@ -340,6 +348,8 @@ struct PSBTInput
                 {
                     if (!witness_script.empty()) {
                         throw std::ios_base::failure("Duplicate Key, input witnessScript already provided");
+                    } else if (key.size() != 1) {
+                        throw std::ios_base::failure("Input witnessScript key is more than one byte type");
                     }
                     s >> witness_script;
                     break;
@@ -353,6 +363,8 @@ struct PSBTInput
                 {
                     if (!final_script_sig.empty()) {
                         throw std::ios_base::failure("Duplicate Key, input final scriptSig already provided");
+                    } else if (key.size() != 1) {
+                        throw std::ios_base::failure("Final scriptSig key is more than one byte type");
                     }
                     s >> final_script_sig;
                     break;
@@ -361,6 +373,8 @@ struct PSBTInput
                 {
                     if (!final_script_witness.IsNull()) {
                         throw std::ios_base::failure("Duplicate Key, input final scriptWitness already provided");
+                    } else if (key.size() != 1) {
+                        throw std::ios_base::failure("Final scriptWitness key is more than one byte type");
                     }
                     UnserializeFromVector(s, final_script_witness.stack);
                     break;
@@ -448,6 +462,8 @@ struct PSBTOutput
                 {
                     if (!redeem_script.empty()) {
                         throw std::ios_base::failure("Duplicate Key, output redeemScript already provided");
+                    } else if (key.size() != 1) {
+                        throw std::ios_base::failure("Output redeemScript key is more than one byte type");
                     }
                     s >> redeem_script;
                     break;
@@ -456,6 +472,8 @@ struct PSBTOutput
                 {
                     if (!witness_script.empty()) {
                         throw std::ios_base::failure("Duplicate Key, output witnessScript already provided");
+                    } else if (key.size() != 1) {
+                        throw std::ios_base::failure("Output witnessScript key is more than one byte type");
                     }
                     s >> witness_script;
                     break;
@@ -570,6 +588,8 @@ struct PartiallySignedTransaction
                 {
                     if (tx) {
                         throw std::ios_base::failure("Duplicate Key, unsigned tx already provided");
+                    } else if (key.size() != 1) {
+                        throw std::ios_base::failure("Global unsigned tx key is more than one byte type");
                     }
                     CMutableTransaction mtx;
                     UnserializeFromVector(s, mtx);
