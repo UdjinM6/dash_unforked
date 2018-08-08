@@ -1260,6 +1260,9 @@ public:
 
     /** Whether a given output is spendable by this wallet */
     bool OutputEligibleForSpending(const COutput& output, const CoinEligibilityFilter& eligibility_filter) const;
+
+    /** Implement lookup of key origin information through wallet key metadata. */
+    bool GetKeyOrigin(const CKeyID& keyid, KeyOriginInfo& info) const override;
 };
 
 /** A key allocated from the key pool. */
