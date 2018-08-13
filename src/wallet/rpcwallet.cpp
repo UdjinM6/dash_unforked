@@ -4344,6 +4344,188 @@ static UniValue listlabels(const JSONRPCRequest& request)
     return ret;
 }
 
+
+UniValue dumphdinfo(const JSONRPCRequest& request);
+UniValue importelectrumwallet(const JSONRPCRequest& request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() < 1 || request.params.size() > 4)
+        throw std::runtime_error(
+            "walletprocesspsbt \"psbt\" ( sign \"sighashtype\" bip32derivs )\n"
+            "\nUpdate a PSBT with input information from our wallet and then sign inputs\n"
+            "that we can sign for.\n"
+            + HelpRequiringPassphrase(pwallet) + "\n"
+
+            "\nArguments:\n"
+            "1. \"psbt\"                      (string, required) The transaction base64 string\n"
+            "2. sign                          (boolean, optional, default=true) Also sign the transaction when updating\n"
+            "3. \"sighashtype\"            (string, optional, default=ALL) The signature hash type to sign with if not specified by the PSBT. Must be one of\n"
+            "       \"ALL\"\n"
+            "       \"NONE\"\n"
+            "       \"SINGLE\"\n"
+            "       \"ALL|ANYONECANPAY\"\n"
+            "       \"NONE|ANYONECANPAY\"\n"
+            "       \"SINGLE|ANYONECANPAY\"\n"
+            "4. bip32derivs                    (boolean, optiona, default=false) If true, includes the BIP 32 derivation paths for public keys if we know them\n"
+
+            "\nResult:\n"
+            "{\n"
+            "  \"psbt\" : \"value\",          (string) The base64-encoded partially signed transaction\n"
+            "  \"complete\" : true|false,   (boolean) If the transaction has a complete set of signatures\n"
+            "  ]\n"
+            "}\n"
+
+            "\nExamples:\n"
+            + HelpExampleCli("walletprocesspsbt", "\"psbt\"")
+        );
+
+    RPCTypeCheck(request.params, {UniValue::VSTR, UniValue::VBOOL, UniValue::VSTR});
+
+    // Unserialize the transaction
+    PartiallySignedTransaction psbtx;
+    std::string error;
+    if (!DecodePSBT(psbtx, request.params[0].get_str(), error)) {
+        throw JSONRPCError(RPC_DESERIALIZATION_ERROR, strprintf("TX decode failed %s", error));
+    }
+
+    // Get the sighash type
+    int nHashType = ParseSighashString(request.params[2]);
+
+    // Use CTransaction for the constant parts of the
+    // transaction to avoid rehashing.
+    const CTransaction txConst(*psbtx.tx);
+
+    // Fill transaction with our data and also sign
+    bool sign = request.params[1].isNull() ? true : request.params[1].get_bool();
+    bool bip32derivs = request.params[3].isNull() ? false : request.params[3].get_bool();
+    bool complete = FillPSBT(pwallet, psbtx, &txConst, nHashType, sign, bip32derivs);
+
+    UniValue result(UniValue::VOBJ);
+    CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+    ssTx << psbtx;
+    result.pushKV("psbt", EncodeBase64((unsigned char*)ssTx.data(), ssTx.size()));
+    result.pushKV("complete", complete);
+
+    return result;
+}
+
+UniValue walletcreatefundedpsbt(const JSONRPCRequest& request)
+{
+    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
+    CWallet* const pwallet = wallet.get();
+
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() < 2 || request.params.size() > 6)
+        throw std::runtime_error(
+                            "walletcreatefundedpsbt [{\"txid\":\"id\",\"vout\":n},...] [{\"address\":amount},{\"data\":\"hex\"},...] ( locktime ) ( replaceable ) ( options bip32derivs )\n"
+                            "\nCreates and funds a transaction in the Partially Signed Transaction format. Inputs will be added if supplied inputs are not enough\n"
+                            "Implements the Creator and Updater roles.\n"
+                            "\nArguments:\n"
+                            "1. \"inputs\"                (array, required) A json array of json objects\n"
+                            "     [\n"
+                            "       {\n"
+                            "         \"txid\":\"id\",      (string, required) The transaction id\n"
+                            "         \"vout\":n,         (numeric, required) The output number\n"
+                            "         \"sequence\":n      (numeric, optional) The sequence number\n"
+                            "       } \n"
+                            "       ,...\n"
+                            "     ]\n"
+                            "2. \"outputs\"               (array, required) a json array with outputs (key-value pairs)\n"
+                            "   [\n"
+                            "    {\n"
+                            "      \"address\": x.xxx,    (obj, optional) A key-value pair. The key (string) is the bitcoin address, the value (float or string) is the amount in " + CURRENCY_UNIT + "\n"
+                            "    },\n"
+                            "    {\n"
+                            "      \"data\": \"hex\"        (obj, optional) A key-value pair. The key must be \"data\", the value is hex encoded data\n"
+                            "    }\n"
+                            "    ,...                     More key-value pairs of the above form. For compatibility reasons, a dictionary, which holds the key-value pairs directly, is also\n"
+                            "                             accepted as second parameter.\n"
+                            "   ]\n"
+                            "3. locktime                  (numeric, optional, default=0) Raw locktime. Non-0 value also locktime-activates inputs\n"
+                            "4. replaceable               (boolean, optional, default=false) Marks this transaction as BIP125 replaceable.\n"
+                            "                             Allows this transaction to be replaced by a transaction with higher fees. If provided, it is an error if explicit sequence numbers are incompatible.\n"
+                            "5. options                 (object, optional)\n"
+                            "   {\n"
+                            "     \"changeAddress\"          (string, optional, default pool address) The bitcoin address to receive the change\n"
+                            "     \"changePosition\"         (numeric, optional, default random) The index of the change output\n"
+                            "     \"change_type\"            (string, optional) The output type to use. Only valid if changeAddress is not specified. Options are \"legacy\", \"p2sh-segwit\", and \"bech32\". Default is set by -changetype.\n"
+                            "     \"includeWatching\"        (boolean, optional, default false) Also select inputs which are watch only\n"
+                            "     \"lockUnspents\"           (boolean, optional, default false) Lock selected unspent outputs\n"
+                            "     \"feeRate\"                (numeric, optional, default not set: makes wallet determine the fee) Set a specific fee rate in " + CURRENCY_UNIT + "/kB\n"
+                            "     \"subtractFeeFromOutputs\" (array, optional) A json array of integers.\n"
+                            "                              The fee will be equally deducted from the amount of each specified output.\n"
+                            "                              The outputs are specified by their zero-based index, before any change output is added.\n"
+                            "                              Those recipients will receive less bitcoins than you enter in their corresponding amount field.\n"
+                            "                              If no outputs are specified here, the sender pays the fee.\n"
+                            "                                  [vout_index,...]\n"
+                            "     \"replaceable\"            (boolean, optional) Marks this transaction as BIP125 replaceable.\n"
+                            "                              Allows this transaction to be replaced by a transaction with higher fees\n"
+                            "     \"conf_target\"            (numeric, optional) Confirmation target (in blocks)\n"
+                            "     \"estimate_mode\"          (string, optional, default=UNSET) The fee estimate mode, must be one of:\n"
+                            "         \"UNSET\"\n"
+                            "         \"ECONOMICAL\"\n"
+                            "         \"CONSERVATIVE\"\n"
+                            "   }\n"
+                            "6. bip32derivs                    (boolean, optiona, default=false) If true, includes the BIP 32 derivation paths for public keys if we know them\n"
+                            "\nResult:\n"
+                            "{\n"
+                            "  \"psbt\": \"value\",        (string)  The resulting raw transaction (base64-encoded string)\n"
+                            "  \"fee\":       n,         (numeric) Fee in " + CURRENCY_UNIT + " the resulting transaction pays\n"
+                            "  \"changepos\": n          (numeric) The position of the added change output, or -1\n"
+                            "}\n"
+                            "\nExamples:\n"
+                            "\nCreate a transaction with no inputs\n"
+                            + HelpExampleCli("walletcreatefundedpsbt", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" \"[{\\\"data\\\":\\\"00010203\\\"}]\"")
+                            );
+
+    RPCTypeCheck(request.params, {
+        UniValue::VARR,
+        UniValueType(), // ARR or OBJ, checked later
+        UniValue::VNUM,
+        UniValue::VBOOL,
+        UniValue::VOBJ
+        }, true
+    );
+
+    CAmount fee;
+    int change_position;
+    CMutableTransaction rawTx = ConstructTransaction(request.params[0], request.params[1], request.params[2], request.params[3]);
+    FundTransaction(pwallet, rawTx, fee, change_position, request.params[4]);
+
+    // Make a blank psbt
+    PartiallySignedTransaction psbtx;
+    psbtx.tx = rawTx;
+    for (unsigned int i = 0; i < rawTx.vin.size(); ++i) {
+        psbtx.inputs.push_back(PSBTInput());
+    }
+    for (unsigned int i = 0; i < rawTx.vout.size(); ++i) {
+        psbtx.outputs.push_back(PSBTOutput());
+    }
+
+    // Use CTransaction for the constant parts of the
+    // transaction to avoid rehashing.
+    const CTransaction txConst(*psbtx.tx);
+
+    // Fill transaction with out data but don't sign
+    bool bip32derivs = request.params[5].isNull() ? false : request.params[5].get_bool();
+    FillPSBT(pwallet, psbtx, &txConst, 1, false, bip32derivs);
+
+    // Serialize the PSBT
+    CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+    ssTx << psbtx;
+
+    UniValue result(UniValue::VOBJ);
+    result.pushKV("psbt", EncodeBase64((unsigned char*)ssTx.data(), ssTx.size()));
+    result.pushKV("fee", ValueFromAmount(fee));
+    result.pushKV("changepos", change_position);
+    return result;
+}
+
 UniValue abortrescan(const JSONRPCRequest& request); // in rpcdump.cpp
 UniValue dumpprivkey(const JSONRPCRequest& request); // in rpcdump.cpp
 UniValue importprivkey(const JSONRPCRequest& request);
@@ -4354,10 +4536,6 @@ UniValue importwallet(const JSONRPCRequest& request);
 UniValue importprunedfunds(const JSONRPCRequest& request);
 UniValue removeprunedfunds(const JSONRPCRequest& request);
 UniValue importmulti(const JSONRPCRequest& request);
-UniValue rescanblockchain(const JSONRPCRequest& request);
-
-UniValue dumphdinfo(const JSONRPCRequest& request);
-UniValue importelectrumwallet(const JSONRPCRequest& request);
 
 static const CRPCCommand commands[] =
 { //  category              name                        actor (function)           argNames
