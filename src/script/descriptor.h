@@ -69,6 +69,9 @@
 // * E/Ih: hardened child (alternative notation)
 //
 // The top level is S.
+//
+// Reference documentation about the descriptor language can be found in
+// doc/descriptors.md.
 
 /** Interface for parsed descriptor objects. */
 struct Descriptor {
