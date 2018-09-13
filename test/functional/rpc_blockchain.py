@@ -51,6 +51,9 @@ class BlockchainTest(BitcoinTestFramework):
         self.num_nodes = 1
         self.setup_clean_chain = True
 
+    def skip_test_if_missing_module(self):
+        self.skip_if_no_wallet()
+
     def run_test(self):
         # Have to prepare the chain manually here.
         # txindex=1 by default in Dash which is incompatible with pruning.
@@ -183,7 +186,7 @@ class BlockchainTest(BitcoinTestFramework):
         assert_equal(res['transactions'], 200)
         assert_equal(res['height'], 200)
         assert_equal(res['txouts'], 200)
-        assert_equal(res['bogosize'], 17000),
+        assert_equal(res['bogosize'], 15000),
         size = res['disk_size']
         assert size > 6400
         assert size < 64000
