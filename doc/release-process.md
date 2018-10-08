@@ -270,6 +270,12 @@ Note: check that SHA256SUMS itself doesn't end up in SHA256SUMS, which is a spur
 
   - Optionally Discord, twitter, reddit /r/Dashpay, ... but this will usually sort out itself
 
+  - dash.org RPC documentation update
+
+  - Update title of #dash on Freenode IRC
+
+  - Optionally twitter, reddit /r/Bitcoin, ... but this will usually sort out itself
+
   - Notify flare so that he can start building [the PPAs](https://launchpad.net/~dash.org/+archive/ubuntu/dash)
 
   - Archive release notes for the new version to `doc/release-notes/` (branch `master` and branch of the release)
