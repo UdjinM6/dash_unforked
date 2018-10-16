@@ -847,22 +847,24 @@ void BitcoinGUI::createIconMenu(QMenu *pmenu)
     // Configuration of the tray icon (or dock icon) icon menu
     pmenu->addAction(toggleHideAction);
     pmenu->addSeparator();
-    pmenu->addAction(sendCoinsMenuAction);
-    pmenu->addAction(coinJoinCoinsMenuAction);
-    pmenu->addAction(receiveCoinsMenuAction);
-    pmenu->addSeparator();
-    pmenu->addAction(signMessageAction);
-    pmenu->addAction(verifyMessageAction);
-    pmenu->addSeparator();
+    if (enableWallet) {
+        pmenu->addAction(sendCoinsMenuAction);
+        pmenu->addAction(coinJoinCoinsMenuAction);
+        pmenu->addAction(receiveCoinsMenuAction);
+        pmenu->addSeparator();
+        pmenu->addAction(signMessageAction);
+        pmenu->addAction(verifyMessageAction);
+        pmenu->addSeparator();
+        pmenu->addAction(openRPCConsoleAction);
+        pmenu->addAction(openRepairAction);
+        pmenu->addAction(showBackupsAction);
+    }
     pmenu->addAction(optionsAction);
     pmenu->addAction(openInfoAction);
-    pmenu->addAction(openRPCConsoleAction);
     pmenu->addAction(openGraphAction);
     pmenu->addAction(openPeersAction);
-    pmenu->addAction(openRepairAction);
     pmenu->addSeparator();
     pmenu->addAction(openConfEditorAction);
-    pmenu->addAction(showBackupsAction);
 #ifndef Q_OS_MAC // This is built-in on Mac
     pmenu->addSeparator();
     pmenu->addAction(quitAction);
