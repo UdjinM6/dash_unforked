@@ -2,6 +2,11 @@ Dash Core
 ==========
 
 This is the official reference wallet for Dash digital currency and comprises the backbone of the Dash peer-to-peer network. You can [download Dash Core](https://www.dash.org/downloads/) or [build it yourself](#building) using the guides below.
+Setup
+---------------------
+Dash Core is the original Dash client and it builds the backbone of the network. It downloads and, by default, stores the entire history of Dash transactions, which requires a few hundred gigabytes of disk space. Depending on the speed of your computer and network connection, the synchronization process can take anywhere from a few hours to a day or more.
+
+To download Dash Core, visit [dash.org](https://www.dash.org/downloads/).
 
 Running
 ---------------------
