@@ -402,6 +402,7 @@ class P2PInterface(P2PConnection):
 
     def on_verack(self, message):
         self.verack_received = True
+        pass
 
     def on_version(self, message):
         assert message.nVersion >= MIN_VERSION_SUPPORTED, "Version {} received. Test framework only supports versions greater than {}".format(message.nVersion, MIN_VERSION_SUPPORTED)
