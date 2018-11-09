@@ -36,7 +36,8 @@ public:
     CTransactionBuilderTestSetup()
     {
         CreateAndProcessBlock({}, GetScriptForRawPubKey(coinbaseKey.GetPubKey()));
-        wallet = MakeUnique<CWallet>(WalletLocation(), WalletDatabase::CreateMock());
+        auto testChain = interfaces::MakeChain();
+        wallet = MakeUnique<CWallet>(*testChain, WalletLocation(), WalletDatabase::CreateMock());
         bool firstRun;
         wallet->LoadWallet(firstRun);
         AddWallet(wallet);
@@ -85,9 +86,10 @@ public:
         CPubKey pubKey;
         BOOST_CHECK(destKey.GetReservedKey(pubKey, false));
         tallyItem.txdest = pubKey.GetID();
+        auto locked_chain = wallet->chain().lock();
 
         for (CAmount nAmount : vecAmounts) {
-            BOOST_CHECK(wallet->CreateTransaction({{GetScriptForDestination(tallyItem.txdest), nAmount, false}}, tx, reserveKey, nFeeRet, nChangePosRet, strError, coinControl));
+            BOOST_CHECK(wallet->CreateTransaction(*locked_chain, {{GetScriptForDestination(tallyItem.txdest), nAmount, false}}, tx, reserveKey, nFeeRet, nChangePosRet, strError, coinControl));
             CValidationState state;
             BOOST_CHECK(wallet->CommitTransaction(tx, {}, {}, {}, reserveKey, nullptr, state));
             AddTxToChain(tx->GetHash());

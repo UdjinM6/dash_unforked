@@ -203,7 +203,8 @@ static UniValue masternode_outputs(const JSONRPCRequest& request)
     std::vector<COutput> vPossibleCoins;
     CCoinControl coin_control;
     coin_control.nCoinType = CoinType::ONLY_MASTERNODE_COLLATERAL;
-    pwallet->AvailableCoins(vPossibleCoins, true, &coin_control);
+    auto locked_chain = pwallet->chain().lock();
+    pwallet->AvailableCoins(*locked_chain, vPossibleCoins, true, &coin_control);
 
     UniValue obj(UniValue::VOBJ);
     for (const auto& out : vPossibleCoins) {
