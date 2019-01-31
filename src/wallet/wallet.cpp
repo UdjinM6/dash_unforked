@@ -4937,6 +4937,9 @@ bool CWallet::Verify(const WalletLocation& location, bool salvage_wallet, std::s
         return false;
     }
 
+    // Keep same database environment instance across Verify/Recover calls below.
+    std::unique_ptr<WalletDatabase> database = WalletDatabase::Create(wallet_path);
+
     try {
         if (!WalletBatch::VerifyEnvironment(wallet_path, error_string)) {
             return false;
@@ -5388,7 +5391,7 @@ bool CWallet::AutoBackupWallet(const fs::path& wallet_path, std::string& strBack
     } else {
         // ... strWalletName file
         std::string strSourceFile;
-        BerkeleyEnvironment* env = GetWalletEnv(wallet_path, strSourceFile);
+        std::shared_ptr<BerkeleyEnvironment> env = GetWalletEnv(wallet_path, strSourceFile);
         fs::path sourceFile = env->Directory() / strSourceFile;
         fs::path backupFile = backupsDir / (strWalletName + dateTimeStr);
         sourceFile.make_preferred();
