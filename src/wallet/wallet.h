@@ -12,7 +12,7 @@
 #include <interfaces/handler.h>
 #include <policy/feerate.h>
 #include <saltedhasher.h>
-#include <script/ismine.h>
+#include <streams.h>
 #include <tinyformat.h>
 #include <ui_interface.h>
 #include <util/system.h>
@@ -21,6 +21,7 @@
 #include <wallet/coincontrol.h>
 #include <wallet/crypter.h>
 #include <wallet/coinselection.h>
+#include <wallet/ismine.h>
 #include <wallet/walletdb.h>
 #include <wallet/walletutil.h>
 
