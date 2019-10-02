@@ -38,6 +38,10 @@ extern RecursiveMutex cs_wallets;
 
 BOOST_FIXTURE_TEST_SUITE(wallet_tests, WalletTestingSetup)
 
+namespace {
+constexpr CAmount defaultFallbackFee = 1000;
+} // anonymous namespace
+
 static std::shared_ptr<CWallet> TestLoadWallet(interfaces::Chain& chain)
 {
     DatabaseOptions options;
@@ -869,7 +873,7 @@ BOOST_FIXTURE_TEST_CASE(CreateTransactionTest, CreateTransactionTestSetup)
         coinControl.Select(GetCoins({{100000, false}})[0]);
 
         // Start with fallback feerate
-        runTest(1, DEFAULT_FALLBACK_FEE, {
+        runTest(1, defaultFallbackFee, {
             {0, {true, ChangeTest::ChangeExpected}},
             {1, {true, ChangeTest::ChangeExpected}},
             {2, {true, ChangeTest::ChangeExpected}},
@@ -886,7 +890,7 @@ BOOST_FIXTURE_TEST_CASE(CreateTransactionTest, CreateTransactionTestSetup)
             {13, {false, ChangeTest::Skip}}
         });
         // Now with 100x fallback feerate
-        runTest(2, DEFAULT_FALLBACK_FEE * 100, {
+        runTest(2, defaultFallbackFee * 100, {
             {0, {true, ChangeTest::ChangeExpected}},
             {1, {false, ChangeTest::Skip}},
             {2, {true, ChangeTest::ChangeExpected}},
@@ -912,7 +916,7 @@ BOOST_FIXTURE_TEST_CASE(CreateTransactionTest, CreateTransactionTestSetup)
         }
 
         // Start with fallback feerate
-        runTest(3, DEFAULT_FALLBACK_FEE, {
+        runTest(3, defaultFallbackFee, {
             {0, {true, ChangeTest::ChangeExpected}},
             {1, {false, ChangeTest::Skip}},
             {2, {true, ChangeTest::ChangeExpected}},
@@ -929,7 +933,7 @@ BOOST_FIXTURE_TEST_CASE(CreateTransactionTest, CreateTransactionTestSetup)
             {13, {false, ChangeTest::Skip}}
         });
         // Now with 100x fallback feerate
-        runTest(4, DEFAULT_FALLBACK_FEE * 100, {
+        runTest(4, defaultFallbackFee * 100, {
             {0, {true, ChangeTest::ChangeExpected}},
             {1, {false, ChangeTest::Skip}},
             {2, {true, ChangeTest::ChangeExpected}},
@@ -958,7 +962,7 @@ BOOST_FIXTURE_TEST_CASE(CreateTransactionTest, CreateTransactionTestSetup)
         }
 
         // Start with fallback feerate
-        runTest(5, DEFAULT_FALLBACK_FEE, {
+        runTest(5, defaultFallbackFee, {
             {0, {true, ChangeTest::ChangeExpected}},
             {1, {false, ChangeTest::Skip}},
             {2, {true, ChangeTest::ChangeExpected}},
@@ -975,7 +979,7 @@ BOOST_FIXTURE_TEST_CASE(CreateTransactionTest, CreateTransactionTestSetup)
             {13, {false, ChangeTest::Skip}}
         });
         // Now with 100x fallback feerate
-        runTest(6, DEFAULT_FALLBACK_FEE * 100, {
+        runTest(6, defaultFallbackFee * 100, {
             {0, {false, ChangeTest::Skip}},
             {1, {false, ChangeTest::Skip}},
             {2, {false, ChangeTest::Skip}},
