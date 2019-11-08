@@ -151,10 +151,9 @@ BerkeleyEnvironment::~BerkeleyEnvironment()
 
 bool BerkeleyEnvironment::Open(bool retry)
 {
-    if (fDbEnvInit)
+    if (fDbEnvInit) {
         return true;
-
-    boost::this_thread::interruption_point();
+    }
 
     fs::path pathIn = strPath;
     TryCreateDirectories(pathIn);
@@ -223,12 +222,10 @@ bool BerkeleyEnvironment::Open(bool retry)
     return true;
 }
 
-//! Construct an in-memory mock Berkeley environment for testing and as a place-holder for g_dbenvs emplace
+//! Construct an in-memory mock Berkeley environment for testing
 BerkeleyEnvironment::BerkeleyEnvironment()
 {
     Reset();
-
-    boost::this_thread::interruption_point();
 
     LogPrint(BCLog::DB, "BerkeleyEnvironment::MakeMock\n");
 
@@ -248,8 +245,9 @@ BerkeleyEnvironment::BerkeleyEnvironment()
                              DB_THREAD |
                              DB_PRIVATE,
                          S_IRUSR | S_IWUSR);
-    if (ret > 0)
+    if (ret > 0) {
         throw std::runtime_error(strprintf("BerkeleyEnvironment::MakeMock: Error %d opening database environment.", ret));
+    }
 
     fDbEnvInit = true;
     fMockDb = true;
