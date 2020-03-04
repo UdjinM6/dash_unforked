@@ -2587,7 +2587,7 @@ static UniValue listwalletdir(const JSONRPCRequest& request)
                         {RPCResult::Type::STR, "name", "The wallet name"},
                     }},
                 }},
-            }
+                    }
         },
         RPCExamples{
             HelpExampleCli("listwalletdir", "")
@@ -2617,7 +2617,7 @@ static UniValue listwallets(const JSONRPCRequest& request)
             RPCResult::Type::ARR, "", "",
             {
                 {RPCResult::Type::STR, "walletname", "the wallet name"},
-            }
+                    }
         },
         RPCExamples{
             HelpExampleCli("listwallets", "")
@@ -3820,7 +3820,7 @@ static UniValue listlabels(const JSONRPCRequest& request)
             RPCResult::Type::ARR, "", "",
             {
                 {RPCResult::Type::STR, "label", "Label name"},
-            }
+                    }
         },
         RPCExamples{
     "\nList all labels\n"

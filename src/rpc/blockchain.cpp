@@ -577,7 +577,7 @@ static UniValue getrawmempool(const JSONRPCRequest& request)
                 {
                     {RPCResult::Type::STR_HEX, "", "The transaction id"},
                 }},
-            RPCResult{"for verbose = true",
+                RPCResult{"for verbose = true",
                 RPCResult::Type::OBJ, "", "",
                 {
                     {RPCResult::Type::OBJ_DYN, "transactionid", "", MempoolEntryDescription()},
