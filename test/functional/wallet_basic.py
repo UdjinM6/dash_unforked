@@ -223,7 +223,60 @@ class WalletTest(BitcoinTestFramework):
 
         self.start_node(3)
         self.connect_nodes(0, 3)
-        self.sync_all()
+        # Sendmany with explicit fee (DASH/kB)
+        # Throw if no conf_target provided
+        assert_raises_rpc_error(-8, "Selected estimate_mode requires a fee rate",
+            self.nodes[2].sendmany,
+            amounts={ address: 10 },
+            estimate_mode='dash/kB')
+        # Throw if negative feerate
+        assert_raises_rpc_error(-3, "Amount out of range",
+            self.nodes[2].sendmany,
+            amounts={ address: 10 },
+            conf_target=-1,
+            estimate_mode='dash/kB')
+        fee_per_kb = 0.0002500
+        explicit_fee_per_byte = Decimal(fee_per_kb) / 1000
+        txid = self.nodes[2].sendmany(
+            amounts={ address: 10 },
+            conf_target=fee_per_kb,
+            estimate_mode='dash/kB',
+        )
+        self.nodes[2].generate(1)
+        self.sync_all(self.nodes[0:3])
+        node_2_bal = self.check_fee_amount(self.nodes[2].getbalance(), node_2_bal - Decimal('10'), explicit_fee_per_byte, count_bytes(self.nodes[2].gettransaction(txid)['hex']))
+        assert_equal(self.nodes[2].getbalance(), node_2_bal)
+        node_0_bal += Decimal('10')
+        assert_equal(self.nodes[0].getbalance(), node_0_bal)
+
+        # Sendmany with explicit fee (DUFFS/B)
+        # Throw if no conf_target provided
+        assert_raises_rpc_error(-8, "Selected estimate_mode requires a fee rate",
+            self.nodes[2].sendmany,
+            amounts={ address: 10 },
+            estimate_mode='duffs/b')
+        # Throw if negative feerate
+        assert_raises_rpc_error(-3, "Amount out of range",
+            self.nodes[2].sendmany,
+            amounts={ address: 10 },
+            conf_target=-1,
+            estimate_mode='duffs/b')
+        fee_duffs_per_b = 2
+        fee_per_kb = fee_duffs_per_b / 100000.0
+        explicit_fee_per_byte = Decimal(fee_per_kb) / 1000
+        txid = self.nodes[2].sendmany(
+            amounts={ address: 10 },
+            conf_target=fee_duffs_per_b,
+            estimate_mode='duffs/b',
+        )
+        self.nodes[2].generate(1)
+        self.sync_all(self.nodes[0:3])
+        balance = self.nodes[2].getbalance()
+        node_2_bal = self.check_fee_amount(balance, node_2_bal - Decimal('10'), explicit_fee_per_byte, count_bytes(self.nodes[2].gettransaction(txid)['hex']))
+        assert_equal(balance, node_2_bal)
+        node_0_bal += Decimal('10')
+        assert_equal(self.nodes[0].getbalance(), node_0_bal)
+
 
         # check if we can list zero value tx as available coins
         # 1. create raw_tx
