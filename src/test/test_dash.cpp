@@ -136,6 +136,7 @@ TestingSetup::~TestingSetup()
 
 TestChainSetup::TestChainSetup(int blockCount) : TestingSetup(CBaseChainParams::REGTEST)
 {
+    UpdateDIP3Parameters(432, 500);
     // Generate a 100-block chain:
     coinbaseKey.MakeNewKey(true);
     CScript scriptPubKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;

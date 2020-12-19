@@ -62,7 +62,7 @@ def create_transaction(node, coinbase, to_address, amount):
 class BIP65Test(BitcoinTestFramework):
     def set_test_params(self):
         self.num_nodes = 1
-        self.extra_args = [['-whitelist=127.0.0.1', '-dip3params=9000:9000']]
+        self.extra_args = [['-whitelist=127.0.0.1']]
         self.setup_clean_chain = True
 
     def run_test(self):

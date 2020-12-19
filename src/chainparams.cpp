@@ -898,8 +898,8 @@ public:
         consensus.BIP65Height = 1351; // BIP65 activated on regtest (Used in rpc activation tests)
         consensus.BIP66Height = 1251; // BIP66 activated on regtest (Used in rpc activation tests)
         consensus.DIP0001Height = 2000;
-        consensus.DIP0003Height = 432;
-        consensus.DIP0003EnforcementHeight = 500;
+        consensus.DIP0003Height = 10000;
+        consensus.DIP0003EnforcementHeight = 11000;
         consensus.DIP0003EnforcementHash = uint256();
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~uint256(0) >> 1
         consensus.nPowTargetTimespan = 24 * 60 * 60; // Dash: 1 day

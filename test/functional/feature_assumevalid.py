@@ -57,7 +57,7 @@ class AssumeValidTest(BitcoinTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 3
-        self.extra_args = ["-dip3params=9000:9000", "-checkblockindex=0"]
+        self.extra_args = ["-checkblockindex=0"]
 
     def setup_network(self):
         self.add_nodes(3)
