@@ -89,7 +89,7 @@ class DashZMQTest (DashTestFramework):
         node0_extra_args = ["-zmqpub%s=%s" % (pub.value, self.address) for pub in ZMQPublisher]
         node0_extra_args.append("-whitelist=127.0.0.1")
 
-        self.set_dash_test_params(4, 3, fast_dip3_enforcement=True, extra_args=[node0_extra_args, [], [], []])
+        self.set_dash_test_params(4, 3, extra_args=[node0_extra_args, [], [], []])
 
     def run_test(self):
         # Check that dashd has been built with ZMQ enabled.

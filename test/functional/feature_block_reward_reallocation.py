@@ -19,7 +19,7 @@ Checks block reward reallocation correctness
 
 class BlockRewardReallocationTest(DashTestFramework):
     def set_test_params(self):
-        self.set_dash_test_params(2, 1, fast_dip3_enforcement=True)
+        self.set_dash_test_params(2, 1)
         self.set_dash_dip8_activation(450)
 
     # 536870912 == 0x20000000, i.e. not signalling for anything
@@ -79,11 +79,6 @@ class BlockRewardReallocationTest(DashTestFramework):
         return threshold_calc
 
     def run_test(self):
-        self.log.info("Wait for DIP3 to activate")
-        while get_bip9_status(self.nodes[0], 'dip0003')['status'] != 'active':
-            self.bump_mocktime(10)
-            self.nodes[0].generate(10)
-
         self.nodes[0].add_p2p_connection(P2PDataStore())
         network_thread_start()
         self.nodes[0].p2p.wait_for_verack()
