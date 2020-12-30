@@ -35,7 +35,7 @@ class LLMQConnections(DashTestFramework):
         self.check_reconnects(2)
 
         self.log.info("Activating SPORK_23_QUORUM_POSE")
-        self.nodes[0].spork("SPORK_23_QUORUM_POSE", 0)
+        self.nodes[0].spork("SPORK_23_QUORUM_POSE", 100)
         self.wait_for_sporks_same()
 
         self.log.info("mining one block and waiting for all members to connect to each other")
@@ -61,7 +61,7 @@ class LLMQConnections(DashTestFramework):
             wait_until(lambda: self.get_mn_probe_count(mn.node, q, True) == 4)
 
         self.log.info("Activating SPORK_21_QUORUM_ALL_CONNECTED")
-        self.nodes[0].spork("SPORK_21_QUORUM_ALL_CONNECTED", 0)
+        self.nodes[0].spork("SPORK_21_QUORUM_ALL_CONNECTED", 100)
         self.wait_for_sporks_same()
 
         self.check_reconnects(4)

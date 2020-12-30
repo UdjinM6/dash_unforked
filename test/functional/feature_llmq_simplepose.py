@@ -33,8 +33,8 @@ class LLMQSimplePoSeTest(DashTestFramework):
 
         self.repair_masternodes(False)
 
-        self.nodes[0].spork("SPORK_21_QUORUM_ALL_CONNECTED", 0)
-        self.nodes[0].spork("SPORK_23_QUORUM_POSE", 0)
+        self.nodes[0].spork("SPORK_21_QUORUM_ALL_CONNECTED", 100)
+        self.nodes[0].spork("SPORK_23_QUORUM_POSE", 100)
         self.wait_for_sporks_same()
 
         self.reset_probe_timeouts()
@@ -51,7 +51,7 @@ class LLMQSimplePoSeTest(DashTestFramework):
         self.test_banning(self.force_old_mn_proto, 3)
 
         # With PoSe off there should be no punishing for non-reachable and outdated nodes
-        self.nodes[0].spork("SPORK_23_QUORUM_POSE", 4070908800)
+        self.nodes[0].spork("SPORK_23_QUORUM_POSE", 0)
         self.wait_for_sporks_same()
 
         self.repair_masternodes(True)

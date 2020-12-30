@@ -231,13 +231,9 @@ public:
     bool UpdateSpork(SporkId nSporkID, int64_t nValue, CConnman& connman);
 
     /**
-     * IsSporkActive returns a bool for time-based sporks, and should be used
-     * to determine whether the spork can be considered active or not.
-     *
-     * For value-based sporks such as SPORK_5_INSTANTSEND_MAX_VALUE, the spork
-     * value should not be considered a timestamp, but an integer value
-     * instead, and therefore this method doesn't make sense and should not be
-     * used.
+     * IsSporkActive treats all sporks as time-based ones by default.
+     * Make sure to implement spork specific logic for value-based sporks
+     * or results of this method will not make sense otherwise.
      */
     bool IsSporkActive(SporkId nSporkID);
 

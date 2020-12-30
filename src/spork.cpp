@@ -22,8 +22,8 @@ std::vector<CSporkDef> sporkDefs = {
     MAKE_SPORK_DEF(SPORK_9_SUPERBLOCKS_ENABLED,            4070908800ULL), // OFF
     MAKE_SPORK_DEF(SPORK_17_QUORUM_DKG_ENABLED,            4070908800ULL), // OFF
     MAKE_SPORK_DEF(SPORK_19_CHAINLOCKS_ENABLED,            4070908800ULL), // OFF
-    MAKE_SPORK_DEF(SPORK_21_QUORUM_ALL_CONNECTED,          4070908800ULL), // OFF
-    MAKE_SPORK_DEF(SPORK_23_QUORUM_POSE,                   4070908800ULL), // OFF
+    MAKE_SPORK_DEF(SPORK_21_QUORUM_ALL_CONNECTED,                      0), // OFF
+    MAKE_SPORK_DEF(SPORK_23_QUORUM_POSE,                               0), // OFF
 };
 
 CSporkManager sporkManager;
@@ -212,7 +212,13 @@ bool CSporkManager::UpdateSpork(SporkId nSporkID, int64_t nValue, CConnman& conn
 bool CSporkManager::IsSporkActive(SporkId nSporkID)
 {
     int64_t nSporkValue = GetSporkValue(nSporkID);
-    return nSporkValue < GetAdjustedTime();
+    switch(nSporkID) {
+        case SPORK_21_QUORUM_ALL_CONNECTED:
+        case SPORK_23_QUORUM_POSE:
+            return nSporkValue > 0;
+        default:
+            return nSporkValue < GetAdjustedTime();
+    }
 }
 
 int64_t CSporkManager::GetSporkValue(SporkId nSporkID)

@@ -52,11 +52,22 @@ uint256 CLLMQUtils::BuildSignHash(Consensus::LLMQType llmqType, const uint256& q
 
 static bool EvalSpork(Consensus::LLMQType llmqType, int64_t spork_value)
 {
+    // Each llmq type occupies 8 bits which means that we can enable
+    // up to 7 llmq types simultaneously via a single spork value
+    // while preserving upper 8 bits for additional flags
+    // e.g. 1 << 56 for all ON etc.
     if (spork_value == 0) {
+        return false;
+    }
+    if (spork_value == (1 << 56)) {
+        // all ON
         return true;
     }
-    if (spork_value == 1 && llmqType != Consensus::LLMQ_100_67 && llmqType != Consensus::LLMQ_400_60 && llmqType != Consensus::LLMQ_400_85) {
-        return true;
+    for (uint8_t slot = 0; slot < 7; ++slot) {
+        uint8_t spork_value_clamped = (spork_value >> (8 * slot)) & 0xff;
+        if (spork_value_clamped == (uint8_t)llmqType) {
+            return true;
+        }
     }
     return false;
 }
