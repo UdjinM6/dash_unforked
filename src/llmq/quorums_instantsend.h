@@ -22,6 +22,7 @@ class CInstantSendLock
 public:
     std::vector<COutPoint> inputs;
     uint256 txid;
+    uint256 dkgBlockHash;
     CBLSLazySignature sig;
 
 public:
@@ -33,6 +34,15 @@ public:
         READWRITE(inputs);
         READWRITE(txid);
         READWRITE(sig);
+        if (s.GetVersion() >= MULTI_QUORUM_CHAINLOCKS_VERSION) {
+            if ((s.GetType() & SER_GETHASH) && !ser_action.ForRead()) {
+                // do not hash dkgBlockHash in old format
+                if (dkgBlockHash.IsNull()) {
+                    return;
+                }
+            }
+            READWRITE(dkgBlockHash);
+        }
     }
 
     uint256 GetRequestId() const;

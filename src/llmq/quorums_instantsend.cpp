@@ -420,14 +420,14 @@ void CInstantSendManager::ProcessTx(const CTransaction& tx, bool fRetroactive, c
 
     // In case the islock was received before the TX, filtered announcement might have missed this islock because
     // we were unable to check for filter matches deep inside the TX. Now we have the TX, so we should retry.
-    uint256 islockHash;
+    CInstantSendLockPtr islock;
     {
         LOCK(cs);
-        islockHash = db.GetInstantSendLockHashByTxid(tx.GetHash());
+        islock = db.GetInstantSendLockByTxid(tx.GetHash());
     }
-    if (!islockHash.IsNull()) {
-        CInv inv(MSG_ISLOCK, islockHash);
-        g_connman->RelayInvFiltered(inv, tx, LLMQS_PROTO_VERSION);
+    if (islock != nullptr) {
+        CInv inv(MSG_ISLOCK, ::SerializeHash(*islock));
+        g_connman->RelayInvFiltered(inv, tx, islock->dkgBlockHash.IsNull() ? LLMQS_PROTO_VERSION : MULTI_QUORUM_CHAINLOCKS_VERSION);
     }
 
     if (!CheckCanLock(tx, true, params)) {
@@ -653,6 +653,12 @@ void CInstantSendManager::TrySignInstantSendLock(const CTransaction& tx)
     for (auto& in : tx.vin) {
         islock.inputs.emplace_back(in.prevout);
     }
+    {
+        LOCK(cs_main);
+        int dkgInterval = Params().GetConsensus().llmqs.at(llmqType).dkgInterval;
+        int nLastDkgHeight = int(chainActive.Height() / dkgInterval) * dkgInterval;
+        islock.dkgBlockHash = chainActive.Tip()->GetAncestor(nLastDkgHeight)->GetBlockHash();
+    }
 
     auto id = islock.GetRequestId();
 
@@ -756,6 +762,16 @@ bool CInstantSendManager::PreVerifyInstantSendLock(const llmq::CInstantSendLock&
         }
     }
 
+    if (!islock.dkgBlockHash.IsNull()) {
+        LOCK(cs_main);
+        auto llmqType = Params().GetConsensus().llmqTypeInstantSend;
+        int dkgInterval = Params().GetConsensus().llmqs.at(llmqType).dkgInterval;
+        auto pindex = LookupBlockIndex(islock.dkgBlockHash);
+        if (pindex == nullptr || pindex->nHeight % dkgInterval > 0) {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -843,7 +859,22 @@ std::unordered_set<uint256> CInstantSendManager::ProcessPendingInstantSendLocks(
             continue;
         }
 
-        auto quorum = quorumSigningManager->SelectQuorumForSigning(llmqType, id, -1, signOffset);
+        int nSignHeight{-1};
+        if (!islock->dkgBlockHash.IsNull()) {
+            LOCK(cs_main);
+            auto pindex = LookupBlockIndex(islock->dkgBlockHash);
+            if (pindex == nullptr) {
+                // shouldn't happen, PreVerifyInstantSendLock should take care of this
+                batchVerifier.badSources.emplace(nodeId);
+                continue;
+            }
+            auto dkgInterval = Params().GetConsensus().llmqs.at(llmqType).dkgInterval;
+            if (pindex->nHeight + dkgInterval < chainActive.Height()) {
+                nSignHeight = pindex->nHeight + dkgInterval - 1;
+            }
+        }
+
+        auto quorum = quorumSigningManager->SelectQuorumForSigning(llmqType, id, nSignHeight, signOffset);
         if (!quorum) {
             // should not happen, but if one fails to select, all others will also fail to select
             return {};
@@ -979,11 +1010,11 @@ void CInstantSendManager::ProcessInstantSendLock(NodeId from, const uint256& has
 
     CInv inv(MSG_ISLOCK, hash);
     if (tx != nullptr) {
-        g_connman->RelayInvFiltered(inv, *tx, LLMQS_PROTO_VERSION);
+        g_connman->RelayInvFiltered(inv, *tx, islock->dkgBlockHash.IsNull() ? LLMQS_PROTO_VERSION : MULTI_QUORUM_CHAINLOCKS_VERSION);
     } else {
         // we don't have the TX yet, so we only filter based on txid. Later when that TX arrives, we will re-announce
         // with the TX taken into account.
-        g_connman->RelayInvFiltered(inv, islock->txid, LLMQS_PROTO_VERSION);
+        g_connman->RelayInvFiltered(inv, islock->txid, islock->dkgBlockHash.IsNull() ? LLMQS_PROTO_VERSION : MULTI_QUORUM_CHAINLOCKS_VERSION);
     }
 
     RemoveMempoolConflictsForLock(hash, *islock);

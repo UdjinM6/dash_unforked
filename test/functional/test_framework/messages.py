@@ -1563,25 +1563,28 @@ class msg_clsig():
 class msg_islock():
     command = b"islock"
 
-    def __init__(self, inputs=[], txid=0, sig=b'\\x0' * 96):
+    def __init__(self, inputs=[], txid=0, sig=b'\\x0' * 96, dkgBlockHash=0):
         self.inputs = inputs
         self.txid = txid
         self.sig = sig
+        self.dkgBlockHash = dkgBlockHash
 
     def deserialize(self, f):
         self.inputs = deser_vector(f, COutPoint)
         self.txid = deser_uint256(f)
         self.sig = f.read(96)
+        self.dkgBlockHash = deser_uint256(f)
 
     def serialize(self):
         r = b""
         r += ser_vector(self.inputs)
         r += ser_uint256(self.txid)
         r += self.sig
+        r += ser_uint256(self.dkgBlockHash)
         return r
 
     def __repr__(self):
-        return "msg_islock(inputs=%s, txid=%064x)" % (repr(self.inputs), self.txid)
+        return "msg_islock(inputs=%s, txid=%064x, dkgBlockHash=%064x)" % (repr(self.inputs), self.txid, self.dkgBlockHash)
 
 
 class msg_qsigshare():

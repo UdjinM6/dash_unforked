@@ -12,6 +12,7 @@ import logging
 import optparse
 import os
 import pdb
+import random
 import shutil
 import sys
 import tempfile
@@ -820,7 +821,9 @@ class DashTestFramework(BitcoinTestFramework):
                 quorum_member = mn
 
         rec_sig = self.get_recovered_sig(request_id, message_hash, node=quorum_member.node)
-        islock = msg_islock(inputs, tx.sha256, hex_str_to_bytes(rec_sig['sig']))
+        blc_cnt = quorum_member.node.getblockcount()
+        recent_dkg_sha256 = int(quorum_member.node.getblockhash(blc_cnt - (blc_cnt % 24)), 16) if random.random() < 0.5 else 0
+        islock = msg_islock(inputs, tx.sha256, hex_str_to_bytes(rec_sig['sig']), recent_dkg_sha256)
         return islock
 
     def wait_for_instantlock(self, txid, node, expected=True, timeout=15):
