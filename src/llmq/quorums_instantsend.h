@@ -20,22 +20,33 @@ namespace llmq
 class CInstantSendLock
 {
 public:
+    uint8_t nVersion{0}; // 0 == old format
     std::vector<COutPoint> inputs;
     uint256 txid;
+    uint256 cycleHash;
     CBLSLazySignature sig;
 
-public:
+    CInstantSendLock() = default;
+    CInstantSendLock(uint8_t nVersionIn) : nVersion(nVersionIn) {}
+
     ADD_SERIALIZE_METHODS
 
     template<typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action)
     {
+        if ((s.GetVersion() >= ISDLOCK_PROTO_VERSION && nVersion > 0) || (s.GetType() & SER_DISK)) {
+            READWRITE(this->nVersion);
+        }
         READWRITE(inputs);
         READWRITE(txid);
+        if (s.GetVersion() >= ISDLOCK_PROTO_VERSION && nVersion > 0) {
+            READWRITE(cycleHash);
+        }
         READWRITE(sig);
     }
 
     uint256 GetRequestId() const;
+    uint256 GetMsgHash() const;
 };
 
 typedef std::shared_ptr<CInstantSendLock> CInstantSendLockPtr;

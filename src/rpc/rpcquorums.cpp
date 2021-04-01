@@ -709,10 +709,18 @@ UniValue verifyislock(const JSONRPCRequest& request)
 
     auto llmqType = Params().GetConsensus().llmqTypeInstantSend;
 
+    CHashWriter hw(SER_GETHASH, 0);
+    hw << (uint8_t)1;
+    hw << txid;
+    uint256 msgHash = hw.GetHash();
+
     // First check against the current active set, if it fails check against the last active set
     int signOffset{Params().GetConsensus().llmqs.at(llmqType).dkgInterval};
-    return llmq::quorumSigningManager->VerifyRecoveredSig(llmqType, signHeight, id, txid, sig, 0) ||
-           llmq::quorumSigningManager->VerifyRecoveredSig(llmqType, signHeight, id, txid, sig, signOffset);
+
+    return  llmq::quorumSigningManager->VerifyRecoveredSig(llmqType, signHeight, id, txid, sig, 0) ||
+            llmq::quorumSigningManager->VerifyRecoveredSig(llmqType, signHeight, id, msgHash, sig, 0) ||
+            llmq::quorumSigningManager->VerifyRecoveredSig(llmqType, signHeight, id, txid, sig, signOffset) ||
+            llmq::quorumSigningManager->VerifyRecoveredSig(llmqType, signHeight, id, msgHash, sig, signOffset);
 }
 
 static const CRPCCommand commands[] =

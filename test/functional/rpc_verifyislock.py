@@ -3,7 +3,9 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-from test_framework.messages import CTransaction, FromHex, hash256, ser_compact_size, ser_string
+import struct
+
+from test_framework.messages import CTransaction, FromHex, hash256, ser_compact_size, ser_string, ser_uint256
 from test_framework.test_framework import DashTestFramework
 from test_framework.util import bytes_to_hex_str, satoshi_round, wait_until
 
@@ -40,9 +42,10 @@ class RPCVerifyISLockTest(DashTestFramework):
         self.wait_for_instantlock(txid, node)
 
         request_id = self.get_request_id(self.nodes[0].getrawtransaction(txid))
-        wait_until(lambda: node.quorum("hasrecsig", 100, request_id, txid))
+        msghash = hash256(struct.pack("<B", 1) + ser_uint256(int(txid, 16)))[::-1].hex()
+        wait_until(lambda: node.quorum("hasrecsig", 100, request_id, msghash))
 
-        rec_sig = node.quorum("getrecsig", 100, request_id, txid)['sig']
+        rec_sig = node.quorum("getrecsig", 100, request_id, msghash)['sig']
         assert(node.verifyislock(request_id, txid, rec_sig))
         # Not mined, should use maxHeight
         assert not node.verifyislock(request_id, txid, rec_sig, 1)
@@ -82,7 +85,7 @@ class RPCVerifyISLockTest(DashTestFramework):
                 break
         assert selected_hash == oldest_quorum_hash
         # Create the ISLOCK, then mine a quorum to move the signing quorum out of the active set
-        islock = self.create_islock(rawtx)
+        islock = self.create_islock(rawtx, True)
         self.mine_quorum()
         # Send the tx and verify the ISLOCK. This triggers the "signHeight + dkgInterval" verification
         rawtx_txid = node.sendrawtransaction(rawtx)

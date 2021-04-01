@@ -751,6 +751,7 @@ std::chrono::microseconds GetObjectInterval(int invType)
         case MSG_CLSIG:
             return std::chrono::seconds{5};
         case MSG_ISLOCK:
+        case MSG_ISDLOCK:
             return std::chrono::seconds{10};
         default:
             return GETDATA_TX_INTERVAL;
@@ -1386,6 +1387,7 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
     case MSG_CLSIG:
         return llmq::chainLocksHandler->AlreadyHave(inv);
     case MSG_ISLOCK:
+    case MSG_ISDLOCK:
         return llmq::quorumInstantSendManager->AlreadyHave(inv);
     }
 
@@ -1726,6 +1728,14 @@ void static ProcessGetData(CNode* pfrom, const CChainParams& chainparams, CConnm
                 llmq::CInstantSendLock o;
                 if (llmq::quorumInstantSendManager->GetInstantSendLockByHash(inv.hash, o)) {
                     connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::ISLOCK, o));
+                    push = true;
+                }
+            }
+
+            if (!push && (inv.type == MSG_ISDLOCK)) {
+                llmq::CInstantSendLock o;
+                if (llmq::quorumInstantSendManager->GetInstantSendLockByHash(inv.hash, o)) {
+                    connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::ISDLOCK, o));
                     push = true;
                 }
             }
@@ -4232,9 +4242,12 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
                     int nInvType = CCoinJoin::GetDSTX(hash) ? MSG_DSTX : MSG_TX;
                     queueAndMaybePushInv(CInv(nInvType, hash));
 
-                    uint256 islockHash;
-                    if (!llmq::quorumInstantSendManager->GetInstantSendLockHashByTxid(hash, islockHash)) continue;
-                    queueAndMaybePushInv(CInv(MSG_ISLOCK, islockHash));
+                    llmq::CInstantSendLockPtr islock = llmq::quorumInstantSendManager->GetInstantSendLockByTxid(hash);
+                    if (islock == nullptr) continue;
+                    if (pto->nVersion < LLMQS_PROTO_VERSION) continue;
+                    if (pto->nVersion < ISDLOCK_PROTO_VERSION && islock->nVersion > 0) continue;
+                    CInv inv(islock->nVersion == 0 ? MSG_ISLOCK : MSG_ISDLOCK, ::SerializeHash(*islock));
+                    queueAndMaybePushInv(inv);
                 }
 
                 // Send an inv for the best ChainLock we have

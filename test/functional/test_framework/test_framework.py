@@ -25,6 +25,7 @@ from .messages import (
     FromHex,
     hash256,
     msg_islock,
+    msg_isdlock,
     ser_compact_size,
     ser_string,
 )
@@ -801,7 +802,7 @@ class DashTestFramework(BitcoinTestFramework):
         if wait_until(check_tx, timeout=timeout, sleep=0.5, do_assert=expected) and not expected:
             raise AssertionError("waiting unexpectedly succeeded")
 
-    def create_islock(self, hextx):
+    def create_islock(self, hextx, dip23=False):
         tx = FromHex(CTransaction(), hextx)
         tx.rehash()
 
@@ -820,7 +821,14 @@ class DashTestFramework(BitcoinTestFramework):
                 quorum_member = mn
 
         rec_sig = self.get_recovered_sig(request_id, message_hash, node=quorum_member.node)
-        islock = msg_islock(inputs, tx.sha256, hex_str_to_bytes(rec_sig['sig']))
+
+        if dip23:
+            blc_cnt = quorum_member.node.getblockcount()
+            cycleHash_sha256 = int(quorum_member.node.getblockhash(blc_cnt - (blc_cnt % 24)), 16)
+            islock = msg_isdlock(1, inputs, tx.sha256, cycleHash_sha256, hex_str_to_bytes(rec_sig['sig']))
+        else:
+            islock = msg_islock(inputs, tx.sha256, hex_str_to_bytes(rec_sig['sig']))
+
         return islock
 
     def wait_for_instantlock(self, txid, node, expected=True, timeout=15):
