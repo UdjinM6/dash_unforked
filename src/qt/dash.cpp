@@ -555,6 +555,7 @@ static void SetupUIArgs()
     gArgs.AddArg("-allowselfsignedrootcertificates", strprintf("Allow self signed root certificates (default: %u)", DEFAULT_SELFSIGNED_ROOTCERTS), true, OptionsCategory::GUI);
 #endif
     gArgs.AddArg("-choosedatadir", strprintf(QObject::tr("Choose data directory on startup (default: %u)").toStdString(), DEFAULT_CHOOSE_DATADIR), false, OptionsCategory::GUI);
+    gArgs.AddArg("-coinjoinname", strprintf("Choose custom name for Dash's CoinJoin (default: %s)", gCoinJoinName), true, OptionsCategory::GUI);
     gArgs.AddArg("-custom-css-dir", "Set a directory which contains custom css files. Those will be used as stylesheets for the UI.", false, OptionsCategory::GUI);
     gArgs.AddArg("-font-family", QObject::tr("Set the font family. Possible values: %1. (default: %2)").arg("SystemDefault, Montserrat").arg(GUIUtil::fontFamilyToString(GUIUtil::getFontFamilyDefault())).toStdString(), false, OptionsCategory::GUI);
     gArgs.AddArg("-font-scale", QObject::tr("Set a scale factor which gets applied to the base font size. Possible range %1 (smallest fonts) to %2 (largest fonts). (default: %3)").arg(-100).arg(100).arg(GUIUtil::getFontScaleDefault()).toStdString(), false, OptionsCategory::GUI);
@@ -806,6 +807,8 @@ int main(int argc, char *argv[])
         QMessageBox::warning(0, QObject::tr(PACKAGE_NAME),
                                 "Warning: UI debug mode (-debug-ui) enabled" + QString(gArgs.IsArgSet("-custom-css-dir") ? "." : " without a custom css directory set with -custom-css-dir."));
     }
+
+    gCoinJoinName = gArgs.GetArg("-coinjoinname", gCoinJoinName);
 
     // Subscribe to global signals from core
     std::unique_ptr<interfaces::Handler> handler = node->handleInitMessage(InitMessage);
