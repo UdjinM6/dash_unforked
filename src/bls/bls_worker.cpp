@@ -142,7 +142,7 @@ struct Aggregator {
     std::mutex m;
     // items in the queue are all intermediate aggregation results of finished batches.
     // The intermediate results must be deleted by us again (which we do in SyncAggregateAndPushAggQueue)
-    boost::lockfree::queue<T*> aggQueue;
+    moodycamel::ConcurrentQueue<T*> aggQueue;
     std::atomic<size_t> aggQueueSize{0};
 
     // keeps track of currently queued/in-progress batches. If it reaches 0, we are done
@@ -160,7 +160,7 @@ struct Aggregator {
                DoneCallback _doneCallback) :
             workerPool(_workerPool),
             parallel(_parallel),
-            aggQueue(0),
+            aggQueue(512),
             doneCallback(std::move(_doneCallback))
     {
         inputVec = std::make_shared<std::vector<const T*> >(count);
@@ -231,12 +231,7 @@ struct Aggregator {
         // the items into the final result
 
         std::vector<T*> rem(aggQueueSize);
-        for (size_t i = 0; i < rem.size(); i++) {
-            T* p = nullptr;
-            bool s = aggQueue.pop(p);
-            assert(s);
-            rem[i] = p;
-        }
+        aggQueue.try_dequeue_bulk(rem.begin(), aggQueueSize);
 
         T r;
         if (rem.size() == 1) {
@@ -276,7 +271,9 @@ struct Aggregator {
 
     void PushAggQueue(const T& v)
     {
-        aggQueue.push(new T(v));
+        auto * newT = new T(v);
+        if(!aggQueue.try_enqueue(newT))
+            aggQueue.enqueue(newT);
 
         if (++aggQueueSize >= batchSize) {
             // we've collected enough intermediate results to form a new batch.
@@ -289,12 +286,7 @@ struct Aggregator {
                 }
                 newBatch = std::make_shared<std::vector<const T*> >(batchSize);
                 // collect items for new batch
-                for (size_t i = 0; i < batchSize; i++) {
-                    T* p = nullptr;
-                    bool s = aggQueue.pop(p);
-                    assert(s);
-                    (*newBatch)[i] = p;
-                }
+                aggQueue.try_dequeue_bulk(newBatch->begin(), batchSize);
                 aggQueueSize -= batchSize;
             }
 
