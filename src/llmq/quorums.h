@@ -187,8 +187,8 @@ public:
     const CBLSSecretKey& GetSkShare() const;
 
 private:
-    void WriteContributions(CEvoDB& evoDb);
-    bool ReadContributions(CEvoDB& evoDb);
+    void WriteContributions(std::unique_ptr<CDBWrapper>& db);
+    bool ReadContributions(std::unique_ptr<CDBWrapper>& db);
 };
 
 /**
@@ -200,9 +200,9 @@ private:
 class CQuorumManager
 {
 private:
-    CEvoDB& evoDb;
     CBLSWorker& blsWorker;
     CDKGSessionManager& dkgManager;
+    mutable std::unique_ptr<CDBWrapper> db GUARDED_BY(quorumsCacheCs) {nullptr};
 
     mutable CCriticalSection quorumsCacheCs;
     mutable std::map<Consensus::LLMQType, unordered_lru_cache<uint256, CQuorumPtr, StaticSaltedHasher>> mapQuorumsCache GUARDED_BY(quorumsCacheCs);
@@ -212,7 +212,7 @@ private:
     mutable CThreadInterrupt quorumThreadInterrupt;
 
 public:
-    CQuorumManager(CEvoDB& _evoDb, CBLSWorker& _blsWorker, CDKGSessionManager& _dkgManager);
+    CQuorumManager(CBLSWorker& _blsWorker, CDKGSessionManager& _dkgManager, bool unitTests, bool fWipe);
     ~CQuorumManager();
 
     void Start();

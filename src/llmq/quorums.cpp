@@ -121,24 +121,26 @@ int CQuorum::GetMemberIndex(const uint256& proTxHash) const
     return -1;
 }
 
-void CQuorum::WriteContributions(CEvoDB& evoDb)
+void CQuorum::WriteContributions(std::unique_ptr<CDBWrapper>& db)
 {
+    CDBBatch batch(*db);
     uint256 dbKey = MakeQuorumKey(*this);
 
     if (quorumVvec != nullptr) {
-        evoDb.GetRawDB().Write(std::make_pair(DB_QUORUM_QUORUM_VVEC, dbKey), *quorumVvec);
+        batch.Write(std::make_pair(DB_QUORUM_QUORUM_VVEC, dbKey), *quorumVvec);
     }
     if (skShare.IsValid()) {
-        evoDb.GetRawDB().Write(std::make_pair(DB_QUORUM_SK_SHARE, dbKey), skShare);
+        batch.Write(std::make_pair(DB_QUORUM_SK_SHARE, dbKey), skShare);
     }
+    db->WriteBatch(batch);
 }
 
-bool CQuorum::ReadContributions(CEvoDB& evoDb)
+bool CQuorum::ReadContributions(std::unique_ptr<CDBWrapper>& db)
 {
     uint256 dbKey = MakeQuorumKey(*this);
 
     BLSVerificationVector qv;
-    if (evoDb.Read(std::make_pair(DB_QUORUM_QUORUM_VVEC, dbKey), qv)) {
+    if (db->Read(std::make_pair(DB_QUORUM_QUORUM_VVEC, dbKey), qv)) {
         quorumVvec = std::make_shared<BLSVerificationVector>(std::move(qv));
     } else {
         return false;
@@ -146,16 +148,17 @@ bool CQuorum::ReadContributions(CEvoDB& evoDb)
 
     // We ignore the return value here as it is ok if this fails. If it fails, it usually means that we are not a
     // member of the quorum but observed the whole DKG process to have the quorum verification vector.
-    evoDb.Read(std::make_pair(DB_QUORUM_SK_SHARE, dbKey), skShare);
+    db->Read(std::make_pair(DB_QUORUM_SK_SHARE, dbKey), skShare);
 
     return true;
 }
 
-CQuorumManager::CQuorumManager(CEvoDB& _evoDb, CBLSWorker& _blsWorker, CDKGSessionManager& _dkgManager) :
-    evoDb(_evoDb),
+CQuorumManager::CQuorumManager(CBLSWorker& _blsWorker, CDKGSessionManager& _dkgManager, bool unitTests, bool fWipe) :
     blsWorker(_blsWorker),
     dkgManager(_dkgManager)
 {
+    // TODO: evodb (which waas used here earlier) has a 16 MiB cache, should find the right size for this one.
+    db = std::make_unique<CDBWrapper>(unitTests ? "" : (GetDataDir() / "llmq/qcdb"), 1 << 20, unitTests, fWipe);
     CLLMQUtils::InitQuorumsCache(mapQuorumsCache);
     CLLMQUtils::InitQuorumsCache(scanQuorumsCache);
     quorumThreadInterrupt.reset();
@@ -306,11 +309,11 @@ CQuorumPtr CQuorumManager::BuildQuorumFromCommitment(const Consensus::LLMQType l
     quorum->Init(qc, pindexQuorum, minedBlockHash, members);
 
     bool hasValidVvec = false;
-    if (quorum->ReadContributions(evoDb)) {
+    if (quorum->ReadContributions(db)) {
         hasValidVvec = true;
     } else {
         if (BuildQuorumContributions(qc, quorum)) {
-            quorum->WriteContributions(evoDb);
+            quorum->WriteContributions(db);
             hasValidVvec = true;
         } else {
             LogPrint(BCLog::LLMQ, "CQuorumManager::%s -- quorum.ReadContributions and BuildQuorumContributions for block %s failed\n", __func__, qc->quorumHash.ToString());
@@ -711,7 +714,8 @@ void CQuorumManager::ProcessMessage(CNode* pFrom, const std::string& strCommand,
                 return;
             }
         }
-        pQuorum->WriteContributions(evoDb);
+        LOCK(quorumsCacheCs);
+        pQuorum->WriteContributions(db);
         return;
     }
 }
