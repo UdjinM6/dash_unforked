@@ -44,7 +44,7 @@ typedef std::shared_ptr<CInstantSendLock> CInstantSendLockPtr;
 class CInstantSendDb
 {
 private:
-    CDBWrapper& db;
+    std::unique_ptr<CDBWrapper> db{nullptr};
 
     mutable unordered_lru_cache<uint256, CInstantSendLockPtr, StaticSaltedHasher, 10000> islockCache;
     mutable unordered_lru_cache<uint256, uint256, StaticSaltedHasher, 10000> txidCache;
@@ -54,7 +54,7 @@ private:
     void RemoveInstantSendLockMined(CDBBatch& batch, const uint256& hash, int nHeight);
 
 public:
-    explicit CInstantSendDb(CDBWrapper& _db) : db(_db) {}
+    explicit CInstantSendDb(bool unitTests, bool fWipe);
 
     void WriteNewInstantSendLock(const uint256& hash, const CInstantSendLock& islock);
     void RemoveInstantSendLock(CDBBatch& batch, const uint256& hash, CInstantSendLockPtr islock, bool keep_cache = true);
@@ -117,7 +117,7 @@ private:
     std::unordered_set<uint256, StaticSaltedHasher> pendingRetryTxs GUARDED_BY(cs);
 
 public:
-    explicit CInstantSendManager(CDBWrapper& _llmqDb);
+    explicit CInstantSendManager(bool unitTests, bool fWipe);
     ~CInstantSendManager();
 
     void Start();
