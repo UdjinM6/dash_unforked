@@ -4376,7 +4376,6 @@ bool FillPSBT(const CWallet* pwallet, PartiallySignedTransaction& psbtx, const C
             CTxOut utxo = wtx.tx->vout[txin.prevout.n];
             // Update both UTXOs from the wallet.
             input.non_witness_utxo = wtx.tx;
-            input.witness_utxo = utxo;
         }
 
         // Get the Sighash type
@@ -4560,7 +4559,7 @@ UniValue walletcreatefundedpsbt(const JSONRPCRequest& request)
 
     CAmount fee;
     int change_position;
-    CMutableTransaction rawTx = ConstructTransaction(request.params[0], request.params[1], request.params[2], request.params[3]);
+    CMutableTransaction rawTx = ConstructTransaction(request.params[0], request.params[1], request.params[2]);
     FundTransaction(pwallet, rawTx, fee, change_position, request.params[4]);
 
     // Make a blank psbt
