@@ -217,7 +217,7 @@ bool SignPSBTInput(const SigningProvider& provider, const CMutableTransaction& t
 
     MutableTransactionSignatureCreator creator(&tx, index, utxo.nValue, sighash);
     bool sig_complete = ProduceSignature(provider, creator, utxo.scriptPubKey, sigdata);
-
+    input.FromSignatureData(sigdata);
     return sig_complete;
 }
 
