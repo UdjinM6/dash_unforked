@@ -3835,7 +3835,7 @@ static UniValue fundrawtransaction(const JSONRPCRequest& request)
           "\nSend the transaction\n"
           + HelpExampleCli("sendrawtransaction", "\"signedtransactionhex\"")
           );
-          
+
     RPCTypeCheck(request.params, {UniValue::VSTR, UniValueType(), UniValue::VBOOL});
 
     // parse hex string from parameter
