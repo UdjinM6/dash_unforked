@@ -196,7 +196,7 @@ bool ProduceSignature(const SigningProvider& provider, const BaseSignatureCreato
 
 bool SignPSBTInput(const SigningProvider& provider, const CMutableTransaction& tx, PSBTInput& input, int index, int sighash)
 {
-    // if this input has a final scriptsig or scriptwitness, don't do anything with it
+    // if this input has a final scriptsig, don't do anything with it
     if (!input.final_script_sig.empty()) {
         return true;
     }

@@ -115,18 +115,14 @@ static constexpr uint8_t PSBT_GLOBAL_UNSIGNED_TX = 0x00;
 
 // Input types
 static constexpr uint8_t PSBT_IN_NON_WITNESS_UTXO = 0x00;
-static constexpr uint8_t PSBT_IN_WITNESS_UTXO = 0x01;
 static constexpr uint8_t PSBT_IN_PARTIAL_SIG = 0x02;
 static constexpr uint8_t PSBT_IN_SIGHASH = 0x03;
 static constexpr uint8_t PSBT_IN_REDEEMSCRIPT = 0x04;
-static constexpr uint8_t PSBT_IN_WITNESSSCRIPT = 0x05;
 static constexpr uint8_t PSBT_IN_BIP32_DERIVATION = 0x06;
 static constexpr uint8_t PSBT_IN_SCRIPTSIG = 0x07;
-static constexpr uint8_t PSBT_IN_SCRIPTWITNESS = 0x08;
 
 // Output types
 static constexpr uint8_t PSBT_OUT_REDEEMSCRIPT = 0x00;
-static constexpr uint8_t PSBT_OUT_WITNESSSCRIPT = 0x01;
 static constexpr uint8_t PSBT_OUT_BIP32_DERIVATION = 0x02;
 
 // The separator is 0x00. Reading this in means that the unserializer can interpret it
@@ -227,7 +223,6 @@ struct PSBTInput
     template <typename Stream>
     inline void Serialize(Stream& s) const {
         // Write the utxo
-        // If there is a non-witness utxo, then don't add the witness one.
         if (non_witness_utxo) {
             SerializeToVector(s, PSBT_IN_NON_WITNESS_UTXO);
             SerializeToVector(s, non_witness_utxo);
