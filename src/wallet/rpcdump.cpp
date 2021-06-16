@@ -645,7 +645,7 @@ UniValue importelectrumwallet(const JSONRPCRequest& request)
 
     EnsureWalletIsUnlocked(pwallet);
 
-    std::ifstream file;
+    fsbridge::ifstream file;
     std::string strFileName = request.params[0].get_str();
     size_t nDotPos = strFileName.find_last_of(".");
     if(nDotPos == std::string::npos)
@@ -655,7 +655,7 @@ UniValue importelectrumwallet(const JSONRPCRequest& request)
     if(strFileExt != "json" && strFileExt != "csv")
         throw JSONRPCError(RPC_INVALID_PARAMETER, "File has wrong extension, should be .json or .csv");
 
-    file.open(strFileName.c_str(), std::ios::in | std::ios::ate);
+    file.open(strFileName, std::ios::in | std::ios::ate);
     if (!file.is_open())
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Cannot open Electrum wallet export file");
 
