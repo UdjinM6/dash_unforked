@@ -4380,7 +4380,6 @@ UniValue importwallet(const JSONRPCRequest& request);
 UniValue importprunedfunds(const JSONRPCRequest& request);
 UniValue removeprunedfunds(const JSONRPCRequest& request);
 UniValue importmulti(const JSONRPCRequest& request);
-UniValue rescanblockchain(const JSONRPCRequest& request);
 
 UniValue dumphdinfo(const JSONRPCRequest& request);
 UniValue importelectrumwallet(const JSONRPCRequest& request);
