@@ -71,11 +71,12 @@ def get_log_events(source, logfile):
 
     Log events may be split over multiple lines. We use the timestamp
     regex match as the marker for a new log event."""
+    print("get_log_events: reading %s" % logfile, file=sys.stderr)
     try:
         with open(logfile, 'r', encoding='utf-8') as infile:
             event = ''
             timestamp = ''
-            for line in infile:
+            for line in infile.readlines():
                 # skip blank lines
                 if line == '\n':
                     continue
