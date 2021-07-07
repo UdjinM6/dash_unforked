@@ -29,7 +29,8 @@ export DOCKER_RUN_IN_BUILDER="docker run -t --rm -w $SRC_DIR $DOCKER_RUN_ARGS $B
 # Default values for targets
 export GOAL="install"
 export SDK_URL=${SDK_URL:-https://bitcoincore.org/depends-sources/sdks}
-export MAKEJOBS="-j4"
+MAKEJOBS="-j$(nproc)"
+export MAKEJOBS
 
 export RUN_UNITTESTS=true
 export RUN_INTEGRATIONTESTS=true
