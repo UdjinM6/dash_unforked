@@ -65,6 +65,9 @@ public:
     int getHeaderTipHeight() const;
     int64_t getHeaderTipTime() const;
 
+    std::string getBestChainLockHash();
+    int32_t getBestChainLockHeight();
+
     void setMasternodeList(const CDeterministicMNList& mnList);
     CDeterministicMNList getMasternodeList() const;
     void refreshMasternodeList();
@@ -87,6 +90,10 @@ public:
     mutable std::atomic<int> cachedBestHeaderHeight;
     mutable std::atomic<int64_t> cachedBestHeaderTime;
 
+    // caches for the best chain lock
+    mutable std::string bclHash;
+    mutable std::atomic<int32_t> bclHeight;
+
 private:
     interfaces::Node& m_node;
     std::unique_ptr<interfaces::Handler> m_handler_show_progress;
@@ -95,6 +102,7 @@ private:
     std::unique_ptr<interfaces::Handler> m_handler_notify_alert_changed;
     std::unique_ptr<interfaces::Handler> m_handler_banned_list_changed;
     std::unique_ptr<interfaces::Handler> m_handler_notify_block_tip;
+    std::unique_ptr<interfaces::Handler> m_handler_notify_chainlock;
     std::unique_ptr<interfaces::Handler> m_handler_notify_header_tip;
     std::unique_ptr<interfaces::Handler> m_handler_notify_masternodelist_changed;
     std::unique_ptr<interfaces::Handler> m_handler_notify_additional_data_sync_progess_changed;
@@ -116,6 +124,7 @@ private:
 Q_SIGNALS:
     void numConnectionsChanged(int count);
     void masternodeListChanged() const;
+    void chainLockChanged(const QString& BestChainLockHash, int BestChainLockHeight, bool header);
     void numBlocksChanged(int count, const QDateTime& blockDate, const QString& blockHash, double nVerificationProgress, bool header);
     void additionalDataSyncProgressChanged(double nSyncProgress);
     void mempoolSizeChanged(long count, size_t mempoolSizeInBytes);

@@ -11,6 +11,7 @@
 #include <qt/peertablemodel.h>
 
 #include <evo/deterministicmns.h>
+#include <llmq/quorums_chainlocks.h>
 
 #include <chain.h>
 #include <chainparams.h>
@@ -71,6 +72,18 @@ int ClientModel::getNumConnections(unsigned int flags) const
         connections = CConnman::CONNECTIONS_ALL;
 
     return m_node.getNodeCount(connections);
+}
+
+std::string ClientModel::getBestChainLockHash()
+{
+    bclHash = llmq::CChainLocksHandler().GetBestChainLock().blockHash.ToString();
+    return bclHash;
+}
+
+int32_t ClientModel::getBestChainLockHeight()
+{
+    bclHeight =  llmq::CChainLocksHandler().GetBestChainLock().nHeight;
+    return bclHeight;
 }
 
 void ClientModel::setMasternodeList(const CDeterministicMNList& mnList)
@@ -275,6 +288,17 @@ static void BlockTipChanged(ClientModel *clientmodel, bool initialSync, int heig
         nLastUpdateNotification = now;
     }
 }
+// Handlers for core signals
+static void NotifyChainLock(ClientModel *clientmodel, const std::string& BestChainLockHash, int BestChainLockHeight, bool fHeader)
+{
+    clientmodel->bclHash = BestChainLockHash;
+    clientmodel->bclHeight = BestChainLockHeight;
+    // emits signal "showProgress"
+    QMetaObject::invokeMethod(clientmodel, "chainLockChanged", Qt::QueuedConnection,
+                              Q_ARG(QString, QString::fromStdString(BestChainLockHash)),
+                              Q_ARG(int, BestChainLockHeight),
+                              Q_ARG(bool, fHeader));
+}
 
 static void NotifyMasternodeListChanged(ClientModel *clientmodel, const CDeterministicMNList& newList)
 {
@@ -296,6 +320,7 @@ void ClientModel::subscribeToCoreSignals()
     m_handler_notify_alert_changed = m_node.handleNotifyAlertChanged(boost::bind(NotifyAlertChanged, this));
     m_handler_banned_list_changed = m_node.handleBannedListChanged(boost::bind(BannedListChanged, this));
     m_handler_notify_block_tip = m_node.handleNotifyBlockTip(boost::bind(BlockTipChanged, this, _1, _2,_3, _4, _5, false));
+    m_handler_notify_chainlock = m_node.handleNotifyChainLock(boost::bind(NotifyChainLock, this, _1, _2, false));
     m_handler_notify_header_tip = m_node.handleNotifyHeaderTip(boost::bind(BlockTipChanged, this, _1, _2, _3, _4, _5, true));
     m_handler_notify_masternodelist_changed = m_node.handleNotifyMasternodeListChanged(boost::bind(NotifyMasternodeListChanged, this, _1));
     m_handler_notify_additional_data_sync_progess_changed = m_node.handleNotifyAdditionalDataSyncProgressChanged(boost::bind(NotifyAdditionalDataSyncProgressChanged, this, _1));
@@ -310,6 +335,7 @@ void ClientModel::unsubscribeFromCoreSignals()
     m_handler_notify_alert_changed->disconnect();
     m_handler_banned_list_changed->disconnect();
     m_handler_notify_block_tip->disconnect();
+    m_handler_notify_chainlock->disconnect();
     m_handler_notify_header_tip->disconnect();
     m_handler_notify_masternodelist_changed->disconnect();
     m_handler_notify_additional_data_sync_progess_changed->disconnect();
