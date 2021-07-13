@@ -579,7 +579,7 @@ case $host in
        AC_MSG_ERROR("windres not found")
      fi
 
-     CPPFLAGS="$CPPFLAGS -D_MT -DWIN32 -D_WINDOWS -DBOOST_THREAD_USE_LIB -D_WIN32_WINNT=0x0601"
+     CPPFLAGS="$CPPFLAGS -D_MT -DWIN32 -D_WINDOWS -DBOOST_THREAD_USE_LIB"
      if test "x$CXXFLAGS_overridden" = "xno"; then
        CXXFLAGS="$CXXFLAGS -w"
      fi
@@ -656,7 +656,6 @@ case $host in
      ;;
    *android*)
      dnl make sure android stays above linux for hosts like *linux-android*
-     TARGET_OS=android
      ;;
    *linux*)
      TARGET_OS=linux
