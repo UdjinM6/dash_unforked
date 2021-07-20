@@ -50,6 +50,7 @@ class P2PBlocksOnly(BitcoinTestFramework):
         txid = self.nodes[0].testmempoolaccept([sigtx])[0]['txid']
         with self.nodes[0].assert_debug_log(['received getdata for: tx {} peer=0'.format(txid)]):
             self.nodes[0].sendrawtransaction(sigtx)
+            self.bump_mocktime(60)
             self.nodes[0].p2p.wait_for_tx(txid)
             assert_equal(self.nodes[0].getmempoolinfo()['size'], 1)
 
