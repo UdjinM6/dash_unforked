@@ -166,7 +166,7 @@ static UniValue getrawtransaction(const JSONRPCRequest& request)
             "     ,...\n"
             "  ],\n"
             "  \"extraPayloadSize\" : n    (numeric) Size of DIP2 extra payload. Only present if it's a special TX\n"
-            "  \"extraPayload\" : \"hex\"    (string) Hex encoded DIP2 extra payload data. Only present if it's a special TX\n"
+            "  \"extraPayload\" : \"hex\"    (string) Hex-encoded DIP2 extra payload data. Only present if it's a special TX\n"
             "  \"hex\" : \"data\",         (string) The serialized, hex-encoded data for 'txid'\n"
             "  \"blockhash\" : \"hash\",   (string) the block hash\n"
             "  \"height\" : n,             (numeric) The block height\n"
@@ -588,7 +588,7 @@ static UniValue decoderawtransaction(const JSONRPCRequest& request)
             "     ,...\n"
             "  ],\n"
             "  \"extraPayloadSize\" : n           (numeric) Size of DIP2 extra payload. Only present if it's a special TX\n"
-            "  \"extraPayload\" : \"hex\"           (string) Hex encoded DIP2 extra payload data. Only present if it's a special TX\n"
+            "  \"extraPayload\" : \"hex\"           (string) Hex-encoded DIP2 extra payload data. Only present if it's a special TX\n"
             "}\n"
 
             "\nExamples:\n"

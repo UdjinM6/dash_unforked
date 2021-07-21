@@ -617,7 +617,7 @@ static UniValue getaddressutxos(const JSONRPCRequest& request)
             "    \"address\"  (string) The address base58check encoded\n"
             "    \"txid\"  (string) The output txid\n"
             "    \"outputIndex\"  (number) The output index\n"
-            "    \"script\"  (string) The script hex encoded\n"
+            "    \"script\"  (string) The script hex-encoded\n"
             "    \"satoshis\"  (number) The number of duffs of the output\n"
             "    \"height\"  (number) The block height\n"
             "  }\n"
