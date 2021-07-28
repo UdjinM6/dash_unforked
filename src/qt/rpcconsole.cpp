@@ -1100,7 +1100,7 @@ void RPCConsole::startExecutor()
     // Replies from executor object must go to this object
     connect(executor, SIGNAL(reply(int,QString)), this, SLOT(message(int,QString)));
     // Requests from this object must go to executor
-    connect(this, SIGNAL(cmdRequest(QString, QString)), executor, SLOT(request(QString, QString)));
+    connect(this, SIGNAL(cmdRequest(QString, const WalletModel*)), executor, SLOT(request(QString, const WalletModel*)));
 
     // On stopExecutor signal
     // - quit the Qt event loop in the execution thread
