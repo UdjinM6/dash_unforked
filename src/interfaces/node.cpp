@@ -433,9 +433,9 @@ class NodeImpl : public Node
                 GuessVerificationProgress(Params().TxData(), block));
         }));
     }
-    std::unique_ptr<Handler> handleNotifyChainLockChanged(NotifyChainLockChangedFn fn) override
+    std::unique_ptr<Handler> handleNotifyChainLock(NotifyChainLockFn fn) override
     {
-        return MakeHandler(::uiInterface.NotifyChainLockChanged_connect([fn](const std::string& BestChainLockHash, int BestChainLockHeight) {
+        return MakeHandler(::uiInterface.NotifyChainLock_connect([fn](const std::string& BestChainLockHash, int BestChainLockHeight) {
             fn(BestChainLockHash, BestChainLockHeight);
         }));
     }

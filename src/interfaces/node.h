@@ -303,9 +303,9 @@ public:
     virtual std::unique_ptr<Handler> handleNotifyBlockTip(NotifyBlockTipFn fn) = 0;
 
     //! Register handler for chainlock messages.
-    using NotifyChainLockChangedFn =
+    using NotifyChainLockFn =
     std::function<void(const std::string& BestChainLockedHash, int32_t BestChainLockedHeight)>;
-    virtual std::unique_ptr<Handler> handleNotifyChainLockChanged(NotifyChainLockChangedFn fn) = 0;
+    virtual std::unique_ptr<Handler> handleNotifyChainLock(NotifyChainLockFn fn) = 0;
 
     //! Register handler for header tip messages.
     using NotifyHeaderTipFn =

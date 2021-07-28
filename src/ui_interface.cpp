@@ -20,7 +20,7 @@ struct UISignals {
     boost::signals2::signal<CClientUIInterface::LoadWalletSig> LoadWallet;
     boost::signals2::signal<CClientUIInterface::ShowProgressSig> ShowProgress;
     boost::signals2::signal<CClientUIInterface::NotifyBlockTipSig> NotifyBlockTip;
-    boost::signals2::signal<CClientUIInterface::NotifyChainLockChangedSig> NotifyChainLockChanged;
+    boost::signals2::signal<CClientUIInterface::NotifyChainLockSig> NotifyChainLock;
     boost::signals2::signal<CClientUIInterface::NotifyHeaderTipSig> NotifyHeaderTip;
     boost::signals2::signal<CClientUIInterface::NotifyMasternodeListChangedSig> NotifyMasternodeListChanged;
     boost::signals2::signal<CClientUIInterface::NotifyAdditionalDataSyncProgressChangedSig> NotifyAdditionalDataSyncProgressChanged;
@@ -46,7 +46,7 @@ ADD_SIGNALS_IMPL_WRAPPER(NotifyAlertChanged);
 ADD_SIGNALS_IMPL_WRAPPER(LoadWallet);
 ADD_SIGNALS_IMPL_WRAPPER(ShowProgress);
 ADD_SIGNALS_IMPL_WRAPPER(NotifyBlockTip);
-ADD_SIGNALS_IMPL_WRAPPER(NotifyChainLockChanged);
+ADD_SIGNALS_IMPL_WRAPPER(NotifyChainLock);
 ADD_SIGNALS_IMPL_WRAPPER(NotifyHeaderTip);
 ADD_SIGNALS_IMPL_WRAPPER(NotifyMasternodeListChanged);
 ADD_SIGNALS_IMPL_WRAPPER(NotifyAdditionalDataSyncProgressChanged);
@@ -61,7 +61,7 @@ void CClientUIInterface::NotifyAlertChanged() { return g_ui_signals.NotifyAlertC
 void CClientUIInterface::LoadWallet(std::shared_ptr<CWallet> wallet) { return g_ui_signals.LoadWallet(wallet); }
 void CClientUIInterface::ShowProgress(const std::string& title, int nProgress, bool resume_possible) { return g_ui_signals.ShowProgress(title, nProgress, resume_possible); }
 void CClientUIInterface::NotifyBlockTip(bool b, const CBlockIndex* i) { return g_ui_signals.NotifyBlockTip(b, i); }
-void CClientUIInterface::NotifyChainLockChanged(const std::string& bclHash, int bclHeight) { return g_ui_signals.NotifyChainLockChanged(bclHash, bclHeight); }
+void CClientUIInterface::NotifyChainLock(const std::string& bclHash, int bclHeight) { return g_ui_signals.NotifyChainLock(bclHash, bclHeight); }
 void CClientUIInterface::NotifyHeaderTip(bool b, const CBlockIndex* i) { return g_ui_signals.NotifyHeaderTip(b, i); }
 void CClientUIInterface::NotifyMasternodeListChanged(const CDeterministicMNList& list) { return g_ui_signals.NotifyMasternodeListChanged(list); }
 void CClientUIInterface::NotifyAdditionalDataSyncProgressChanged(double nSyncProgress) { return g_ui_signals.NotifyAdditionalDataSyncProgressChanged(nSyncProgress); }
