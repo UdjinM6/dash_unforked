@@ -318,7 +318,6 @@ class CAddress:
                 % (self.nServices, self.ADDRV2_NET_NAME[self.net], self.ip, self.port))
 
 
-
 class CInv:
     __slots__ = ("hash", "type")
 
@@ -642,7 +641,6 @@ class CBlock(CBlockHeader):
         return "CBlock(nVersion=%i hashPrevBlock=%064x hashMerkleRoot=%064x nTime=%s nBits=%08x nNonce=%08x vtx=%s)" \
                % (self.nVersion, self.hashPrevBlock, self.hashMerkleRoot,
                   time.ctime(self.nTime), self.nBits, self.nNonce, repr(self.vtx))
-
 
 class PrefilledTransaction:
     __slots__ = ("index", "tx")
@@ -1569,8 +1567,6 @@ class msg_reject:
         return "msg_reject: %s %d %s [%064x]" \
                % (self.message, self.code, self.reason, self.data)
 
-
-
 class msg_sendcmpct:
     __slots__ = ("announce", "version")
     command = b"sendcmpct"
@@ -1592,7 +1588,6 @@ class msg_sendcmpct:
     def __repr__(self):
         return "msg_sendcmpct(announce=%s, version=%lu)" % (self.announce, self.version)
 
-
 class msg_cmpctblock:
     __slots__ = ("header_and_shortids",)
     command = b"cmpctblock"
@@ -1612,7 +1607,6 @@ class msg_cmpctblock:
     def __repr__(self):
         return "msg_cmpctblock(HeaderAndShortIDs=%s)" % repr(self.header_and_shortids)
 
-
 class msg_getblocktxn:
     __slots__ = ("block_txn_request",)
     command = b"getblocktxn"
@@ -1631,7 +1625,6 @@ class msg_getblocktxn:
 
     def __repr__(self):
         return "msg_getblocktxn(block_txn_request=%s)" % (repr(self.block_txn_request))
-
 
 class msg_blocktxn:
     __slots__ = ("block_transactions",)
