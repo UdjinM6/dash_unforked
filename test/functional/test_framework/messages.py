@@ -220,7 +220,9 @@ def ToHex(obj):
 
 # Objects that map to dashd objects, which can be serialized/deserialized
 
-class CService():
+class CService:
+    __slots__ = ("ip", "port")
+
     def __init__(self):
         self.ip = ""
         self.port = 0
@@ -445,7 +447,7 @@ class CTxOut:
 
 class CTransaction:
     __slots__ = ("hash", "nLockTime", "nVersion", "sha256", "vin", "vout",
-                 "wit", "nType", "vExtraPayload")
+                 "nType", "vExtraPayload")
 
     def __init__(self, tx=None):
         if tx is None:
@@ -874,7 +876,9 @@ class CMerkleBlock:
         return "CMerkleBlock(header=%s txn=%s)" % (repr(self.header), repr(self.txn))
 
 
-class CCbTx():
+class CCbTx:
+    __slots__ = ("version", "height", "merkleRootMNList", "merkleRootQuorums")
+
     def __init__(self, version=None, height=None, merkleRootMNList=None, merkleRootQuorums=None):
         self.set_null()
         if version is not None:
@@ -908,7 +912,9 @@ class CCbTx():
         return r
 
 
-class CSimplifiedMNListEntry():
+class CSimplifiedMNListEntry:
+    __slots__ = ("proRegTxHash", "confirmedHash", "service", "pubKeyOperator", "keyIDVoting", "isValid")
+
     def __init__(self):
         self.set_null()
 
@@ -940,6 +946,9 @@ class CSimplifiedMNListEntry():
 
 
 class CFinalCommitment:
+    __slots__ = ("nVersion", "llmqType", "quorumHash", "signers", "validMembers", "quorumPublicKey",
+                 "quorumVvecHash", "quorumSig", "membersSig")
+
     def __init__(self):
         self.set_null()
 
@@ -980,6 +989,9 @@ class CFinalCommitment:
 
 
 class CGovernanceObject:
+    __slots__ = ("nHashParent", "nRevision", "nTime", "nCollateralHash", "vchData", "nObjectType",
+                 "masternodeOutpoint", "vchSig")
+
     def __init__(self):
         self.nHashParent = 0
         self.nRevision = 0
@@ -1020,6 +1032,8 @@ class CGovernanceObject:
 
 
 class CGovernanceVote:
+    __slots__ = ("masternodeOutpoint", "nParentHash", "nVoteOutcome", "nVoteSignal", "nTime", "vchSig")
+
     def __init__(self):
         self.masternodeOutpoint = COutPoint()
         self.nParentHash = 0
@@ -1051,6 +1065,8 @@ class CGovernanceVote:
 
 
 class CRecoveredSig:
+    __slots__ = ("llmqType", "quorumHash", "id", "msgHash", "sig")
+
     def __init__(self):
         self.llmqType = 0
         self.quorumHash = 0
@@ -1076,6 +1092,8 @@ class CRecoveredSig:
 
 
 class CSigShare:
+    __slots__ = ("llmqType", "quorumHash", "quorumMember", "id", "msgHash", "sigShare")
+
     def __init__(self):
         self.llmqType = 0
         self.quorumHash = 0
@@ -1104,6 +1122,8 @@ class CSigShare:
 
 
 class CBLSPublicKey:
+    __slots__ = ("data")
+
     def __init__(self):
         self.data = b'\\x0' * 48
 
@@ -1117,6 +1137,8 @@ class CBLSPublicKey:
 
 
 class CBLSIESEncryptedSecretKey:
+    __slots__ = ("ephemeral_pubKey", "iv", "data")
+
     def __init__(self):
         self.ephemeral_pubKey = b'\\x0' * 48
         self.iv = b'\\x0' * 32
@@ -1231,8 +1253,8 @@ class msg_addr:
         return "msg_addr(addrs=%s)" % (repr(self.addrs))
 
 
-class msg_addrv2():
-    # __slots__ = ("addrs",)
+class msg_addrv2:
+    __slots__ = ("addrs",)
     # msgtype = b"addrv2"
     command = b"addrv2"
 
@@ -1249,8 +1271,8 @@ class msg_addrv2():
         return "msg_addrv2(addrs=%s)" % (repr(self.addrs))
 
 
-class msg_sendaddrv2():
-    # __slots__ = ()
+class msg_sendaddrv2:
+    __slots__ = ()
     # msgtype = b"sendaddrv2"
     command = b"sendaddrv2"
 
@@ -1267,7 +1289,8 @@ class msg_sendaddrv2():
         return "msg_sendaddrv2()"
 
 
-class msg_inv():
+class msg_inv:
+    __slots__ = ("inv",)
     command = b"inv"
 
     def __init__(self, inv=None):
@@ -1362,7 +1385,6 @@ class msg_block:
 
     def __repr__(self):
         return "msg_block(block=%s)" % (repr(self.block))
-
 
 # for cases where a user needs tighter control over what is sent over the wire
 # note that the user must supply the name of the command, and the data
@@ -1644,7 +1666,8 @@ class msg_blocktxn:
     def __repr__(self):
         return "msg_blocktxn(block_transactions=%s)" % (repr(self.block_transactions))
 
-class msg_getmnlistd():
+class msg_getmnlistd:
+    __slots__ = ("baseBlockHash", "blockHash",)
     command = b"getmnlistd"
 
     def __init__(self, baseBlockHash=0, blockHash=0):
@@ -1666,7 +1689,8 @@ class msg_getmnlistd():
 
 QuorumId = namedtuple('QuorumId', ['llmqType', 'quorumHash'])
 
-class msg_mnlistdiff():
+class msg_mnlistdiff:
+    __slots__ = ("baseBlockHash", "blockHash", "merkleProof", "cbTx", "deletedMNs", "mnList", "deletedQuorums", "newQuorums",)
     command = b"mnlistdiff"
 
     def __init__(self):
@@ -1708,7 +1732,8 @@ class msg_mnlistdiff():
         return "msg_mnlistdiff(baseBlockHash=%064x, blockHash=%064x)" % (self.baseBlockHash, self.blockHash)
 
 
-class msg_clsig():
+class msg_clsig:
+    __slots__ = ("height", "blockHash", "sig",)
     command = b"clsig"
 
     def __init__(self, height=0, blockHash=0, sig=b'\\x0' * 96):
@@ -1732,7 +1757,8 @@ class msg_clsig():
         return "msg_clsig(height=%d, blockHash=%064x)" % (self.height, self.blockHash)
 
 
-class msg_islock():
+class msg_islock:
+    __slots__ = ("inputs", "txid", "sig",)
     command = b"islock"
 
     def __init__(self, inputs=[], txid=0, sig=b'\\x0' * 96):
@@ -1756,7 +1782,8 @@ class msg_islock():
         return "msg_islock(inputs=%s, txid=%064x)" % (repr(self.inputs), self.txid)
 
 
-class msg_qsigshare():
+class msg_qsigshare:
+    __slots__ = ("sig_shares",)
     command = b"qsigshare"
 
     def __init__(self, sig_shares=[]):
@@ -1774,7 +1801,8 @@ class msg_qsigshare():
         return "msg_qsigshare(sigShares=%d)" % (len(self.sig_shares))
 
 
-class msg_qwatch():
+class msg_qwatch:
+    __slots__ = ()
     command = b"qwatch"
 
     def __init__(self):
@@ -1790,7 +1818,8 @@ class msg_qwatch():
         return "msg_qwatch()"
 
 
-class msg_qgetdata():
+class msg_qgetdata:
+    __slots__ = ("quorum_hash", "quorum_type", "data_mask", "protx_hash")
     command = b"qgetdata"
 
     def __init__(self, quorum_hash=0, quorum_type=-1, data_mask=0, protx_hash=0):
@@ -1821,7 +1850,8 @@ class msg_qgetdata():
                                                                                 self.protx_hash)
 
 
-class msg_qdata():
+class msg_qdata:
+    __slots__ = ("quorum_hash", "quorum_type", "data_mask", "protx_hash", "error", "quorum_vvec", "enc_contributions",)
     command = b"qdata"
 
     def __init__(self):
