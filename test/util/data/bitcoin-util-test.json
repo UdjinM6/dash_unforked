@@ -105,7 +105,7 @@
   { "exec": "./dash-tx",
     "args":
     ["-create",
-      "in=5897de6bd6027a475eadd57019d4e6872c396d0716c4875a5f1a6fcfdf385c1f:0"],
+      "in=Z897de6bd6027a475eadd57019d4e6872c396d0716c4875a5f1a6fcfdf385c1f:0"],
     "return_code": 1,
     "error_txt": "error: invalid TX input txid",
     "description": "Tests the check for an invalid txid invalid hex"
@@ -121,7 +121,7 @@
   { "exec": "./dash-tx",
     "args":
     ["-create",
-      "in=5897de6bd6027a475eadd57019d4e6872c396d0716c4875a5f1a6fcfdf385c1f:0"],
+      "in=5897de6bd6027a475eadd57019d4e6872c396d0716c4875a5f1a6fcfdf385c1f12:0"],
     "return_code": 1,
     "error_txt": "error: invalid TX input txid",
     "description": "Tests the check for an invalid txid valid hex but too long"
@@ -280,7 +280,7 @@
     ["-create",
       "in=4d49a71ec9da436f71ec4ee231d04f292a29cd316f598bb7068feccabdc59485:0",
       "set=privatekeys:[\"7qYrzJZWqnyCWMYswFcqaRJypGdVceudXPSxmZKsngN7fyo7aAV\"]",
-      "set=prevtxs:[{\"txid\":\"4d49a71ec9da436f71ec4ee231d04f292a29cd316f598bb7068feccabdc59412\",\"vout\":0,\"scriptPubKey\":\"76a91491b24bf9f5288532960ac687abb035127b1d28a588ac\"}]",
+      "set=prevtxs:[{\"txid\":\"Zd49a71ec9da436f71ec4ee231d04f292a29cd316f598bb7068feccabdc59412\",\"vout\":0,\"scriptPubKey\":\"76a91491b24bf9f5288532960ac687abb035127b1d28a588ac\"}]",
       "sign=ALL",
       "outaddr=0.001:XijDvbYpPmznwgpWD3DkdYNfGmRP2KoVSk"],
     "return_code": 1,
