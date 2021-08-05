@@ -7,23 +7,25 @@
 #ifndef BITCOIN_WALLET_KEYPOOL_H
 #define BITCOIN_WALLET_KEYPOOL_H
 
-#include <pubkey.h>
 #include <serialize.h>
 #include <script/script.h>
 
 class CWallet;
 class CPubKey;
+class CBLSPublicKey;
+class CReserveScript;
 
+template <typename PublicKey>
 /** A key pool entry */
 class CKeyPool
 {
 public:
     int64_t nTime;
-    CPubKey vchPubKey;
+    PublicKey vchPubKey;
     bool fInternal; // for change outputs
 
     CKeyPool();
-    CKeyPool(const CPubKey& vchPubKeyIn, bool fInternalIn);
+    CKeyPool(const PublicKey& vchPubKeyIn, bool fInternalIn);
 
     template<typename Stream>
     void Serialize(Stream& s) const
@@ -53,13 +55,14 @@ public:
     }
 };
 
+template <typename PublicKey>
 /** A key allocated from the key pool. */
 class CReserveKey final : public CReserveScript
 {
 protected:
     CWallet* pwallet;
     int64_t nIndex;
-    CPubKey vchPubKey;
+    PublicKey vchPubKey;
     bool fInternal;
 public:
     explicit CReserveKey(CWallet* pwalletIn)
@@ -79,7 +82,7 @@ public:
     }
 
     void ReturnKey();
-    bool GetReservedKey(CPubKey &pubkey, bool fInternalIn /*= false*/);
+    bool GetReservedKey(PublicKey &pubkey, bool fInternalIn /*= false*/);
     void KeepKey();
     void KeepScript() override { KeepKey(); }
 };
