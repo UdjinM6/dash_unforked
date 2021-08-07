@@ -840,7 +840,7 @@ static UniValue sendmany(const JSONRPCRequest& request)
 
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 10)
         throw std::runtime_error(
-            "sendmany \"\" {\"address\":amount,...} ( minconf  addlocked \"comment\" [\"address\",...] replaceable conf_target \"estimate_mode\")\n"
+            "sendmany \"\" {\"address\":amount,...} ( minconf addlocked \"comment\" [\"address\",...] subtractfeefrom use_is use_cj conf_target \"estimate_mode\")\n"
             "\nSend multiple times. Amounts are double-precision floating point numbers.\n"
             + HelpRequiringPassphrase(pwallet) + "\n"
             "\nArguments:\n"
@@ -1249,7 +1249,7 @@ static UniValue listreceivedbyaddress(const JSONRPCRequest& request)
             "[\n"
             "  {\n"
             "    \"involvesWatchonly\" : true,        (bool) Only returned if imported addresses were involved in transaction\n"
-            "    \"address\" : \"receivingaddress\",  (string) The receiving address\n"
+            "    \"address\" : \"receivingaddress\",    (string) The receiving address\n"
             "    \"amount\" : x.xxx,                  (numeric) The total amount in " + CURRENCY_UNIT + " received by the address\n"
             "    \"confirmations\" : n                (numeric) The number of confirmations of the most recent transaction included.\n"
             "                                                 If 'addlocked' is true, the number of confirmations can be less than\n"
@@ -1485,12 +1485,8 @@ static UniValue listtransactions(const JSONRPCRequest& request)
     // the user could have gotten from another RPC command prior to now
     pwallet->BlockUntilSyncedToCurrentChain();
 
-    std::string strAccount = "*";
-    if (!request.params[0].isNull()) {
-        strAccount = request.params[0].get_str();
-        if (strAccount.empty()) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Label argument must be a valid label name or \"*\".");
-        }
+    if (!request.params[0].isNull() && request.params[0].get_str() != "*") {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Dummy value must be set to \"*\"");
     }
     int nCount = 10;
     if (!request.params[1].isNull())
@@ -4031,13 +4027,20 @@ UniValue walletcreatefundedpsbt(const JSONRPCRequest& request)
 static const CRPCCommand commands[] =
 { //  category              name                        actor (function)           argNames
     //  --------------------- ------------------------    -----------------------    ----------
+#if ENABLE_MINER
+    { "generating",         "generate",                         &generate,                      {"nblocks","maxtries"} },
+#else
+    { "hidden",             "generate",                         &generate,                      {"nblocks","maxtries"} }, // Hidden as it isn't functional, just an error to let people know if miner isn't compiled
+#endif //ENABLE_MINER
+    { "hidden",             "instantsendtoaddress",             &instantsendtoaddress,          {} },
     { "hidden",             "resendwallettransactions",         &resendwallettransactions,      {} },
-    { "rawtransactions",    "fundrawtransaction",               &fundrawtransaction,            {"hexstring","options","iswitness"} },
+    { "rawtransactions",    "fundrawtransaction",               &fundrawtransaction,            {"hexstring","options"} },
     { "wallet",             "abandontransaction",               &abandontransaction,            {"txid"} },
     { "wallet",             "abortrescan",                      &abortrescan,                   {} },
     { "wallet",             "addmultisigaddress",               &addmultisigaddress,            {"nrequired","keys","label"} },
     { "wallet",             "backupwallet",                     &backupwallet,                  {"destination"} },
     { "wallet",             "createwallet",                     &createwallet,                  {"wallet_name", "disable_private_keys"} },
+    { "wallet",             "dumphdinfo",                       &dumphdinfo,                    {} },
     { "wallet",             "dumpprivkey",                      &dumpprivkey,                   {"address"}  },
     { "wallet",             "dumpwallet",                       &dumpwallet,                    {"filename"} },
     { "wallet",             "encryptwallet",                    &encryptwallet,                 {"passphrase"} },
@@ -4052,20 +4055,22 @@ static const CRPCCommand commands[] =
     { "wallet",             "getunconfirmedbalance",            &getunconfirmedbalance,         {} },
     { "wallet",             "getwalletinfo",                    &getwalletinfo,                 {} },
     { "wallet",             "importaddress",                    &importaddress,                 {"address","label","rescan","p2sh"} },
+    { "wallet",             "importelectrumwallet",             &importelectrumwallet,          {"filename", "index"} },
     { "wallet",             "importmulti",                      &importmulti,                   {"requests","options"} },
     { "wallet",             "importprivkey",                    &importprivkey,                 {"privkey","label","rescan"} },
     { "wallet",             "importprunedfunds",                &importprunedfunds,             {"rawtransaction","txoutproof"} },
     { "wallet",             "importpubkey",                     &importpubkey,                  {"pubkey","label","rescan"} },
     { "wallet",             "importwallet",                     &importwallet,                  {"filename"} },
+    { "wallet",             "keepass",                          &keepass,                       {} },
     { "wallet",             "keypoolrefill",                    &keypoolrefill,                 {"newsize"} },
+    { "wallet",             "listaddressbalances",              &listaddressbalances,           {"minamount"} },
     { "wallet",             "listaddressgroupings",             &listaddressgroupings,          {} },
-    { "wallet",             "listaddressbalances",      &listaddressbalances,      {"minamount"} },
     { "wallet",             "listlabels",                       &listlabels,                    {"purpose"} },
     { "wallet",             "listlockunspent",                  &listlockunspent,               {} },
     { "wallet",             "listreceivedbyaddress",            &listreceivedbyaddress,         {"minconf","addlocked","include_empty","include_watchonly","address_filter"} },
     { "wallet",             "listreceivedbylabel",              &listreceivedbylabel,           {"minconf","addlocked","include_empty","include_watchonly"} },
     { "wallet",             "listsinceblock",                   &listsinceblock,                {"blockhash","target_confirmations","include_watchonly","include_removed"} },
-    { "wallet",             "listtransactions",                 &listtransactions,              {"label|dummy","count","skip","include_watchonly"} },
+    { "wallet",             "listtransactions",                 &listtransactions,              {"dummy","count","skip","include_watchonly"} },
     { "wallet",             "listunspent",                      &listunspent,                   {"minconf","maxconf","addresses","include_unsafe","query_options"} },
     { "wallet",             "listwallets",                      &listwallets,                   {} },
     { "wallet",             "loadwallet",                       &loadwallet,                    {"filename"} },
@@ -4074,10 +4079,10 @@ static const CRPCCommand commands[] =
     { "wallet",             "rescanblockchain",                 &rescanblockchain,              {"start_height", "stop_height"} },
     { "wallet",             "sendmany",                         &sendmany,                      {"dummy","amounts","minconf","addlocked","comment","subtractfeefrom","use_is","use_cj","conf_target","estimate_mode"} },
     { "wallet",             "sendtoaddress",                    &sendtoaddress,                 {"address","amount","comment","comment_to","subtractfeefromamount","use_is","use_cj","conf_target","estimate_mode"} },
+    { "wallet",             "setcoinjoinrounds",                &setcoinjoinrounds,             {"rounds"} },
+    { "wallet",             "setcoinjoinamount",                &setcoinjoinamount,             {"amount"} },
     { "wallet",             "setlabel",                         &setlabel,                      {"address","label"} },
     { "wallet",             "settxfee",                         &settxfee,                      {"amount"} },
-    { "wallet",             "setcoinjoinrounds",     &setcoinjoinrounds,     {"rounds"} },
-    { "wallet",             "setcoinjoinamount",     &setcoinjoinamount,     {"amount"} },
     { "wallet",             "signmessage",                      &signmessage,                   {"address","message"} },
     { "wallet",             "signrawtransactionwithwallet",     &signrawtransactionwithwallet,  {"hexstring","prevtxs","sighashtype"} },
     { "wallet",             "unloadwallet",                     &unloadwallet,                  {"wallet_name"} },
@@ -4089,16 +4094,6 @@ static const CRPCCommand commands[] =
     { "wallet",             "rescanblockchain",                 &rescanblockchain,              {"start_height", "stop_height"} },
     { "wallet",             "walletprocesspsbt",                &walletprocesspsbt,             {"psbt","sign","sighashtype","bip32derivs"} },
     { "wallet",             "walletcreatefundedpsbt",           &walletcreatefundedpsbt,        {"inputs","outputs","locktime","options","bip32derivs"} },
-
-#if ENABLE_MINER
-    { "generating",         "generate",                         &generate,                      {"nblocks","maxtries"} },
-#else
-    { "hidden",             "generate",                         &generate,                      {"nblocks","maxtries"} }, // Hidden as it isn't functional, just an error to let people know if miner isn't compiled
-#endif //ENABLE_MINER
-    { "wallet",             "keepass",                  &keepass,                  {} },
-    { "hidden",             "instantsendtoaddress",     &instantsendtoaddress,     {} },
-    { "wallet",             "dumphdinfo",               &dumphdinfo,               {} },
-    { "wallet",             "importelectrumwallet",     &importelectrumwallet,     {"filename", "index"} },
 };
 
 void RegisterWalletRPCCommands(CRPCTable &t)

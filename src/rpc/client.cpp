@@ -44,8 +44,6 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "settxfee", 0, "amount" },
     { "getreceivedbyaddress", 1, "minconf" },
     { "getreceivedbyaddress", 2, "addlocked" },
-    { "getreceivedbyaccount", 1, "minconf" },
-    { "getreceivedbyaccount", 2, "addlocked" },
     { "getreceivedbylabel", 1, "minconf" },
     { "getreceivedbylabel", 2, "addlocked" },
     { "listaddressbalances", 0, "minamount" },
