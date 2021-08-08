@@ -41,7 +41,7 @@ const char* TransactionErrorString(const TransactionError err)
     return "Unknown error";
 }
 
-bool BroadcastTransaction(const CTransactionRef tx, uint256& hashTx, TransactionError& error, std::string& err_string, const bool allowhighfees)
+bool BroadcastTransaction(const CTransactionRef tx, uint256& hashTx, TransactionError& error, std::string& err_string, const bool allowhighfees, const bool bypass_limits)
 {
     std::promise<void> promise;
     hashTx = tx->GetHash();
@@ -64,7 +64,7 @@ bool BroadcastTransaction(const CTransactionRef tx, uint256& hashTx, Transaction
         CValidationState state;
         bool fMissingInputs;
         if (!AcceptToMemoryPool(mempool, state, std::move(tx), &fMissingInputs,
-                                false /* plTxnReplaced */, false /* bypass_limits */, nMaxRawTxFee)) {
+                                bypass_limits, nMaxRawTxFee)) {
             if (state.IsInvalid()) {
                 err_string = FormatStateMessage(state);
                 error = TransactionError::MEMPOOL_REJECTED;

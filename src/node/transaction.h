@@ -38,6 +38,6 @@ const char* TransactionErrorString(const TransactionError error);
  * @param[in]  allowhighfees whether to allow fees exceeding maxTxFee
  * return true on success, false on error (and fills in `error`)
  */
-bool BroadcastTransaction(CTransactionRef tx, uint256& txid, TransactionError& error, std::string& err_string, bool allowhighfees = false);
+bool BroadcastTransaction(const CTransactionRef tx, uint256& txid, TransactionError& error, std::string& err_string, const bool allowhighfees = false, const bool bypass_limits = false);
 
 #endif // BITCOIN_NODE_TRANSACTION_H

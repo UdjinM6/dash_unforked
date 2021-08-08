@@ -1105,10 +1105,12 @@ UniValue sendrawtransaction(const JSONRPCRequest& request)
     CTransactionRef tx(MakeTransactionRef(std::move(mtx)));
     bool allowhighfees = false;
     if (!request.params[1].isNull()) allowhighfees = request.params[1].get_bool();
+    bool bypass_limits = false;
+    if (!request.params[3].isNull()) bypass_limits = request.params[3].get_bool();
     uint256 txid;
     TransactionError err;
     std::string err_string;
-    if (!BroadcastTransaction(tx, txid, err, err_string, allowhighfees)) {
+    if (!BroadcastTransaction(tx, txid, err, err_string, allowhighfees, bypass_limits)) {
         throw JSONRPCTransactionError(err, err_string);
     }
 
