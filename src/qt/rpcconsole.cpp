@@ -11,7 +11,6 @@
 #include <qt/forms/ui_debugwindow.h>
 
 #include <evo/deterministicmns.h>
-#include <llmq/quorums_chainlocks.h>
 
 #include <qt/bantablemodel.h>
 #include <qt/clientmodel.h>
@@ -616,8 +615,7 @@ void RPCConsole::setClientModel(ClientModel *model)
         setNumBlocks(node.getNumBlocks(), QDateTime::fromTime_t(node.getLastBlockTime()), QString::fromStdString(node.getLastBlockHash()), node.getVerificationProgress(), false);
         connect(model, SIGNAL(numBlocksChanged(int,QDateTime,QString,double,bool)), this, SLOT(setNumBlocks(int,QDateTime,QString,double,bool)));
 
-        setChainLock(QString::fromStdString(node.llmq().getBestChainLockHash()), node.llmq().getBestChainLockHeight(), false);
-        connect(model, SIGNAL(chainLockChanged(QString,int,bool)), this, SLOT(setChainLock(QString,int,bool)));
+        connect(model, SIGNAL(chainLockChanged(QString,int)), this, SLOT(setChainLock(QString,int)));
 
         updateNetworkState();
         connect(model, SIGNAL(networkActiveChanged(bool)), this, SLOT(setNetworkActive(bool)));
@@ -989,12 +987,10 @@ void RPCConsole::setNumBlocks(int count, const QDateTime& blockDate, const QStri
     }
 }
 
-void RPCConsole::setChainLock(const QString& bestChainLockHash, int bestChainLockHeight, bool headers)
+void RPCConsole::setChainLock(const QString& bestChainLockHash, int bestChainLockHeight)
 {
-    if (!headers) {
-        ui->BestChainLockHash->setText(bestChainLockHash);
-        ui->BestChainLockHeight->setText(QString::number(bestChainLockHeight));
-    }
+    ui->bestChainLockHash->setText(bestChainLockHash);
+    ui->bestChainLockHeight->setText(QString::number(bestChainLockHeight));
 }
 
 void RPCConsole::updateMasternodeCount()

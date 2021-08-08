@@ -46,8 +46,6 @@ class LLMQ
 {
 public:
     virtual ~LLMQ() {}
-    virtual std::string getBestChainLockHash() = 0;
-    virtual int32_t getBestChainLockHeight() = 0;
     virtual size_t getInstantSentLockCount() = 0;
 };
 
@@ -304,7 +302,7 @@ public:
 
     //! Register handler for chainlock messages.
     using NotifyChainLockFn =
-    std::function<void(const std::string& BestChainLockedHash, int32_t BestChainLockedHeight)>;
+    std::function<void(const std::string& bestChainLockedHash, int32_t bestChainLockedHeight)>;
     virtual std::unique_ptr<Handler> handleNotifyChainLock(NotifyChainLockFn fn) = 0;
 
     //! Register handler for header tip messages.

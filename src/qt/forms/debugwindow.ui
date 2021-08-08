@@ -406,14 +406,14 @@
         </widget>
        </item>
        <item row="15" column="0">
-        <widget class="QLabel" name="BestChainLockHashLabel">
+        <widget class="QLabel" name="bestChainLockHashLabel">
          <property name="text">
           <string>Latest ChainLocked block hash</string>
          </property>
         </widget>
        </item>
        <item row="15" column="1">
-        <widget class="QLabel" name="BestChainLockHash">
+        <widget class="QLabel" name="bestChainLockHash">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
          </property>
@@ -429,14 +429,14 @@
         </widget>
        </item>
        <item row="16" column="0">
-        <widget class="QLabel" name="BestChainLockHeightLabel">
+        <widget class="QLabel" name="bestChainLockHeightLabel">
          <property name="text">
           <string>Latest ChainLocked block height</string>
          </property>
         </widget>
        </item>
        <item row="16" column="1">
-        <widget class="QLabel" name="BestChainLockHeight">
+        <widget class="QLabel" name="bestChainLockHeight">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
          </property>
@@ -504,7 +504,7 @@
          </property>
         </widget>
        </item>
-       <item row="15" column="2" rowspan="3">
+       <item row="18" column="2" rowspan="3">
         <layout class="QVBoxLayout" name="verticalLayoutDebugButton">
          <property name="spacing">
           <number>3</number>
@@ -1345,6 +1345,19 @@
              <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
             </property>
            </widget>
+          </item>
+          <item row="20" column="1">
+           <spacer name="verticalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>

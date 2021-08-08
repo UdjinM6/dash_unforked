@@ -117,7 +117,7 @@ public Q_SLOTS:
     /** Update number of masternodes shown in the UI */
     void updateMasternodeCount();
     /** Set latest chainlocked hash and height shown in the UI */
-    void setChainLock(const QString& bestChainLockHash, int bestChainLockHeight, bool headers);
+    void setChainLock(const QString& bestChainLockHash, int bestChainLockHeight);
     /** Set number of blocks, last block date and last block hash shown in the UI */
     void setNumBlocks(int count, const QDateTime& blockDate, const QString& blockHash, double nVerificationProgress, bool headers);
     /** Set size (number of transactions and memory usage) of the mempool in the UI */

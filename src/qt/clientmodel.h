@@ -65,9 +65,6 @@ public:
     int getHeaderTipHeight() const;
     int64_t getHeaderTipTime() const;
 
-    std::string getBestChainLockHash();
-    int32_t getBestChainLockHeight();
-
     void setMasternodeList(const CDeterministicMNList& mnList);
     CDeterministicMNList getMasternodeList() const;
     void refreshMasternodeList();
@@ -89,10 +86,6 @@ public:
     // caches for the best header
     mutable std::atomic<int> cachedBestHeaderHeight;
     mutable std::atomic<int64_t> cachedBestHeaderTime;
-
-    // caches for the best chain lock
-    mutable std::string bclHash;
-    mutable std::atomic<int32_t> bclHeight;
 
 private:
     interfaces::Node& m_node;
@@ -124,7 +117,7 @@ private:
 Q_SIGNALS:
     void numConnectionsChanged(int count);
     void masternodeListChanged() const;
-    void chainLockChanged(const QString& BestChainLockHash, int BestChainLockHeight, bool header);
+    void chainLockChanged(const QString& bestChainLockHash, int bestChainLockHeight);
     void numBlocksChanged(int count, const QDateTime& blockDate, const QString& blockHash, double nVerificationProgress, bool header);
     void additionalDataSyncProgressChanged(double nSyncProgress);
     void mempoolSizeChanged(long count, size_t mempoolSizeInBytes);

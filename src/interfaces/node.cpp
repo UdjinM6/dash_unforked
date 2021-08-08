@@ -14,7 +14,6 @@
 #include <init.h>
 #include <interfaces/handler.h>
 #include <interfaces/wallet.h>
-#include <llmq/quorums_chainlocks.h>
 #include <llmq/quorums_instantsend.h>
 #include <masternode/masternode-sync.h>
 #include <net.h>
@@ -67,20 +66,6 @@ public:
 class LLMQImpl : public LLMQ
 {
 public:
-    std::string getBestChainLockHash() override
-    {
-        if (!llmq::chainLocksHandler) {
-            return "";
-        }
-        return llmq::chainLocksHandler->GetBestChainLock().blockHash.ToString();
-    }
-    int32_t getBestChainLockHeight() override
-    {
-        if (!llmq::chainLocksHandler) {
-            return 0;
-        }
-        return llmq::chainLocksHandler->GetBestChainLock().nHeight;
-    }
     size_t getInstantSentLockCount() override
     {
         if (!llmq::quorumInstantSendManager) {
@@ -435,8 +420,8 @@ class NodeImpl : public Node
     }
     std::unique_ptr<Handler> handleNotifyChainLock(NotifyChainLockFn fn) override
     {
-        return MakeHandler(::uiInterface.NotifyChainLock_connect([fn](const std::string& BestChainLockHash, int BestChainLockHeight) {
-            fn(BestChainLockHash, BestChainLockHeight);
+        return MakeHandler(::uiInterface.NotifyChainLock_connect([fn](const std::string& bestChainLockHash, int bestChainLockHeight) {
+            fn(bestChainLockHash, bestChainLockHeight);
         }));
     }
     std::unique_ptr<Handler> handleNotifyHeaderTip(NotifyHeaderTipFn fn) override
