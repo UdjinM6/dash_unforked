@@ -322,6 +322,7 @@ libdash_server_a_SOURCES = \
   chain.cpp \
   checkpoints.cpp \
   coinjoin/coinjoin.cpp \
+  coinjoin/coinjoin-client-options.cpp \
   coinjoin/coinjoin-server.cpp \
   consensus/tx_verify.cpp \
   dsnotificationinterface.cpp \
