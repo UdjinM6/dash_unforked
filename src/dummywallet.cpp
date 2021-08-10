@@ -2,8 +2,9 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <logging.h>
 #include <stdio.h>
-#include <util.h>
+#include <util/system.h>
 #include <walletinitinterface.h>
 
 class CWallet;
@@ -21,6 +22,12 @@ public:
     void Flush() const override {}
     void Stop() const override {}
     void Close() const override {}
+
+    // Dash Specific WalletInitInterface InitCoinJoinSettings
+    void AutoLockMasternodeCollaterals() const override {}
+    void InitCoinJoinSettings() const override {}
+    void InitKeePass() const override {}
+    bool InitAutoBackup() const override {return true;}
 };
 
 void DummyWalletInit::AddWalletOptions() const
