@@ -400,9 +400,7 @@ class P2PInterface(P2PConnection):
     def on_qdata(self, message): pass
     def on_qwatch(self, message): pass
 
-    def on_verack(self, message):
-        self.verack_received = True
-        pass
+    def on_verack(self, message): pass
 
     def on_version(self, message):
         assert message.nVersion >= MIN_VERSION_SUPPORTED, "Version {} received. Test framework only supports versions greater than {}".format(message.nVersion, MIN_VERSION_SUPPORTED)
@@ -462,14 +460,15 @@ class P2PInterface(P2PConnection):
         test_function = lambda: self.last_message.get("getheaders")
         wait_until(test_function, timeout=timeout, lock=mininode_lock)
 
-    def wait_for_inv(self, expected_inv, timeout=60):
-        """Waits for an INV message and checks that the first inv object in the message was as expected."""
-        if len(expected_inv) > 1:
-            raise NotImplementedError("wait_for_inv() will only verify the first inv object")
-        test_function = lambda: self.last_message.get("inv") and \
-                                self.last_message["inv"].inv[0].type == expected_inv[0].type and \
-                                self.last_message["inv"].inv[0].hash == expected_inv[0].hash
-        wait_until(test_function, timeout=timeout, lock=mininode_lock)
+    # TODO: enable when p2p_filter.py is backported
+    # def wait_for_inv(self, expected_inv, timeout=60):
+    #     """Waits for an INV message and checks that the first inv object in the message was as expected."""
+    #     if len(expected_inv) > 1:
+    #         raise NotImplementedError("wait_for_inv() will only verify the first inv object")
+    #     test_function = lambda: self.last_message.get("inv") and \
+    #                             self.last_message["inv"].inv[0].type == expected_inv[0].type and \
+    #                             self.last_message["inv"].inv[0].hash == expected_inv[0].hash
+    #     wait_until(test_function, timeout=timeout, lock=mininode_lock)
 
     def wait_for_verack(self, timeout=60):
         test_function = lambda: self.message_count["verack"]
