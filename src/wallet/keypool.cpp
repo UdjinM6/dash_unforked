@@ -6,7 +6,6 @@
 
 #include <wallet/keypool.h>
 
-#include <coinjoin/coinjoin-client.h>
 #include <wallet/wallet.h>
 
 template <class PublicKey>
