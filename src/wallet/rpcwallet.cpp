@@ -4112,6 +4112,11 @@ public:
         return obj;
     }
 
+    UniValue operator()(const CBLSKeyID &keyID) const {
+        throw std::runtime_error("Unimplemented logic!");
+        return UniValue(UniValue::VOBJ);
+    }
+
     UniValue operator()(const CScriptID &scriptID) const {
         UniValue obj(UniValue::VOBJ);
         CScript subscript;
