@@ -10,9 +10,6 @@
 #include <consensus/validation.h>
 #include <core_io.h>
 #include <index/txindex.h>
-#include <keystore.h>
-#include <validation.h>
-#include <validationinterface.h>
 #include <init.h>
 #include <key_io.h>
 #include <keystore.h>
@@ -22,7 +19,6 @@
 #include <policy/policy.h>
 #include <primitives/transaction.h>
 #include <psbt.h>
-#include <rpc/util.h>
 #include <rpc/rawtransaction.h>
 #include <rpc/server.h>
 #include <rpc/util.h>
@@ -34,6 +30,7 @@
 #include <uint256.h>
 #include <util/validation.h>
 #include <util/strencodings.h>
+#include <validation.h>
 #include <validationinterface.h>
 #ifdef ENABLE_WALLET
 #include <wallet/rpcwallet.h>
