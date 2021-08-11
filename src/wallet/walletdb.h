@@ -8,6 +8,7 @@
 
 #include <amount.h>
 #include <wallet/db.h>
+#include <wallet/keypool.h>
 #include <hdchain.h>
 #include <key.h>
 
@@ -35,7 +36,6 @@ class CAccount;
 class CAccountingEntry;
 struct CBlockLocator;
 class CGovernanceObject;
-class CKeyPool;
 class CMasterKey;
 class CScript;
 class CWallet;
@@ -148,8 +148,8 @@ public:
 
     bool WriteOrderPosNext(int64_t nOrderPosNext);
 
-    bool ReadPool(int64_t nPool, CKeyPool& keypool);
-    bool WritePool(int64_t nPool, const CKeyPool& keypool);
+    bool ReadPool(int64_t nPool, CKeyPool<CPubKey>& keypool);
+    bool WritePool(int64_t nPool, const CKeyPool<CPubKey>& keypool);
     bool ErasePool(int64_t nPool);
 
     bool WriteMinVersion(int nVersion);

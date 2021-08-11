@@ -20,6 +20,7 @@
 #include <wallet/coincontrol.h>
 #include <wallet/crypter.h>
 #include <wallet/coinselection.h>
+#include <wallet/keypool.h>
 #include <wallet/walletdb.h>
 #include <wallet/walletutil.h>
 
@@ -72,7 +73,6 @@ class CBlockIndex;
 class CCoinControl;
 class CKey;
 class COutput;
-class CReserveKey;
 class CScript;
 class CTxDSIn;
 class CTxMemPool;
@@ -116,45 +116,6 @@ enum WalletFlags : uint64_t {
 };
 
 static constexpr uint64_t g_known_wallet_flags = WALLET_FLAG_DISABLE_PRIVATE_KEYS;
-
-/** A key pool entry */
-class CKeyPool
-{
-public:
-    int64_t nTime;
-    CPubKey vchPubKey;
-    bool fInternal; // for change outputs
-
-    CKeyPool();
-    CKeyPool(const CPubKey& vchPubKeyIn, bool fInternalIn);
-
-    template<typename Stream>
-    void Serialize(Stream& s) const
-    {
-        int nVersion = s.GetVersion();
-        if (!(s.GetType() & SER_GETHASH)) {
-            s << nVersion;
-        }
-        s << nTime << vchPubKey << fInternal;
-    }
-
-    template<typename Stream>
-    void Unserialize(Stream& s)
-    {
-        int nVersion = s.GetVersion();
-        if (!(s.GetType() & SER_GETHASH)) {
-            s >> nVersion;
-        }
-        s >> nTime >> vchPubKey;
-        try {
-            s >> fInternal;
-        } catch (std::ios_base::failure&) {
-            /* flag as external address if we can't read the internal boolean
-               (this will be the case for any wallet before the HD chain split version) */
-            fInternal = false;
-        }
-    }
-};
 
 /** Address book data */
 class CAddressBookData
@@ -869,7 +830,7 @@ public:
      */
     const std::string& GetName() const { return m_location.GetName(); }
 
-    void LoadKeyPool(int64_t nIndex, const CKeyPool &keypool) EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
+    void LoadKeyPool(int64_t nIndex, const CKeyPool<CPubKey> &keypool) EXCLUSIVE_LOCKS_REQUIRED(cs_wallet);
 
     // Map from Key ID to key metadata.
     std::map<CKeyID, CKeyMetadata> mapKeyMetadata GUARDED_BY(cs_wallet);
@@ -1090,9 +1051,9 @@ public:
      * selected by SelectCoins(); Also create the change output, when needed
      * @note passing nChangePosInOut as -1 will result in setting a random position
      */
-    bool CreateTransaction(const std::vector<CRecipient>& vecSend, CTransactionRef& tx, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
+    bool CreateTransaction(const std::vector<CRecipient>& vecSend, CTransactionRef& tx, CReserveKey<CPubKey>& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
                            std::string& strFailReason, const CCoinControl& coin_control, bool sign = true, int nExtraPayloadSize = 0);
-    bool CommitTransaction(CTransactionRef tx, mapValue_t mapValue, std::vector<std::pair<std::string, std::string>> orderForm, std::string fromAccount, CReserveKey& reservekey, CConnman* connman, CValidationState& state);
+    bool CommitTransaction(CTransactionRef tx, mapValue_t mapValue, std::vector<std::pair<std::string, std::string>> orderForm, std::string fromAccount, CReserveKey<CPubKey>& reservekey, CConnman* connman, CValidationState& state);
 
     void ListAccountCreditDebit(const std::string& strAccount, std::list<CAccountingEntry>& entries);
     bool AddAccountingEntry(const CAccountingEntry&);
@@ -1138,7 +1099,7 @@ public:
      *     was not found in the wallet, or was misclassified in the internal
      *     or external keypool
      */
-    bool ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool, bool fRequestedInternal);
+    bool ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool<CPubKey>& keypool, bool fRequestedInternal);
     void KeepKey(int64_t nIndex);
     void ReturnKey(int64_t nIndex, bool fInternal, const CPubKey& pubkey);
     bool GetKeyFromPool(CPubKey &key, bool fInternal /*= false*/);
@@ -1335,38 +1296,6 @@ public:
     /** Implement lookup of key origin information through wallet key metadata. */
     bool GetKeyOrigin(const CKeyID& keyid, KeyOriginInfo& info) const override;
 };
-
-/** A key allocated from the key pool. */
-class CReserveKey final : public CReserveScript
-{
-protected:
-    CWallet* pwallet;
-    int64_t nIndex;
-    CPubKey vchPubKey;
-    bool fInternal;
-public:
-    explicit CReserveKey(CWallet* pwalletIn)
-    {
-        nIndex = -1;
-        pwallet = pwalletIn;
-        fInternal = false;
-    }
-
-    CReserveKey() = default;
-    CReserveKey(const CReserveKey&) = delete;
-    CReserveKey& operator=(const CReserveKey&) = delete;
-
-    ~CReserveKey()
-    {
-        ReturnKey();
-    }
-
-    void ReturnKey();
-    bool GetReservedKey(CPubKey &pubkey, bool fInternalIn /*= false*/);
-    void KeepKey();
-    void KeepScript() override { KeepKey(); }
-};
-
 
 /**
  * DEPRECATED Account information.

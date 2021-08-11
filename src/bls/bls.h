@@ -10,6 +10,8 @@
 #include <uint256.h>
 #include <util/strencodings.h>
 
+#include <support/allocators/secure.h>
+
 // bls-dash uses relic, which may define DEBUG and ERROR, which leads to many warnings in some build setups
 #undef ERROR
 #undef DEBUG
@@ -32,6 +34,8 @@ static const bool fLegacyDefault{true};
 #define BLS_CURVE_PUBKEY_SIZE 48
 #define BLS_CURVE_SIG_SIZE 96
 
+class CPublicKey;
+class CSecretKey;
 class CBLSSignature;
 class CBLSPublicKey;
 
@@ -42,10 +46,9 @@ class CBLSWrapper
     friend class CBLSPublicKey;
     friend class CBLSSignature;
 
-    bool fLegacy;
-
 protected:
     ImplType impl;
+    bool fLegacy = fLegacyDefault;
     bool fValid{false};
     mutable uint256 cachedHash;
 
@@ -152,6 +155,12 @@ public:
         return IsValid();
     }
 
+    //! CKey-like read only interface to access byte vector
+    unsigned int size() const { return (new std::vector<uint8_t>(ToByteVector()))->size(); }
+    const unsigned char* begin() const { return (new std::vector<uint8_t>(ToByteVector()))->data(); }
+    const unsigned char* end() const { return (new std::vector<uint8_t>(ToByteVector()))->data() + size(); }
+    const unsigned char& operator[](unsigned int pos) const { return (new std::vector<uint8_t>(ToByteVector()))->data()[pos]; }
+
 public:
     inline void Serialize(CSizeComputer& s) const
     {
@@ -193,12 +202,13 @@ public:
     }
 };
 
-struct CBLSIdImplicit : public uint256
+template <typename T1>
+struct CBLSIdImplicit : public T1
 {
     CBLSIdImplicit() = default;
-    CBLSIdImplicit(const uint256& id)
+    CBLSIdImplicit(const T1& id)
     {
-        memcpy(begin(), id.begin(), sizeof(uint256));
+        memcpy(this->begin(), id.begin(), sizeof(T1));
     }
     static CBLSIdImplicit FromBytes(const uint8_t* buffer, const bool fLegacy = false)
     {
@@ -208,11 +218,11 @@ struct CBLSIdImplicit : public uint256
     }
     std::vector<uint8_t> Serialize(const bool fLegacy = false) const
     {
-        return {begin(), end()};
+        return {this->begin(), this->end()};
     }
 };
 
-class CBLSId : public CBLSWrapper<CBLSIdImplicit, BLS_CURVE_ID_SIZE, CBLSId>
+class CBLSId : public CBLSWrapper<CBLSIdImplicit<uint256>, BLS_CURVE_ID_SIZE, CBLSId>
 {
 public:
     using CBLSWrapper::operator=;
@@ -222,6 +232,20 @@ public:
 
     CBLSId() = default;
     explicit CBLSId(const uint256& nHash);
+};
+
+class CBLSKeyID : public CBLSWrapper<CBLSIdImplicit<uint160>, BLS_CURVE_ID_SIZE, CBLSKeyID>
+{
+public:
+    using CBLSWrapper::operator=;
+    using CBLSWrapper::operator==;
+    using CBLSWrapper::operator!=;
+    using CBLSWrapper::CBLSWrapper;
+
+    CBLSKeyID() = default;
+    explicit CBLSKeyID(const uint160& nHash);
+
+    friend inline bool operator<(const CBLSKeyID& a, const CBLSKeyID& b) { return a.impl.Compare(b.impl) < 0; }
 };
 
 class CBLSSecretKey : public CBLSWrapper<bls::PrivateKey, BLS_CURVE_SECKEY_SIZE, CBLSSecretKey>
@@ -248,6 +272,25 @@ public:
     CBLSSignature Sign(const uint256& hash) const;
 };
 
+class CSecretKey : public CBLSSecretKey
+{
+protected:
+    bool fLegacy = false;
+public:
+    using CBLSSecretKey::Sign;
+
+    CSecretKey() = default;
+    CSecretKey(const CSecretKey&) = default;
+    CSecretKey& operator=(const CSecretKey&) = default;
+
+    std::vector<unsigned char, secure_allocator<unsigned char> > GetPrivKey() const;
+    CPublicKey GetPubKey() const;
+
+    bool Load(const std::vector<unsigned char, secure_allocator<unsigned char> >& privkey, const CPublicKey& vchPubKey, bool fSkipCheck);
+    bool Sign(const uint256& hash, std::vector<unsigned char>& vchSig) const;
+    bool VerifyPubKey(const CPublicKey& vchPubKey) const;
+};
+
 class CBLSPublicKey : public CBLSWrapper<bls::G1Element, BLS_CURVE_PUBKEY_SIZE, CBLSPublicKey>
 {
     friend class CBLSSecretKey;
@@ -267,6 +310,19 @@ public:
     bool PublicKeyShare(const std::vector<CBLSPublicKey>& mpk, const CBLSId& id);
     bool DHKeyExchange(const CBLSSecretKey& sk, const CBLSPublicKey& pk);
 
+};
+
+class CPublicKey : public CBLSPublicKey
+{
+protected:
+    bool fLegacy = false;
+public:
+    CPublicKey() = default;
+
+    CBLSKeyID GetID() const;
+    uint256 GetHash() const;
+
+    bool Verify(const uint256& hash, const std::vector<unsigned char>& vchSig) const;
 };
 
 class CBLSSignature : public CBLSWrapper<bls::G2Element, BLS_CURVE_SIG_SIZE, CBLSSignature>

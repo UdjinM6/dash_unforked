@@ -2,6 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <bls/bls.h>
 #include <key_io.h>
 #include <keystore.h>
 #include <pubkey.h>
@@ -84,6 +85,12 @@ public:
     UniValue operator()(const CScriptID &scriptID) const {
         UniValue obj(UniValue::VOBJ);
         obj.pushKV("isscript", true);
+        return obj;
+    }
+
+    UniValue operator()(const CBLSKeyID &keyID) const {
+        UniValue obj(UniValue::VOBJ);
+        obj.pushKV("isscript", false);
         return obj;
     }
 };

@@ -5,6 +5,7 @@
 
 #include <script/standard.h>
 
+#include <bls/bls.h>
 #include <pubkey.h>
 #include <script/script.h>
 #include <util/system.h>
@@ -212,6 +213,12 @@ public:
     bool operator()(const CNoDestination &dest) const {
         script->clear();
         return false;
+    }
+
+    bool operator()(const CBLSKeyID &keyID) const {
+        script->clear();
+        *script << OP_DUP << OP_HASH160 << keyID.ToByteVector() << OP_EQUALVERIFY << OP_BLS_CHECKSIG;
+        return true;
     }
 
     bool operator()(const CKeyID &keyID) const {
