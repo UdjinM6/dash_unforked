@@ -10,7 +10,13 @@
 #include <serialize.h>
 #include <script/standard.h>
 
+#if defined(HAVE_CONFIG_H)
+#include <config/dash-config.h>
+#endif
+
+#ifdef ENABLE_BIP70
 #include <qt/paymentrequestplus.h>
+#endif
 #include <qt/walletmodeltransaction.h>
 
 #include <interfaces/wallet.h>
@@ -60,8 +66,14 @@ public:
     // If from a payment request, this is used for storing the memo
     QString message;
 
+#ifdef ENABLE_BIP70
     // If from a payment request, paymentRequest.IsInitialized() will be true
     PaymentRequestPlus paymentRequest;
+#else
+    // If building with BIP70 is disabled, keep the payment request around as
+    // serialized string to ensure load/store is lossless
+    std::string sPaymentRequest;
+#endif
     // Empty if no authentication or invalid signature/cert/etc.
     QString authenticatedMerchant;
 
@@ -80,9 +92,11 @@ public:
         SER_WRITE(obj, message_str = obj.message.toStdString());
         SER_WRITE(obj, auth_merchant_str = obj.authenticatedMerchant.toStdString());
         SER_WRITE(obj, paymentRequest = obj.paymentRequest);
+#ifdef ENABLE_BIP70
         if (paymentRequest.IsInitialized()) {
             paymentRequest.SerializeToString(&sPaymentRequest);
         }
+#endif
 
         READWRITE(obj.nVersion, address_str, label_str, obj.amount, message_str, sPaymentRequest, auth_merchant_str);
 
@@ -90,8 +104,10 @@ public:
         SER_READ(obj, obj.label = QString::fromStdString(label_str));
         SER_READ(obj, obj.message = QString::fromStdString(message_str));
         SER_READ(obj, obj.authenticatedMerchant = QString::fromStdString(auth_merchant_str));
+#ifdef ENABLE_BIP70
         if (!sPaymentRequest.empty()) {
             SER_READ(obj, obj.paymentRequest.parse(QByteArray::fromRawData(sPaymentRequest.data(), sPaymentRequest.size())));
+#endif
         }
     }
 };
