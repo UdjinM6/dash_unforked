@@ -200,6 +200,8 @@ TransactionView::TransactionView(QWidget* parent) :
     connect(editLabelAction, &QAction::triggered, this, &TransactionView::editLabel);
     connect(showDetailsAction, &QAction::triggered, this, &TransactionView::showDetails);
     connect(showAddressQRCodeAction, &QAction::triggered, this, &TransactionView::showAddressQRCode);
+    // Double-clicking on a transaction on the transaction history page shows details
+    connect(this, &TransactionView::doubleClicked, this, &TransactionView::showDetails);
 }
 
 void TransactionView::setModel(WalletModel *_model)

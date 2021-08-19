@@ -49,8 +49,8 @@ AppearanceWidget::AppearanceWidget(QWidget* parent) :
     connect(ui->theme, &QComboBox::currentTextChanged, this, &AppearanceWidget::updateTheme);
     connect(ui->fontFamily, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AppearanceWidget::updateFontFamily);
     connect(ui->fontScaleSlider, &QSlider::valueChanged, this, &AppearanceWidget::updateFontScale);
-    connect(ui->fontWeightNormalSlider, &QSlider::valueChanged, this, [this](auto nValue) { updateFontWeightNormal(nValue); });
-    connect(ui->fontWeightBoldSlider, &QSlider::valueChanged, this, [this](auto nValue) { updateFontWeightBold(nValue); });
+    connect(ui->fontWeightNormalSlider, &QSlider::valueChanged, [this](auto nValue) { updateFontWeightNormal(nValue); });
+    connect(ui->fontWeightBoldSlider, &QSlider::valueChanged, [this](auto nValue) { updateFontWeightBold(nValue); });
 
     connect(ui->theme, &QComboBox::currentTextChanged, [=]() { Q_EMIT appearanceChanged(); });
     connect(ui->fontFamily, &QComboBox::currentTextChanged, [=]() { Q_EMIT appearanceChanged(); });

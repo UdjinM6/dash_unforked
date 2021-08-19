@@ -164,7 +164,7 @@ OverviewPage::OverviewPage(QWidget* parent) :
     showOutOfSyncWarning(true);
 
     timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, [this]{ coinJoinStatus(); });
+    connect(timer, &QTimer::timeout, [this]{ coinJoinStatus(); });
 }
 
 void OverviewPage::handleTransactionClicked(const QModelIndex &index)
