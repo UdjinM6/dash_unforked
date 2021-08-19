@@ -85,14 +85,16 @@ public:
     SERIALIZE_METHODS(SendCoinsRecipient, obj)
     {
         std::string address_str, label_str, message_str, auth_merchant_str, sPaymentRequest;
+#ifdef ENABLE_BIP70
         PaymentRequestPlus paymentRequest;
+#endif
 
         SER_WRITE(obj, address_str = obj.address.toStdString());
         SER_WRITE(obj, label_str = obj.label.toStdString());
         SER_WRITE(obj, message_str = obj.message.toStdString());
         SER_WRITE(obj, auth_merchant_str = obj.authenticatedMerchant.toStdString());
-        SER_WRITE(obj, paymentRequest = obj.paymentRequest);
 #ifdef ENABLE_BIP70
+        SER_WRITE(obj, paymentRequest = obj.paymentRequest);
         if (paymentRequest.IsInitialized()) {
             paymentRequest.SerializeToString(&sPaymentRequest);
         }
@@ -107,8 +109,8 @@ public:
 #ifdef ENABLE_BIP70
         if (!sPaymentRequest.empty()) {
             SER_READ(obj, obj.paymentRequest.parse(QByteArray::fromRawData(sPaymentRequest.data(), sPaymentRequest.size())));
-#endif
         }
+#endif
     }
 };
 
