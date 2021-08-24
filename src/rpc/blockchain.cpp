@@ -919,7 +919,7 @@ static UniValue getblockheaders(const JSONRPCRequest& request)
 
     for (; pblockindex; pblockindex = chainActive.Next(pblockindex))
     {
-        arrHeaders.push_back(blockheaderToJSON(pblockindex));
+        arrHeaders.push_back(blockheaderToJSON(chainActive.Tip(), pblockindex));
         if (--nCount <= 0)
             break;
     }
