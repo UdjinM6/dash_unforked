@@ -186,8 +186,8 @@ script: |
   done
   mkdir -p $OUTDIR/src
   mv $SOURCEDIST $OUTDIR/src
-  mv ${OUTDIR}/${DISTNAME}-x86_64-apple-darwin16.tar.gz ${OUTDIR}/${DISTNAME}-osx64.tar.gz
-  mv ${OUTDIR}/${DISTNAME}-x86_64-apple-darwin16-debug.tar.gz ${OUTDIR}/${DISTNAME}-osx64-debug.tar.gz
+  mv ${OUTDIR}/${DISTNAME}-x86_64-apple-darwin18.tar.gz ${OUTDIR}/${DISTNAME}-osx64.tar.gz
+  mv ${OUTDIR}/${DISTNAME}-x86_64-apple-darwin18-debug.tar.gz ${OUTDIR}/${DISTNAME}-osx64-debug.tar.gz
 
   # Compress ccache (otherwise the assert file will get too huge)
   if [ "$CCACHE_DIR" != "" ]; then
