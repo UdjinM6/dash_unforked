@@ -198,11 +198,6 @@ def main():
     args.windows = 'w' in args.os
     args.macos = 'm' in args.os
 
-    # Disable for MacOS if no SDK found
-    if args.macos and not os.path.isfile('gitian-builder/inputs/Xcode-11.3.1-11C505-extracted-SDK-with-libcxx-headers.tar.gz'):
-        print('Cannot build for MacOS, SDK does not exist. Will build for other OSes')
-        args.macos = False
-
     args.sign_prog = 'true' if args.detach_sign else 'gpg --detach-sign'
 
     if not args.signer:
