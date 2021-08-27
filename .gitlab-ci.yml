@@ -36,8 +36,8 @@ builder-image:
   stage: build-depends
   image: $CI_REGISTRY_IMAGE:builder-$CI_COMMIT_REF_SLUG
   variables:
-    SDK_URL: https://bitcoincore.org/depends-sources/sdks
-    OSX_SDK: "10.14"
+    SDK_URL: "https://bitcoincore.org/depends-sources/sdks"
+    OSX_SDK: "Xcode-11.3.1-11C505-extracted-SDK-with-libcxx-headers"
     MAKEJOBS: -j4
   before_script:
     - echo HOST=$HOST
@@ -46,10 +46,12 @@ builder-image:
         echo "Downloading MacOS SDK"
         mkdir -p depends/SDKs
         mkdir -p depends/sdk-sources
-        if [ ! -f depends/sdk-sources/MacOSX${OSX_SDK}.sdk.tar.gz ]; then
-          curl --location --fail $SDK_URL/MacOSX${OSX_SDK}.sdk.tar.gz -o depends/sdk-sources/MacOSX${OSX_SDK}.sdk.tar.gz
+        if [ ! -f depends/sdk-sources/${OSX_SDK}.tar.gz ]; then
+          curl --location --fail $SDK_URL/${OSX_SDK}.tar.gz -o depends/sdk-sources/${OSX_SDK}.tar.gz
         fi
-        tar -C depends/SDKs -xf depends/sdk-sources/MacOSX${OSX_SDK}.sdk.tar.gz
+        sha256sum depends/sdk-sources/${OSX_SDK}.tar.gz
+        echo "436df6dfc7073365d12f8ef6c1fdb060777c720602cc67c2dcf9a59d94290e38 depends/sdk-sources/${OSX_SDK}.tar.gz" | sha256sum -c
+        tar -C depends/SDKs -xf depends/sdk-sources/${OSX_SDK}.tar.gz
       fi
   script:
     - make $MAKEJOBS -C depends HOST=$HOST $DEP_OPTS
