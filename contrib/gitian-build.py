@@ -70,8 +70,8 @@ def build():
 
     if args.macos:
         print('\nCompiling ' + args.version + ' MacOS')
-        subprocess.check_call(['wget', '-N', '-P', 'inputs', 'https://bitcoincore.org/depends-sources/sdks/MacOSX10.11.sdk.tar.gz'])
-        subprocess.check_output(["echo 'bec9d089ebf2e2dd59b1a811a38ec78ebd5da18cbbcd6ab39d1e59f64ac5033f inputs/MacOSX10.11.sdk.tar.gz' | sha256sum -c"], shell=True)
+        subprocess.check_call(['wget', '-N', '-P', 'inputs', 'https://bitcoincore.org/depends-sources/sdks/Xcode-11.3.1-11C505-extracted-SDK-with-libcxx-headers.tar.gz'])
+        subprocess.check_output(["echo '436df6dfc7073365d12f8ef6c1fdb060777c720602cc67c2dcf9a59d94290e38 inputs/Xcode-11.3.1-11C505-extracted-SDK-with-libcxx-headers.tar.gz' | sha256sum -c"], shell=True)
         subprocess.check_call(['bin/gbuild', '-j', args.jobs, '-m', args.memory, '--commit', 'dash='+args.commit, '--url', 'dash='+args.url, '../dash/contrib/gitian-descriptors/gitian-osx.yml'])
         subprocess.check_call(['bin/gsign', '-p', args.sign_prog, '--signer', args.signer, '--release', args.version+'-osx-unsigned', '--destination', '../gitian.sigs/', '../dash/contrib/gitian-descriptors/gitian-osx.yml'])
         subprocess.check_call('mv build/out/dashcore-*-osx-unsigned.tar.gz inputs/dashcore-osx-unsigned.tar.gz', shell=True)
@@ -135,7 +135,7 @@ def verify():
 def main():
     global args, workdir
 
-    parser = argparse.ArgumentParser(usage='%(prog)s [options] signer version')
+    parser = argparse.ArgumentParser(description='Script for running full Gitian builds.')
     parser.add_argument('-c', '--commit', action='store_true', dest='commit', help='Indicate that the version argument is for a commit or branch')
     parser.add_argument('-p', '--pull', action='store_true', dest='pull', help='Indicate that the version argument is the number of a github repository pull request')
     parser.add_argument('-u', '--url', dest='url', default='https://github.com/dashpay/dash', help='Specify the URL of the repository. Default is %(default)s')
@@ -150,23 +150,13 @@ def main():
     parser.add_argument('-S', '--setup', action='store_true', dest='setup', help='Set up the Gitian building environment. Only works on Debian-based systems (Ubuntu, Debian)')
     parser.add_argument('-D', '--detach-sign', action='store_true', dest='detach_sign', help='Create the assert file for detached signing. Will not commit anything.')
     parser.add_argument('-n', '--no-commit', action='store_false', dest='commit_files', help='Do not commit anything to git')
-    parser.add_argument('signer', help='GPG signer to sign each build assert file')
-    parser.add_argument('version', help='Version number, commit, or branch to build. If building a commit or branch, the -c option must be specified')
+    parser.add_argument('signer', nargs='?', help='GPG signer to sign each build assert file')
+    parser.add_argument('version', nargs='?', help='Version number, commit, or branch to build. If building a commit or branch, the -c option must be specified')
 
     args = parser.parse_args()
     workdir = os.getcwd()
 
-    args.linux = 'l' in args.os
-    args.windows = 'w' in args.os
-    args.macos = 'm' in args.os
-
     args.is_bionic = b'bionic' in subprocess.check_output(['lsb_release', '-cs'])
-
-    if args.buildsign:
-        args.build = True
-        args.sign = True
-
-    args.sign_prog = 'true' if args.detach_sign else 'gpg --detach-sign'
 
     args.lxc = (args.virtualization == 'lxc')
     args.kvm = (args.virtualization == 'kvm')
@@ -174,6 +164,7 @@ def main():
 
     script_name = os.path.basename(sys.argv[0])
     # Set all USE_* environment variables for gitian-builder: USE_LXC, USE_DOCKER and USE_VBOX
+    os.environ['USE_LXC'] = ''
     os.environ['USE_VBOX'] = ''
     if args.lxc:
         os.environ['USE_LXC'] = '1'
@@ -193,13 +184,28 @@ def main():
         print('Try '+script_name+' --help for more information')
         exit(1)
 
-    # Signer and version shouldn't be empty
-    if args.signer == '':
-        print(script_name+': Missing signer.')
+    if args.setup:
+        setup()
+
+    if args.buildsign:
+        args.build = True
+        args.sign = True
+
+    if not args.build and not args.sign and not args.verify:
+        sys.exit(0)
+
+    args.linux = 'l' in args.os
+    args.windows = 'w' in args.os
+    args.macos = 'm' in args.os
+
+    args.sign_prog = 'true' if args.detach_sign else 'gpg --detach-sign'
+
+    if not args.signer:
+        print(script_name+': Missing signer')
         print('Try '+script_name+' --help for more information')
-        exit(1)
-    if args.version == '':
-        print(script_name+': Missing version.')
+        sys.exit(1)
+    if not args.version:
+        print(script_name+': Missing version')
         print('Try '+script_name+' --help for more information')
         exit(1)
 
@@ -207,12 +213,6 @@ def main():
     if args.commit and args.pull:
         raise Exception('Cannot have both commit and pull')
     args.commit = ('' if args.commit else 'v') + args.version
-
-    if args.setup:
-        setup()
-
-    if not args.build and not args.sign and not args.verify:
-        exit(0)
 
     os.chdir('dash')
     if args.pull:
