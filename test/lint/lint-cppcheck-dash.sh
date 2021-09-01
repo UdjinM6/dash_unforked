@@ -35,7 +35,7 @@ ENABLED_CHECKS=(
 )
 
 IGNORED_WARNINGS=(
-    "src/bls/bls.h:.* warning: Struct 'CBLSIdImplicit' has a constructor with 1 argument that is not explicit."
+    "src/bls/bls.h:.* Struct 'CBLSIdImplicit' has a constructor with 1 argument that is not explicit."
     "src/llmq/quorums_init.cpp:.* warning: Variable 'llmqDbTmp' is assigned a value that is never used."
     "src/llmq/quorums.cpp:.* warning: Parameter '_blsWorker' can be declared with const"
 
