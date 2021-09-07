@@ -226,6 +226,24 @@ class DashZMQTest (DashTestFramework):
         assert_equal(uint256_to_string(zmq_chain_lock.blockHash), rpc_chain_lock_hash)
         assert_equal(zmq_chain_locked_block.hash, rpc_chain_lock_hash)
         assert_equal(zmq_chain_lock.sig.hex(), rpc_best_chain_lock_sig)
+
+        # Test getzmqnotifications RPC
+        assert_equal(self.nodes[0].getzmqnotifications(), [
+            {"type": "pubhashchainlock", "address": self.address, "hwm": 1000},
+            {"type": "pubhashgovernanceobject", "address": self.address, "hwm": 1000},
+            {"type": "pubhashgovernancevote", "address": self.address, "hwm": 1000},
+            {"type": "pubhashinstantsenddoublespend", "address": self.address, "hwm": 1000},
+            {"type": "pubhashrecoveredsig", "address": self.address, "hwm": 1000},
+            {"type": "pubhashtxlock", "address": self.address, "hwm": 1000},
+            {"type": "pubrawchainlock", "address": self.address, "hwm": 1000},
+            {"type": "pubrawchainlocksig", "address": self.address, "hwm": 1000},
+            {"type": "pubrawgovernanceobject", "address": self.address, "hwm": 1000},
+            {"type": "pubrawgovernancevote", "address": self.address, "hwm": 1000},
+            {"type": "pubrawinstantsenddoublespend", "address": self.address, "hwm": 1000},
+            {"type": "pubrawrecoveredsig", "address": self.address, "hwm": 1000},
+            {"type": "pubrawtxlock", "address": self.address, "hwm": 1000},
+            {"type": "pubrawtxlocksig", "address": self.address, "hwm": 1000},
+        ])
         # Unsubscribe from ChainLock messages
         self.unsubscribe(chain_lock_publishers)
 
