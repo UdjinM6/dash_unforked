@@ -58,6 +58,8 @@ elif [ "$BUILD_TARGET" = "linux64" ]; then
   export DEP_OPTS="NO_UPNP=1 DEBUG=1"
   export BITCOIN_CONFIG="--enable-zmq --enable-glibc-back-compat --enable-reduce-exports --enable-crash-hooks"
   export CPPFLAGS="-DDEBUG_LOCKORDER -DENABLE_DASH_DEBUG -DARENA_DEBUG"
+  export CFLAGS="-g0 -O2 -funsigned-char"
+  export CXXFLAGS="-g0 -O2 -funsigned-char"
   export PYZMQ=true
 elif [ "$BUILD_TARGET" = "linux64_cxx17" ]; then
   export HOST=x86_64-unknown-linux-gnu
