@@ -104,6 +104,7 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
         """Sets test framework defaults. Do not override this method. Instead, override the set_test_params() method"""
         self.chain = 'regtest'
         self.setup_clean_chain = False
+        self.mock_time_on_setup = True
         self.nodes = []
         self.network_thread = None
         self.mocktime = 0
@@ -274,10 +275,12 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
         self.log.info("Initializing test directory " + self.options.tmpdir)
         if self.setup_clean_chain:
             self._initialize_chain_clean()
-            self.set_genesis_mocktime()
+            if self.mock_time_on_setup:
+                self.set_genesis_mocktime()
         else:
             self._initialize_chain()
-            self.set_cache_mocktime()
+            if self.mock_time_on_setup:
+                self.set_cache_mocktime()
 
     def setup_network(self):
         """Override this method to customize test network topology"""
