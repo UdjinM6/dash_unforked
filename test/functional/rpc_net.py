@@ -23,8 +23,12 @@ from test_framework.messages import CAddress, msg_addr, NODE_NETWORK
 class NetTest(BitcoinTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
-        self.mock_time_on_setup = False
         self.num_nodes = 2
+
+    def setup_network(self):
+        self.disable_mocktime()
+        self.setup_nodes()
+        connect_nodes_bi(self.nodes, 0, 1)
 
     def run_test(self):
         # Wait for one ping/pong to finish so that we can be sure that there is no chatter between nodes for some time
