@@ -49,16 +49,8 @@ from test_framework.mininode import (
 class BlockchainTest(BitcoinTestFramework):
     def set_test_params(self):
         self.num_nodes = 1
-        self.setup_clean_chain = True
 
     def run_test(self):
-        # Have to prepare the chain manually here.
-        # txindex=1 by default in Dash which is incompatible with pruning.
-        self.set_genesis_mocktime()
-        for i in range(200):
-            self.bump_mocktime(156)
-            self.nodes[0].generate(1)
-
         self.restart_node(0, extra_args=['-stopatheight=207', '-prune=1', '-txindex=0'])  # Set extra args with pruning after rescan is complete
 
         # Actual tests

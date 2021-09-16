@@ -596,6 +596,50 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
         for i in range(self.num_nodes):
             initialize_datadir(self.options.tmpdir, i, self.chain)
 
+    def skip_if_no_py3_zmq(self):
+        """Attempt to import the zmq package and skip the test if the import fails."""
+        try:
+            import zmq  # noqa
+        except ImportError:
+            raise SkipTest("python3-zmq module not available.")
+
+    def skip_if_no_bitcoind_zmq(self):
+        """Skip the running test if dashd has not been compiled with zmq support."""
+        if not self.is_zmq_compiled():
+            raise SkipTest("dashd has not been built with zmq enabled.")
+
+    def skip_if_no_wallet(self):
+        """Skip the running test if wallet has not been compiled."""
+        if not self.is_wallet_compiled():
+            raise SkipTest("wallet has not been compiled.")
+
+    def skip_if_no_cli(self):
+        """Skip the running test if dash-cli has not been compiled."""
+        if not self.is_cli_compiled():
+            raise SkipTest("dash-cli has not been compiled.")
+
+    def is_cli_compiled(self):
+        """Checks whether dash-cli was compiled."""
+        config = configparser.ConfigParser()
+        config.read_file(open(self.options.configfile))
+
+        return config["components"].getboolean("ENABLE_UTILS")
+
+    def is_wallet_compiled(self):
+        """Checks whether the wallet module was compiled."""
+        config = configparser.ConfigParser()
+        config.read_file(open(self.options.configfile))
+
+        return config["components"].getboolean("ENABLE_WALLET")
+
+    def is_zmq_compiled(self):
+        """Checks whether the zmq module was compiled."""
+        config = configparser.ConfigParser()
+        config.read_file(open(self.options.configfile))
+
+        return config["components"].getboolean("ENABLE_ZMQ")
+
+
 MASTERNODE_COLLATERAL = 1000
 
 
@@ -615,6 +659,9 @@ class DashTestFramework(BitcoinTestFramework):
     def set_test_params(self):
         """Tests must this method to change default values for number of nodes, topology, etc"""
         raise NotImplementedError
+
+    def skip_test_if_missing_module(self):
+        self.skip_if_no_wallet()
 
     def run_test(self):
         """Tests must override this method to define test logic"""
@@ -1231,46 +1278,3 @@ class DashTestFramework(BitcoinTestFramework):
                     c += 1
             return c >= count
         wait_until(test, timeout=timeout)
-
-    def skip_if_no_py3_zmq(self):
-        """Attempt to import the zmq package and skip the test if the import fails."""
-        try:
-            import zmq  # noqa
-        except ImportError:
-            raise SkipTest("python3-zmq module not available.")
-
-    def skip_if_no_bitcoind_zmq(self):
-        """Skip the running test if dashd has not been compiled with zmq support."""
-        if not self.is_zmq_compiled():
-            raise SkipTest("dashd has not been built with zmq enabled.")
-
-    def skip_if_no_wallet(self):
-        """Skip the running test if wallet has not been compiled."""
-        if not self.is_wallet_compiled():
-            raise SkipTest("wallet has not been compiled.")
-
-    def skip_if_no_cli(self):
-        """Skip the running test if bitcoin-cli has not been compiled."""
-        if not self.is_cli_compiled():
-            raise SkipTest("bitcoin-cli has not been compiled.")
-
-    def is_cli_compiled(self):
-        """Checks whether bitcoin-cli was compiled."""
-        config = configparser.ConfigParser()
-        config.read_file(open(self.options.configfile))
-
-        return config["components"].getboolean("ENABLE_UTILS")
-
-    def is_wallet_compiled(self):
-        """Checks whether the wallet module was compiled."""
-        config = configparser.ConfigParser()
-        config.read_file(open(self.options.configfile))
-
-        return config["components"].getboolean("ENABLE_WALLET")
-
-    def is_zmq_compiled(self):
-        """Checks whether the zmq module was compiled."""
-        config = configparser.ConfigParser()
-        config.read_file(open(self.options.configfile))
-
-        return config["components"].getboolean("ENABLE_ZMQ")
