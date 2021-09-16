@@ -13,7 +13,6 @@ Output descriptors currently support:
 - Pay-to-pubkey scripts (P2PK), through the `pk` function.
 - Pay-to-pubkey-hash scripts (P2PKH), through the `pkh` function.
 - Pay-to-script-hash scripts (P2SH), through the `sh` function.
-- Pay-to-witness-script-hash scripts (P2WSH), through the `wsh` function.
 - Multisig scripts, through the `multi` function.
 - Any type of supported address through the `addr` function.
 - Raw hex scripts through the `raw` function.
@@ -22,10 +21,9 @@ Output descriptors currently support:
 ## Examples
 
 - `pk(0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798)` represents a P2PK output.
-- `sh(wsh(pkh(02e493dbf1c10d80f3581e4904930b1404cc6c13900ee0758474fa94abe8c4cd13)))` represents a (overly complicated) P2SH-P2WSH-P2PKH output.
 - `multi(1,022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4,025cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e39ce92bddedcac4f9bc)` represents a bare *1-of-2* multisig.
 - `pkh(xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEjWgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw/1'/2)` refers to a single P2PKH output, using child key *1'/2* of the specified xpub.
-  
+
 ## Reference
 
 Descriptors consist of several types of expressions. The top level expression is always a `SCRIPT`.
@@ -34,14 +32,13 @@ Descriptors consist of several types of expressions. The top level expression is
 - `pk(KEY)` (anywhere): P2PK output for the given public key.
 - `pkh(KEY)` (anywhere): P2PKH output for the given public key (use `addr` if you only know the pubkey hash).
 - `sh(SCRIPT)` (top level only): P2SH embed the argument.
-- `combo(KEY)` (top level only): an alias for the collection of `pk(KEY)` and `pkh(KEY)`. If the key is compressed, it also includes `wpkh(KEY)` and `sh(wpkh(KEY))`.
+- `combo(KEY)` (top level only): an alias for the collection of `pk(KEY)` and `pkh(KEY)`.
 - `multi(k,KEY_1,KEY_2,...,KEY_n)` (anywhere): k-of-n multisig script.
 - `addr(ADDR)` (top level only): the script which ADDR expands to.
 - `raw(HEX)` (top level only): the script whose hex encoding is HEX.
 
 `KEY` expressions:
 - Hex encoded public keys (66 characters starting with `02` or `03`, or 130 characters starting with `04`).
-  - Inside `wpkh` and `wsh`, only compressed public keys are permitted.
 - [WIF](https://en.bitcoin.it/wiki/Wallet_import_format) encoded private keys may be specified instead of the corresponding public key, with the same meaning.
 -`xpub` encoded extended public key or `xprv` encoded private key (as defined in [BIP 32](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki)).
   - Followed by zero or more `/NUM` unhardened and `/NUM'` hardened BIP32 derivation steps.
@@ -50,25 +47,23 @@ Descriptors consist of several types of expressions. The top level expression is
   - Instead of a `'`, the suffix `h` can be used to denote hardened derivation.
 
 `ADDR` expressions are any type of supported address:
-- P2PKH addresses (base58, of the form `1...`). Note that P2PKH addresses in descriptors cannot be used for P2PK outputs (use the `pk` function instead).
-- P2SH addresses (base58, of the form `3...`, defined in [BIP 13](https://github.com/bitcoin/bips/blob/master/bip-0013.mediawiki)).
-- Segwit addresses (bech32, of the form `bc1...`, defined in [BIP 173](https://github.com/bitcoin/bips/blob/master/bip-0173.mediawiki)).
+- P2PKH addresses (base58, of the form `X...`). Note that P2PKH addresses in descriptors cannot be used for P2PK outputs (use the `pk` function instead).
+- P2SH addresses (base58, of the form `7...`, defined in [BIP 13](https://github.com/bitcoin/bips/blob/master/bip-0013.mediawiki)).
 
 ## Explanation
 
 ### Single-key scripts
 
 Many single-key constructions are used in practice, generally including
-P2PK, P2PKH, P2WPKH, and P2SH-P2WPKH. Many more combinations are
-imaginable, though they may not be optimal: P2SH-P2PK, P2SH-P2PKH,
-P2WSH-P2PK, P2WSH-P2PKH, P2SH-P2WSH-P2PK, P2SH-P2WSH-P2PKH.
+P2PK and P2PKH. More combinations are
+imaginable, though they may not be optimal: P2SH-P2PK and P2SH-P2PKH.
 
 To describe these, we model these as functions. The functions `pk`
-(P2PK), `pkh` (P2PKH) and `wpkh` (P2WPKH) take as input a public key in
+(P2PK) and `pkh` (P2PKH) take as input a public key in
 hexadecimal notation (which will be extended later), and return the
-corresponding *scriptPubKey*. The functions `sh` (P2SH) and `wsh` (P2WSH)
-take as input a script, and return the script describing P2SH and P2WSH
-outputs with the input as embedded script. The names of the functions do
+corresponding *scriptPubKey*. The `sh` (P2SH) function
+takes as input a script, and returns the script describing P2SH
+outputs with the input as embedded script. The name of the function does
 not contain "p2" for brevity.
 
 ### Multisig
@@ -106,7 +101,6 @@ steps, or for dumping wallet descriptors including private key material.
 ### Compatibility with old wallets
 
 In order to easily represent the sets of scripts currently supported by
-existing Bitcoin Core wallets, a convenience function `combo` is
-provided, which takes as input a public key, and constructs the P2PK,
-P2PKH, P2WPKH, and P2SH-P2WPH scripts for that key. In case the key is
-uncompressed, it only constructs P2PK and P2PKH.
+existing Dash Core wallets, a convenience function `combo` is
+provided, which takes as input a public key, and constructs the P2PK and
+P2PKH scripts for that key.
