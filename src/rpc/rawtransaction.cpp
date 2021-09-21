@@ -11,7 +11,6 @@
 #include <core_io.h>
 #include <index/txindex.h>
 #include <init.h>
-#include <init.h>
 #include <key_io.h>
 #include <keystore.h>
 #include <merkleblock.h>

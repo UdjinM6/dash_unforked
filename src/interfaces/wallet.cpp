@@ -38,8 +38,6 @@
 #include <utility>
 #include <vector>
 
-#include <memory>
-
 namespace interfaces {
 namespace {
 
