@@ -286,9 +286,10 @@ static void BlockTipChanged(ClientModel *clientmodel, bool initialSync, int heig
 static void NotifyChainLock(ClientModel *clientmodel, const std::string& bestChainLockHash, int bestChainLockHeight)
 {
     // emits signal "chainlockChanged"
-    QMetaObject::invokeMethod(clientmodel, "chainLockChanged", Qt::QueuedConnection,
+    bool invoked = QMetaObject::invokeMethod(clientmodel, "chainLockChanged", Qt::QueuedConnection,
                               Q_ARG(QString, QString::fromStdString(bestChainLockHash)),
                               Q_ARG(int, bestChainLockHeight));
+    assert(invoked);
 }
 
 static void NotifyMasternodeListChanged(ClientModel *clientmodel, const CDeterministicMNList& newList)
@@ -298,8 +299,9 @@ static void NotifyMasternodeListChanged(ClientModel *clientmodel, const CDetermi
 
 static void NotifyAdditionalDataSyncProgressChanged(ClientModel *clientmodel, double nSyncProgress)
 {
-    QMetaObject::invokeMethod(clientmodel, "additionalDataSyncProgressChanged", Qt::QueuedConnection,
+    bool invoked = QMetaObject::invokeMethod(clientmodel, "additionalDataSyncProgressChanged", Qt::QueuedConnection,
                               Q_ARG(double, nSyncProgress));
+    assert(invoked);
 }
 
 void ClientModel::subscribeToCoreSignals()

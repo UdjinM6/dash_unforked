@@ -786,12 +786,13 @@ static void NotifyTransactionChanged(TransactionTableModel *ttm, const uint256 &
 
 static void NotifyAddressBookChanged(TransactionTableModel *ttm, const CTxDestination &address, const std::string &label, bool isMine, const std::string &purpose, ChangeType status)
 {
-    QMetaObject::invokeMethod(ttm, "updateAddressBook", Qt::QueuedConnection,
+    bool invoked = QMetaObject::invokeMethod(ttm, "updateAddressBook", Qt::QueuedConnection,
                               Q_ARG(QString, QString::fromStdString(EncodeDestination(address))),
                               Q_ARG(QString, QString::fromStdString(label)),
                               Q_ARG(bool, isMine),
                               Q_ARG(QString, QString::fromStdString(purpose)),
                               Q_ARG(int, (int)status));
+    assert(invoked);
 }
 
 static void ShowProgress(TransactionTableModel *ttm, const std::string &title, int nProgress)
