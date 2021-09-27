@@ -122,7 +122,7 @@ void CMasternodeMetaMan::CheckAndRemove()
 std::string CMasternodeMetaMan::ToString() const
 {
     std::ostringstream info;
-
+    LOCK(cs);
     info << "Masternodes: meta infos object count: " << (int)metaInfos.size() <<
          ", nDsqCount: " << (int)nDsqCount;
     return info.str();
