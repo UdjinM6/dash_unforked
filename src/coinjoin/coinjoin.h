@@ -2,8 +2,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_COINJOIN_COINJOIN_H
-#define BITCOIN_COINJOIN_COINJOIN_H
+#ifndef BITCOIN_COINJOIN_H
+#define BITCOIN_COINJOIN_H
 
 #include <chainparams.h>
 #include <primitives/transaction.h>
@@ -448,4 +448,4 @@ public:
 
 };
 
-#endif // BITCOIN_COINJOIN_COINJOIN_H
+#endif // BITCOIN_COINJOIN_H
