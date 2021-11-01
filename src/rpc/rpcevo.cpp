@@ -101,13 +101,21 @@ static RPCArg GetHelpString(const std::string& strParamName)
                 "The address must be unused and must differ from the collateralAddress."}
         },
         {"payoutAddress_register",
-            {"payoutAddress_register", RPCArg::Type::OBJ, /* opt */ false, /* default_val */ "{}",
-                "The dash address to use for masternode reward payments."}
+            {"payoutAddress_register", RPCArg::Type::OBJ, /* opt */ false, /* default_val */ "",
+                "The dash address to use for masternode reward payments.",
+                {
+                    {"address", RPCArg::Type::AMOUNT, /* opt */ false, /* default_val */ "", "The dash address is the key, the numeric amount (can be string) is the value"},
+                },
+            }
         },
         {"payoutAddress_update",
-            {"payoutAddress_update", RPCArg::Type::OBJ, /* opt */ false, /* default_val */ "{}",
+            {"payoutAddress_update", RPCArg::Type::OBJ, /* opt */ false, /* default_val */ "",
                 "The dash address to use for masternode reward payments.\n"
-                "If set to an empty string, the currently active payout address is reused."}
+                "If set to an empty string, the currently active payout address is reused.",
+                {
+                    {"address", RPCArg::Type::AMOUNT, /* opt */ false, /* default_val */ "", "The dash address is the key, the numeric amount (can be string) is the value"},
+                },
+            }
         },
         {"proTxHash",
             {"proTxHash", RPCArg::Type::STR, /* opt */ false, /* default_val */ "",
@@ -343,7 +351,7 @@ static void protx_register_fund_help(CWallet* const pwallet)
             "\nResult (if \"submit\" is set to false):\n"
             "\"hex\"                         (string) The serialized signed ProTx in hex format.\n"
             "\nExamples:\n"
-            + HelpExampleCli("protx", R"(register_fund "XrVhS9LogauRJGJu2sHuryjhpuex4RNPSb" "1.2.3.4:1234" "Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr" "93746e8731c57f87f79b3620a7982924e2931717d49540a85864bd543de11c43fb868fd63e501a1db37e19ed59ae6db4" "Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr" 0 "XrVhS9LogauRJGJu2sHuryjhpuex4RNPSb")")
+            + HelpExampleCli("protx", R"(register_fund "XrVhS9LogauRJGJu2sHuryjhpuex4RNPSb" "1.2.3.4:1234" "Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr" "93746e8731c57f87f79b3620a7982924e2931717d49540a85864bd543de11c43fb868fd63e501a1db37e19ed59ae6db4" "Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr" 0 "{\"XrVhS9LogauRJGJu2sHuryjhpuex4RNPSb\":10000}")")
     );
 }
 
@@ -516,7 +524,8 @@ static UniValue protx_register(const JSONRPCRequest& request)
 //    if (!IsValidDestination(payoutDest)) {
 //        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("invalid payout address: %s", request.params[paramIdx + 5].get_str()));
 //    }
-    const UniValue& options = request.params[paramIdx + 5].get_obj();
+    UniValue options;
+    options.read(request.params[paramIdx + 5].get_str());
     CTxDestination payoutDest;
 
 //    std::map<std::string,UniValue> kv;
@@ -532,11 +541,11 @@ static UniValue protx_register(const JSONRPCRequest& request)
         payoutDest = DecodeDestination(key);
         if (!IsValidDestination(payoutDest))
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Dash address: ") + key);
-        if (options[key].isNum()) {
+        if (!options[key].isNum()) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid amount: ") + options[key].get_str());
         }
         if (options[key].get_int() == 0) {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid amount: ") + options[key].get_str());
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid amount: 0"));
         }
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid amount: ") + options[key].get_str());
         list.push_back(std::make_pair<CScript, uint16_t>(GetScriptForDestination(payoutDest), (uint16_t) options[key].get_int()));
