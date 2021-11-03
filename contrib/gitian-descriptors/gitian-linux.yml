@@ -24,6 +24,7 @@ packages:
 - "python3"
 - "libxkbcommon0"
 - "ccache"
+- "cmake"
 # Cross compilation HOSTS:
 #  - arm-linux-gnueabihf
 - "binutils-arm-linux-gnueabihf"

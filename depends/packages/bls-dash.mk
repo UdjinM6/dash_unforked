@@ -5,7 +5,7 @@ $(package)_download_file=$($(package)_version).tar.gz
 $(package)_file_name=$(package)-$($(package)_download_file)
 $(package)_build_subdir=build
 $(package)_sha256_hash=276c8573104e5f18bb5b9fd3ffd49585dda5ba5f6de2de74759dda8ca5a9deac
-$(package)_dependencies=gmp cmake
+$(package)_dependencies=gmp
 $(package)_patches=gcc_alignment_cast.patch
 $(package)_darwin_triplet=x86_64-apple-darwin19
 
@@ -71,7 +71,7 @@ define $(package)_config_cmds
   export CFLAGS="$($(package)_cflags) $($(package)_cppflags)" && \
   export CXXFLAGS="$($(package)_cxxflags) $($(package)_cppflags)" && \
   export LDFLAGS="$($(package)_ldflags)" && \
-  $(host_prefix)/bin/cmake ../ $($(package)_config_opts)
+  cmake ../ $($(package)_config_opts)
 endef
 
 define $(package)_build_cmds
