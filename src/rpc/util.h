@@ -137,7 +137,6 @@ struct RPCResult {
     explicit RPCResult(std::string result)
         : m_cond{}, m_result{std::move(result)}
     {
-        assert(!m_result.empty());
     }
 
     RPCResult(std::string cond, std::string result)
