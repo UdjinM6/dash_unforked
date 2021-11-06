@@ -101,8 +101,10 @@ script: |
     for prog in ${FAKETIME_HOST_PROGS}; do
         if which ${i}-${prog}-8
         then
+            FAKETIME_HOST_PROG_VERSION=$(${i}-${prog}-8 --version | head -1)
             echo '#!/usr/bin/env bash' > ${WRAP_DIR}/${i}-${prog}
             echo "# GCCVERSION=${GCCVERSION}" >> ${WRAP_DIR}/${i}-${prog}
+            echo "# FAKETIME_HOST_PROG_VERSION=${FAKETIME_HOST_PROG_VERSION}" >> ${WRAP_DIR}/${i}-${prog}
             echo "REAL=\`which -a ${i}-${prog}-8 | grep -v ${WRAP_DIR}/${i}-${prog} | head -1\`" >> ${WRAP_DIR}/${i}-${prog}
             echo "export LD_PRELOAD='/usr/\$LIB/faketime/libfaketime.so.1'" >> ${WRAP_DIR}/${i}-${prog}
             echo "export FAKETIME=\"$1\"" >> ${WRAP_DIR}/${i}-${prog}
