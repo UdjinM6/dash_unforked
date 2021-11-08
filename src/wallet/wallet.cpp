@@ -2291,7 +2291,7 @@ bool CWalletTx::RelayWalletTransaction(interfaces::Chain::Lock& locked_chain)
         if (InMempool() || AcceptToMemoryPool(locked_chain, state)) {
             pwallet->WalletLogPrintf("Relaying wtx %s\n", GetHash().ToString());
             if (pwallet->chain().p2pEnabled()) {
-                pwallet->chain().relayTransaction(GetHash());
+                pwallet->chain().relayTransaction(tx);
                 return true;
             }
         }
@@ -5016,7 +5016,7 @@ std::shared_ptr<CWallet> CWallet::CreateWalletFromFile(interfaces::Chain& chain,
         std::string strBackupError;
         if(!walletInstance->AutoBackupWallet("", strBackupWarning, strBackupError)) {
             if (!strBackupWarning.empty()) {
-                InitWarning(strBackupWarning);
+                chain.initWarning(strBackupWarning);
             }
             if (!strBackupError.empty()) {
                 return error(strBackupError);

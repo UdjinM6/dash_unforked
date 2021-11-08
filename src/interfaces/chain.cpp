@@ -314,10 +314,9 @@ public:
         auto it_mp = ::mempool.mapTx.find(txid);
         return it_mp != ::mempool.mapTx.end() && it_mp->GetCountWithDescendants() > 1;
     }
-    void relayTransaction(const uint256& txid) override
+    void relayTransaction(CTransactionRef tx) override
     {
-        CInv inv(MSG_TX, txid);
-        g_connman->ForEachNode([&inv](CNode* node) { node->PushInventory(inv); });
+        g_connman->RelayTransaction(*tx);
     }
     void getTransactionAncestry(const uint256& txid, size_t& ancestors, size_t& descendants) override
     {
