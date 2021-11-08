@@ -86,7 +86,7 @@ static UniValue mnsync(const JSONRPCRequest& request)
                 {
                     {"mode", RPCArg::Type::STR, RPCArg::Optional::NO, "[status|next|reset]"},
                 },
-                RPCResult{""},
+                RPCResults{},
                 RPCExamples{""}
             }.ToString());
 

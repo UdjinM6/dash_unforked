@@ -2472,7 +2472,7 @@ static UniValue setcoinjoinrounds(const JSONRPCRequest& request)
                         "The default number of rounds is " + std::to_string(DEFAULT_COINJOIN_ROUNDS) +
                         " Cannot be more than " + std::to_string(MAX_COINJOIN_ROUNDS) + " nor less than " + std::to_string(MIN_COINJOIN_ROUNDS)},
                 },
-                RPCResult{""},
+                RPCResults{},
                 RPCExamples{
                     HelpExampleCli("setcoinjoinrounds", "4")
             + HelpExampleRpc("setcoinjoinrounds", "16")
@@ -2505,7 +2505,7 @@ static UniValue setcoinjoinamount(const JSONRPCRequest& request)
                         "The default amount is " + std::to_string(DEFAULT_COINJOIN_AMOUNT) +
                         " Cannot be more than " + std::to_string(MAX_COINJOIN_AMOUNT) + " nor less than " + std::to_string(MIN_COINJOIN_AMOUNT)},
                 },
-                RPCResult{""},
+                RPCResults{},
                 RPCExamples{
                     HelpExampleCli("setcoinjoinamount", "500")
             + HelpExampleRpc("setcoinjoinamount", "208")
@@ -2725,7 +2725,7 @@ static UniValue upgradetohd(const JSONRPCRequest& request)
                     {"mnemonicpassphrase", RPCArg::Type::STR, /* default */ "", "Optional mnemonic passphrase as defined in BIP39"},
                     {"walletpassphrase", RPCArg::Type::STR, /* default */ "", "If your wallet is encrypted you must have your wallet passphrase here. If your wallet is not encrypted specifying wallet passphrase will trigger wallet encryption."},
                 },
-                RPCResult{""},
+                RPCResults{},
                 RPCExamples{
                     HelpExampleCli("upgradetohd", "")
             + HelpExampleCli("upgradetohd", "\"mnemonicword1 ... mnemonicwordN\"")

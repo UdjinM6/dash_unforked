@@ -33,7 +33,7 @@ static UniValue coinjoin(const JSONRPCRequest& request)
                 {
                     {"command", RPCArg::Type::STR, RPCArg::Optional::NO, "The command to execute"},
                 },
-                RPCResult{""},
+                RPCResults{},
                 RPCExamples{""},
             }.ToString());
 
@@ -88,7 +88,7 @@ static UniValue getpoolinfo(const JSONRPCRequest& request)
             RPCHelpMan{"getpoolinfo",
                 "DEPRECATED. Please use getcoinjoininfo instead.\n",
                 {},
-                RPCResult{""},
+                RPCResults{},
                 RPCExamples{""}}
             .ToString());
 }

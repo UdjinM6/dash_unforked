@@ -90,7 +90,7 @@ static void quorum_info_help()
                 {"quorumHash", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "Block hash of quorum."},
                 {"includeSkShare", RPCArg::Type::BOOL, /* default */ "", "Include secret key share in output."},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }
@@ -166,7 +166,7 @@ static void quorum_dkgstatus_help()
                     "Detail level of output.\n"
                     "0=Only show counts. 1=Show member indexes. 2=Show member's ProTxHashes."},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }
@@ -252,7 +252,7 @@ static void quorum_memberof_help()
                     "Number of quorums to scan for. If not specified,\n"
                     "the active quorum count for each specific quorum type is used."},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }
@@ -338,7 +338,7 @@ static void quorum_verify_help()
                     "The height at which the message was signed.\n"
                     "Only works when quorumHash is \"\"."},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }
@@ -353,7 +353,7 @@ static void quorum_hasrecsig_help()
                 {"id", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "Request id."},
                 {"msgHash", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "Message hash."},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }
@@ -368,7 +368,7 @@ static void quorum_getrecsig_help()
                 {"id", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "Request id."},
                 {"msgHash", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "Message hash."},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }
@@ -383,7 +383,7 @@ static void quorum_isconflicting_help()
                 {"id", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "Request id."},
                 {"msgHash", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "Message hash."},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }
@@ -516,7 +516,7 @@ static void quorum_selectquorum_help()
                 {"llmqType", RPCArg::Type::NUM, RPCArg::Optional::NO, "LLMQ type."},
                 {"id", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "Request id."},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }
@@ -562,7 +562,7 @@ static void quorum_dkgsimerror_help()
                 {"type", RPCArg::Type::STR, RPCArg::Optional::NO, "Error type."},
                 {"rate", RPCArg::Type::NUM, RPCArg::Optional::NO, "Rate at which to simulate this error type."},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }
@@ -601,7 +601,7 @@ static void quorum_getdata_help()
                     "3 - Request both, 1 and 2"},
                 {"proTxHash", RPCArg::Type::STR_HEX, /* default */ "", "The proTxHash the contributions will be requested for. Must be member of the specified LLMQ."},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }
@@ -659,7 +659,7 @@ static UniValue quorum_getdata(const JSONRPCRequest& request)
             {
                 {"command", RPCArg::Type::STR, RPCArg::Optional::NO, "The command to execute"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }
@@ -706,7 +706,7 @@ static void verifychainlock_help()
                 {"signature", RPCArg::Type::STR, RPCArg::Optional::NO, "The signature of the ChainLock."},
                 {"blockHeight", RPCArg::Type::NUM, /* default */ "", "The height of the ChainLock. There will be an internal lookup of \"blockHash\" if this is not provided."},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }
@@ -751,7 +751,7 @@ static void verifyislock_help()
                 {"signature", RPCArg::Type::STR, RPCArg::Optional::NO, "The InstantSend Lock signature to verify."},
                 {"maxHeight", RPCArg::Type::NUM, /* default */ "", "The maximum height to search quorums from."},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }

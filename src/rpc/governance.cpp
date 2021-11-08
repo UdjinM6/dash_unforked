@@ -33,7 +33,7 @@ static void gobject_count_help()
             {
                 {"mode", RPCArg::Type::STR, /* default */ "json", "Output format: json (\"json\") or string in free form (\"all\")"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -63,7 +63,7 @@ static void gobject_deserialize_help()
             {
                 {"hex_data", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "data in hex string form"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -92,7 +92,7 @@ static void gobject_check_help()
             {
                 {"hex_data", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "data in hex string format"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -145,7 +145,7 @@ static void gobject_prepare_help(CWallet* const pwallet)
                 {"outputHash", RPCArg::Type::STR_HEX, /* default */ "", "the single output to submit the proposal fee from"},
                 {"outputIndex", RPCArg::Type::NUM, /* default */ "", "The output index."},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -266,7 +266,7 @@ static void gobject_list_prepared_help(CWallet* const pwallet)
             {
                 {"count", RPCArg::Type::NUM, /* default */ "10", "Maximum number of objects to return."},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -321,7 +321,7 @@ static void gobject_submit_help()
                 {"data-hex", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "data in hex string form"},
                 {"fee-txid", RPCArg::Type::STR_HEX, /* default */ "", "fee-tx id, required for all objects except triggers"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -434,7 +434,7 @@ static void gobject_vote_conf_help()
                 {"vote", RPCArg::Type::STR, RPCArg::Optional::NO, "vote, possible values: [funding|valid|delete|endorsed]"},
                 {"vote-outcome", RPCArg::Type::STR, RPCArg::Optional::NO, "vote outcome, possible values: [yes|no|abstain]"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -609,7 +609,7 @@ static void gobject_vote_many_help(CWallet* const pwallet)
                 {"vote", RPCArg::Type::STR, RPCArg::Optional::NO, "vote, possible values: [funding|valid|delete|endorsed]"},
                 {"vote-outcome", RPCArg::Type::STR, RPCArg::Optional::NO, "vote outcome, possible values: [yes|no|abstain]"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -667,7 +667,7 @@ static void gobject_vote_alias_help(CWallet* const pwallet)
                 {"vote-outcome", RPCArg::Type::STR, RPCArg::Optional::NO, "vote outcome, possible values: [yes|no|abstain]"},
                 {"protx-hash", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "masternode's proTxHash"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -785,7 +785,7 @@ static void gobject_list_help()
                 {"signal", RPCArg::Type::STR, /* default */ "valid", "cached signal, possible values: [valid|funding|delete|endorsed|all]"},
                 {"type", RPCArg::Type::STR, /* default */ "all", "object type, possible values: [proposals|triggers|all]"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -821,7 +821,7 @@ static void gobject_diff_help()
                 {"signal", RPCArg::Type::STR, /* default */ "valid", "cached signal, possible values: [valid|funding|delete|endorsed|all]"},
                 {"type", RPCArg::Type::STR, /* default */ "all", "object type, possible values: [proposals|triggers|all]"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -856,7 +856,7 @@ static void gobject_get_help()
             {
                 {"governance-hash", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, "object id"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -950,7 +950,7 @@ static void gobject_getcurrentvotes_help()
                 {"txid", RPCArg::Type::STR_HEX, /* default */ "", "masternode collateral txid"},
                 {"vout", RPCArg::Type::STR, /* default */ "", "masternode collateral output index, required if <txid> presents"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -1022,7 +1022,7 @@ static UniValue gobject_getcurrentvotes(const JSONRPCRequest& request)
 #endif // ENABLE_WALLET
             ,
             {},
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -1099,7 +1099,7 @@ static UniValue voteraw(const JSONRPCRequest& request)
                     {"time", RPCArg::Type::NUM, RPCArg::Optional::NO, ""},
                     {"vote-sig", RPCArg::Type::STR_HEX, RPCArg::Optional::NO, ""},
                 },
-                RPCResult{""},
+                RPCResults{},
                 RPCExamples{""}
             }.ToString());
 

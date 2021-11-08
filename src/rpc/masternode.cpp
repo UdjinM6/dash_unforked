@@ -50,7 +50,7 @@ static void masternode_list_help()
                     {"mode", RPCArg::Type::STR, /* default */ "json", "The mode to run list in"},
                     {"filter", RPCArg::Type::STR, /* default */ "", "Filter results. Partial match by outpoint by default in all modes, additional matches in some modes are also available"},
                 },
-                RPCResult{""},
+                RPCResults{},
                 RPCExamples{""},
             }.ToString());
 }
@@ -76,7 +76,7 @@ static void masternode_connect_help()
             {
                 {"address", RPCArg::Type::STR, RPCArg::Optional::NO, "The address of the masternode to connect"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -106,7 +106,7 @@ static void masternode_count_help()
         RPCHelpMan{"masternode count",
             "Get information about number of masternodes.\n",
             {},
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -158,7 +158,7 @@ static void masternode_winner_help()
         RPCHelpMan{"masternode winner",
             "Print info on next masternode winner to vote for\n",
             {},
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -181,7 +181,7 @@ static void masternode_current_help()
         RPCHelpMan{"masternode current",
             "Print info on current masternode winner to be paid the next block (calculated locally)\n",
             {},
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -201,7 +201,7 @@ static void masternode_outputs_help()
         RPCHelpMan{"masternode outputs",
             "Print masternode compatible outputs\n",
             {},
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -242,7 +242,7 @@ static void masternode_status_help()
         RPCHelpMan{"masternode status",
             "Print masternode status information\n",
             {},
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -325,7 +325,7 @@ static void masternode_winners_help()
                 {"count", RPCArg::Type::NUM, /* default */ "", "number of last winners to return"},
                 {"filter", RPCArg::Type::STR, /* default */ "", "filter for returned winners"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""}
         }.ToString());
 }
@@ -539,7 +539,7 @@ static UniValue masternode_payments(const JSONRPCRequest& request)
             {
                 {"command", RPCArg::Type::STR, RPCArg::Optional::NO, "The command to execute"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }

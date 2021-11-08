@@ -680,7 +680,7 @@ UniValue importelectrumwallet(const JSONRPCRequest& request)
                     {"filename", RPCArg::Type::STR, RPCArg::Optional::NO, "The Electrum wallet export file, should be in csv or json format"},
                     {"index", RPCArg::Type::NUM, /* default */ "0", "Rescan the wallet for transactions starting from this block index"},
                 },
-                RPCResult{""},
+                RPCResults{},
                 RPCExamples{
             "\nImport the wallet\n"
             + HelpExampleCli("importelectrumwallet", "\"test.csv\"")

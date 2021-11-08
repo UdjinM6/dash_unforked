@@ -931,7 +931,7 @@ static void protx_list_help()
                 {"detailed", RPCArg::Type::BOOL, /* default */ "false", "If not specified, only the hashes of the ProTx will be returned."},
                 {"height", RPCArg::Type::NUM, /* default */ "current chain-tip", ""},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }
@@ -1140,7 +1140,7 @@ static void protx_diff_help()
                 {"baseBlock", RPCArg::Type::NUM, RPCArg::Optional::NO, "The starting block height."},
                 {"block", RPCArg::Type::NUM, RPCArg::Optional::NO, "The ending block height."},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }
@@ -1204,7 +1204,7 @@ static UniValue protx_diff(const JSONRPCRequest& request)
             {
                 {"command", RPCArg::Type::STR, RPCArg::Optional::NO, "The command to execute"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }
@@ -1326,7 +1326,7 @@ static UniValue bls_fromsecret(const JSONRPCRequest& request)
             {
                 {"command", RPCArg::Type::STR, RPCArg::Optional::NO, "The command to execute"},
             },
-            RPCResult{""},
+            RPCResults{},
             RPCExamples{""},
         }.ToString());
 }
