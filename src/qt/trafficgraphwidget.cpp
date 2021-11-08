@@ -124,6 +124,7 @@ void TrafficGraphWidget::paintEvent(QPaintEvent *)
 
     const TrafficGraphData::SampleQueue& queue = trafficGraphData.getCurrentRangeQueueWithAverageBandwidth();
 
+    painter.setRenderHint(QPainter::Antialiasing);
     if(!queue.empty()) {
         QPainterPath pIn;
         QColor lucentGreen = green;
