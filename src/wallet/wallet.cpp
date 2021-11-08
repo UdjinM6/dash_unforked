@@ -3269,7 +3269,7 @@ static bool IsCurrentForAntiFeeSniping(interfaces::Chain& chain, interfaces::Cha
     if (chain.isInitialBlockDownload()) {
         return false;
     }
-    constexpr int64_t MAX_ANTI_FEE_SNIPING_TIP_AGE = 4 * 60; // in seconds
+    constexpr int64_t MAX_ANTI_FEE_SNIPING_TIP_AGE = 8 * 60 * 60; // in seconds
     if (locked_chain.getBlockTime(*locked_chain.getHeight()) < (GetTime() - MAX_ANTI_FEE_SNIPING_TIP_AGE)) {
         return false;
     }
