@@ -69,13 +69,12 @@ script: |
     CONFIGFLAGS="${CONFIGFLAGS} --disable-ccache"
   fi
 
-  # We include the GCC version in all wrappers so that ccache can detect compiler upgrades when hashing the wrappers
-  GCCVERSION=`gcc --version | head -1`
-
   function create_global_faketime_wrappers {
   for prog in ${FAKETIME_PROGS}; do
+    # We include the program version in all wrappers so that ccache can detect upgrades when hashing the wrappers
+    FAKETIME_PROG_VERSION=$(${prog} --version | head -1 || echo "N/A")
     echo '#!/usr/bin/env bash' > ${WRAP_DIR}/${prog}
-    echo "# GCCVERSION=${GCCVERSION}" >> ${WRAP_DIR}/${prog}
+    echo "# FAKETIME_PROG_VERSION=${FAKETIME_PROG_VERSION}" >> ${WRAP_DIR}/${prog}
     echo "REAL=\`which -a ${prog} | grep -v ${WRAP_DIR}/${prog} | head -1\`" >> ${WRAP_DIR}/${prog}
     echo 'export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1' >> ${WRAP_DIR}/${prog}
     echo "export FAKETIME=\"$1\"" >> ${WRAP_DIR}/${prog}
@@ -88,8 +87,10 @@ script: |
   function create_per-host_faketime_wrappers {
   for i in $HOSTS; do
     for prog in ${FAKETIME_HOST_PROGS}; do
+        # We include the program version in all wrappers so that ccache can detect upgrades when hashing the wrappers
+        FAKETIME_HOST_PROG_VERSION=$(${i}-${prog} --version | head -1 || echo "N/A")
         echo '#!/usr/bin/env bash' > ${WRAP_DIR}/${i}-${prog}
-        echo "# GCCVERSION=${GCCVERSION}" >> ${WRAP_DIR}/${i}-${prog}
+        echo "# FAKETIME_HOST_PROG_VERSION=${FAKETIME_HOST_PROG_VERSION}" >> ${WRAP_DIR}/${i}-${prog}
         echo "REAL=\`which -a ${i}-${prog} | grep -v ${WRAP_DIR}/${i}-${prog} | head -1\`" >> ${WRAP_DIR}/${i}-${prog}
         echo 'export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1' >> ${WRAP_DIR}/${i}-${prog}
         echo "export FAKETIME=\"$1\"" >> ${WRAP_DIR}/${i}-${prog}
@@ -105,11 +106,11 @@ script: |
   for i in $HOSTS; do
     mkdir -p ${WRAP_DIR}/${i}
     for prog in gcc g++; do
+        # We include the compiler version in all wrappers so that ccache can detect upgrades when hashing the wrappers
+        COMPILER_VERSION=$(${i}-${prog}-posix --version | head -1 || echo "N/A")
         echo '#!/usr/bin/env bash' > ${WRAP_DIR}/${i}-${prog}
-        echo "# GCCVERSION=${GCCVERSION}" >> ${WRAP_DIR}/${i}-${prog}
+        echo "# COMPILER_VERSION=${COMPILER_VERSION}" > ${WRAP_DIR}/${i}-${prog}
         echo "REAL=\`which -a ${i}-${prog}-posix | grep -v ${WRAP_DIR}/${i}-${prog} | head -1\`" >> ${WRAP_DIR}/${i}-${prog}
-        echo '# Add the gcc version to the wrapper so that ccache takes this into account (we use CCACHE_COMPILERCHECK=content)' >> ${WRAP_DIR}/${i}-${prog}
-        echo "# `${prog} --version | head -1`" >> ${WRAP_DIR}/${i}-${prog}
         echo 'export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1' >> ${WRAP_DIR}/${i}-${prog}
         echo "export FAKETIME=\"$1\"" >> ${WRAP_DIR}/${i}-${prog}
         echo "export COMPILER_PATH=${WRAP_DIR}/${i}" >> ${WRAP_DIR}/${i}-${prog}

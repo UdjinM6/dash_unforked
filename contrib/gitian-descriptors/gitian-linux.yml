@@ -80,13 +80,12 @@ script: |
     CONFIGFLAGS="${CONFIGFLAGS} --disable-ccache"
   fi
 
-  # We include the GCC version in all wrappers so that ccache can detect compiler upgrades when hashing the wrappers
-  GCCVERSION=`gcc --version | head -1`
-
   function create_global_faketime_wrappers {
   for prog in ${FAKETIME_PROGS}; do
+    # We include the program version in all wrappers so that ccache can detect upgrades when hashing the wrappers
+    FAKETIME_PROG_VERSION=$(${prog} --version | head -1 || echo "N/A")
     echo '#!/usr/bin/env bash' > ${WRAP_DIR}/${prog}
-    echo "# GCCVERSION=${GCCVERSION}" >> ${WRAP_DIR}/${prog}
+    echo "# FAKETIME_PROG_VERSION=${FAKETIME_PROG_VERSION}" >> ${WRAP_DIR}/${prog}
     echo "REAL=\`which -a ${prog} | grep -v ${WRAP_DIR}/${prog} | head -1\`" >> ${WRAP_DIR}/${prog}
     echo 'export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1' >> ${WRAP_DIR}/${prog}
     echo "export FAKETIME=\"$1\"" >> ${WRAP_DIR}/${prog}
@@ -101,8 +100,10 @@ script: |
     for prog in ${FAKETIME_HOST_PROGS}; do
         if which ${i}-${prog}-8
         then
+            # We include the program version in all wrappers so that ccache can detect upgrades when hashing the wrappers
+            FAKETIME_HOST_PROG_VERSION=$(${i}-${prog}-8 --version | head -1 || echo "N/A")
             echo '#!/usr/bin/env bash' > ${WRAP_DIR}/${i}-${prog}
-            echo "# GCCVERSION=${GCCVERSION}" >> ${WRAP_DIR}/${i}-${prog}
+            echo "# FAKETIME_HOST_PROG_VERSION=${FAKETIME_HOST_PROG_VERSION}" >> ${WRAP_DIR}/${i}-${prog}
             echo "REAL=\`which -a ${i}-${prog}-8 | grep -v ${WRAP_DIR}/${i}-${prog} | head -1\`" >> ${WRAP_DIR}/${i}-${prog}
             echo 'export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1' >> ${WRAP_DIR}/${i}-${prog}
             echo "export FAKETIME=\"$1\"" >> ${WRAP_DIR}/${i}-${prog}
@@ -132,9 +133,11 @@ script: |
 
   for prog in gcc g++; do
   rm -f ${WRAP_DIR}/${prog}
+  # We include the compiler version in all wrappers so that ccache can detect upgrades when hashing the wrappers
+  COMPILER_VERSION=$(${prog} --version | head -1 || echo "N/A")
   cat << EOF > ${WRAP_DIR}/${prog}
   #!/usr/bin/env bash
-  # GCCVERSION=${GCCVERSION}
+  # COMPILER_VERSION=${COMPILER_VERSION}
   REAL="$(which -a ${prog}-8 | grep -v ${WRAP_DIR}/${prog} | head -1)"
   for var in "\$@"
   do

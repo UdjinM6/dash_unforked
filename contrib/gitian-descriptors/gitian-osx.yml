@@ -76,7 +76,10 @@ script: |
 
   function create_global_faketime_wrappers {
   for prog in ${FAKETIME_PROGS}; do
+    # We include the program version in all wrappers so that ccache can detect upgrades when hashing the wrappers
+    FAKETIME_PROG_VERSION=$(${prog} --version | head -1 || echo "N/A")
     echo '#!/usr/bin/env bash' > ${WRAP_DIR}/${prog}
+    echo "# FAKETIME_PROG_VERSION=${FAKETIME_PROG_VERSION}" >> ${WRAP_DIR}/${prog}
     echo "REAL=\`which -a ${prog} | grep -v ${WRAP_DIR}/${prog} | head -1\`" >> ${WRAP_DIR}/${prog}
     echo 'export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1' >> ${WRAP_DIR}/${prog}
     echo "export FAKETIME=\"$1\"" >> ${WRAP_DIR}/${prog}
@@ -89,7 +92,10 @@ script: |
   function create_per-host_faketime_wrappers {
   for i in $HOSTS; do
     for prog in ${FAKETIME_HOST_PROGS}; do
+        # We include the program version in all wrappers so that ccache can detect upgrades when hashing the wrappers
+        FAKETIME_HOST_PROG_VERSION=$(${i}-${prog} --version | head -1 || echo "N/A")
         echo '#!/usr/bin/env bash' > ${WRAP_DIR}/${i}-${prog}
+        echo "# FAKETIME_HOST_PROG_VERSION=${FAKETIME_HOST_PROG_VERSION}" >> ${WRAP_DIR}/${i}-${prog}
         echo "REAL=\`which -a ${i}-${prog} | grep -v ${WRAP_DIR}/${i}-${prog} | head -1\`" >> ${WRAP_DIR}/${i}-${prog}
         echo 'export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1' >> ${WRAP_DIR}/${i}-${prog}
         echo "export FAKETIME=\"$1\"" >> ${WRAP_DIR}/${i}-${prog}
