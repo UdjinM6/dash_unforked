@@ -580,7 +580,7 @@ CXXFLAGS="$TEMP_CXXFLAGS"
 
 fi
 
-CPPFLAGS="$CPPFLAGS -DHAVE_BUILD_INFO -D__STDC_FORMAT_MACROS"
+CPPFLAGS="$CPPFLAGS -DHAVE_BUILD_INFO"
 
 AC_ARG_WITH([utils],
   [AS_HELP_STRING([--with-utils],
@@ -975,9 +975,6 @@ AC_LINK_IFELSE([AC_LANG_SOURCE([
   ]
 )
 
-dnl thread_local is currently disabled when building with glibc back compat.
-dnl Our minimum supported glibc is 2.17, however support for thread_local
-dnl did not arrive in glibc until 2.18.
 if test "x$use_thread_local" = xyes || test "x$use_thread_local" = xauto; then
   TEMP_LDFLAGS="$LDFLAGS"
   LDFLAGS="$TEMP_LDFLAGS $PTHREAD_CFLAGS"
