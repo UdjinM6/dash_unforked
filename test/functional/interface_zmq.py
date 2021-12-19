@@ -80,7 +80,7 @@ class ZMQTest (BitcoinTestFramework):
         connect_nodes(self.nodes[0], 1)
         socket.connect(address)
         # Relax so that the subscriber is ready before publishing zmq messages
-        sleep(0.2)
+        sleep(2)
 
         num_blocks = 5
         self.log.info("Generate %(n)d blocks (and %(n)d coinbase txes)" % {"n": num_blocks})
@@ -141,7 +141,7 @@ class ZMQTest (BitcoinTestFramework):
         self.restart_node(0, ['-zmqpub%s=%s' % (hashblock.topic.decode(), address)])
         socket.connect(address)
         # Relax so that the subscriber is ready before publishing zmq messages
-        sleep(0.2)
+        sleep(2)
 
         # Generate 1 block in nodes[0] and receive all notifications
         self.nodes[0].generatetoaddress(1, ADDRESS_BCRT1_UNSPENDABLE)
