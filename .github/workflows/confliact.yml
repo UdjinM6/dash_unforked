@@ -21,7 +21,7 @@ jobs:
                 continue
               }
 
-              console.log("issue: " + issue)
+              console.dir("issue: " + issue)
               const listFilesOptions = github.rest.pulls.listFiles.endpoint.merge({
                 owner: issue.repo.owner,
                 repo: issue.repo.repo,
