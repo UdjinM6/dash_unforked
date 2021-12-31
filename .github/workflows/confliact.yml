@@ -18,8 +18,12 @@ jobs:
             const issues = await github.paginate(opts)
 
             for (const issue of issues) {
+              if (!issue.pull_request) {
+                continue
+              }
               // console.log("issue: " + JSON.stringify(issue))
               console.log("pull_request: " + issue.number)
+              // Get a list of all files for a specific pull request
               const listFilesOptions = github.rest.pulls.listFiles.endpoint.merge({
                 ...context.issue,
                 pull_number: issue.number,
@@ -33,6 +37,7 @@ jobs:
                 console.log("  " + file)
               }
 
+              // pull extra data for this pull request
               const { data: pullRequest } = await github.rest.pulls.get({
                 ...context.issue,
                 pull_number: issue.number,
@@ -40,7 +45,7 @@ jobs:
               // console.log("pr: " + JSON.stringify(pullRequest))
 
               for (const issue2 of issues) {
-                if (issue.number == issue2.number) {
+                if (!issue.pull_request || issue.number == issue2.number) {
                   continue
                 }
 
