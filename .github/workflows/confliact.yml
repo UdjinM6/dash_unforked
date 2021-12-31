@@ -1,0 +1,50 @@
+name: confliact
+on: [pull_request]
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v5
+        with:
+          script: |
+            // Get a list of all issues
+            // See: https://octokit.github.io/rest.js/#pagination
+            const opts = github.rest.issues.listForRepo.endpoint.merge({
+              ...context.issue,
+              state: 'open'
+            })
+            const issues = await github.paginate(opts)
+
+            for (const issue of issues) {
+              if (!issue.pull_request) {
+                continue
+              }
+
+              const listFilesOptions = github.rest.pulls.listFiles.endpoint.merge({
+                owner: github.context.repo.owner,
+                repo: github.context.repo.repo,
+                pull_number: issue.number,
+              })
+
+              const listFilesResponse = await github.paginate(listFilesOptions)
+              const changedFiles = listFilesResponse.map(getFilename)
+
+              core.debug("found changed files:")
+              for (const file of changedFiles) {
+                core.debug("  " + file);
+              }
+            }
+
+            function getFilename(item) {
+              return item.filename;
+            }
+  diff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v5
+        with:
+          script: |
+            const diff_url = context.payload.pull_request.diff_url
+            const result = await github.request(diff_url)
+            console.log(result)
