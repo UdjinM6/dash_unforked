@@ -83,7 +83,8 @@ jobs:
                     head1: pullRequest.head.label,
                     head2: pullRequest2.head.label,
                     headers: {
-                      accept: "text/html"
+                      accept: 'text/html',
+                      'user-agent': 'confliact',
                     },
                     owner: context.issue.owner,
                     repo: context.issue.repo,
