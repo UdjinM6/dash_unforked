@@ -75,7 +75,7 @@ jobs:
                 }).length > 0) {
                   console.log(issue.number + " conflicts with " + issue2.number)
                   // TODO: fetch and check magic url
-                  const magic_url = "https://github.com/${context.issue.owner}/${context.issue.repo}/branches/pre_mergeable/${pullRequest.head.label}...${pullRequest2.head.label}"
+                  const magic_url = "https://github.com/" + context.issue.owner + "/" + context.issue.repo + "/branches/pre_mergeable/" +pullRequest.head.label + "..." + pullRequest2.head.label
                   console.log(magic_url)
                   const result = await github.request(magic_url)
                   console.log(result)
