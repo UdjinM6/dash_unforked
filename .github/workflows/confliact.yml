@@ -37,7 +37,7 @@ jobs:
             }
 
             function getFilename(item) {
-              console.log("item  " + item);
+              console.log("item  " + JSON.stringify(item));
               return item.filename;
             }
 
