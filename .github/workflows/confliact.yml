@@ -21,7 +21,8 @@ jobs:
                 continue
               }
 
-              console.log("issue: " + JSON.stringify(issue))
+              // console.log("issue: " + JSON.stringify(issue))
+              console.log("pull_request: " + issue.number)
               const listFilesOptions = github.rest.pulls.listFiles.endpoint.merge({
                 ...context.issue,
                 pull_number: issue.number,
@@ -32,13 +33,38 @@ jobs:
 
               console.log("found changed files:")
               for (const file of changedFiles) {
-                console.log("  " + file);
+                console.log("  " + file)
+              }
+              for (const issue2 of issues) {
+                if (!issue2.pull_request || issue.number == issue2.number) {
+                  continue
+                }
+
+                // console.log("issue2: " + JSON.stringify(issue2))
+                console.log("pull_request2: " + issue2.number)
+                const listFilesOptions2 = github.rest.pulls.listFiles.endpoint.merge({
+                  ...context.issue,
+                  pull_number: issue2.number,
+                })
+
+                const listFilesResponse2 = await github.paginate(listFilesOptions2)
+                const changedFiles2 = listFilesResponse2.map(getFilename)
+
+                console.log("found changed files:")
+                for (const file2 of changedFiles2) {
+                  console.log("  " + file2)
+                }
+                if (listFilesResponse2.filter(function(el) {
+                    return listFilesResponse.indexOf(el) >= 0
+                }).length > 0) {
+                  console.log(issue.number + " conflicts with " + issue2.number)
+                }
               }
             }
 
             function getFilename(item) {
-              console.log("item  " + JSON.stringify(item));
-              return item.filename;
+              // console.log("item  " + JSON.stringify(item))
+              return item.filename
             }
 
   diff:
