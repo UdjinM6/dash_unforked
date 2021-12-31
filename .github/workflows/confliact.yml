@@ -25,12 +25,12 @@ jobs:
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo,
                 pull_number: issue.number,
-              });
+              })
 
-              const listFilesResponse = await github.paginate(listFilesOptions);
-              const changedFiles = listFilesResponse.map((f: any) => f.filename);
+              const listFilesResponse = await github.paginate(listFilesOptions)
+              const changedFiles = listFilesResponse.map((f: any) => f.filename)
 
-              core.debug("found changed files:");
+              core.debug("found changed files:")
               for (const file of changedFiles) {
                 core.debug("  " + file);
               }
