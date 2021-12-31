@@ -77,10 +77,16 @@ jobs:
                   // TODO: fetch and check magic url
                   const magic_url = "https://github.com/" + context.issue.owner + "/" + context.issue.repo + "/branches/pre_mergeable/" +pullRequest.head.label + "..." + pullRequest2.head.label
                   console.log(magic_url)
-                  const result = await github.request(magic_url, {
+                  // const result = await github.request(magic_url, {
+                  const result = await github.request("GET /{owner}/{repo}/branches/pre_mergeable/{head1}..{head2}", {
+                    baseUrl: "https://github.com",
+                    head1: pullRequest.head.label,
+                    head2: pullRequest2.head.label,
                     headers: {
                       accept: "text/html"
-                    }
+                    },
+                    owner: context.issue.owner,
+                    repo: context.issue.repo,
                   })
                   console.log(result)
                 }
