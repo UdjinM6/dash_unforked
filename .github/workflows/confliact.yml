@@ -83,8 +83,7 @@ jobs:
                     head1: pullRequest.head.label,
                     head2: pullRequest2.head.label,
                     headers: {
-                      accept: "text/html;charset=utf-8",
-                      "content-type": "text/plain",
+                      "accept": "text/html;charset=utf-8",
                       "user-agent": "confliact",
                     },
                     owner: context.issue.owner,
