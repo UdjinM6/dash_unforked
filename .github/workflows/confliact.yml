@@ -22,7 +22,8 @@ jobs:
               }
 
               const listFilesOptions = github.rest.pulls.listFiles.endpoint.merge({
-                ...issue,
+                owner: issue.repo.owner,
+                repo: issue.repo.repo,
                 pull_number: issue.number,
               })
 
@@ -36,6 +37,7 @@ jobs:
             }
 
             function getFilename(item) {
+              console.log("item  " + item);
               return item.filename;
             }
 
