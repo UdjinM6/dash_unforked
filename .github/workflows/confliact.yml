@@ -22,8 +22,7 @@ jobs:
               }
 
               const listFilesOptions = github.rest.pulls.listFiles.endpoint.merge({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
+                ...context.issue,
                 pull_number: issue.number,
               })
 
