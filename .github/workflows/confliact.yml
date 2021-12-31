@@ -18,10 +18,6 @@ jobs:
             const issues = await github.paginate(opts)
 
             for (const issue of issues) {
-              if (!issue.pull_request) {
-                continue
-              }
-
               // console.log("issue: " + JSON.stringify(issue))
               console.log("pull_request: " + issue.number)
               const listFilesOptions = github.rest.pulls.listFiles.endpoint.merge({
@@ -41,10 +37,10 @@ jobs:
                 ...context.issue,
                 pull_number: issue.number,
               })
-              console.log("pr: " + JSON.stringify(pullRequest))
+              // console.log("pr: " + JSON.stringify(pullRequest))
 
               for (const issue2 of issues) {
-                if (!issue2.pull_request || issue.number == issue2.number) {
+                if (issue.number == issue2.number) {
                   continue
                 }
 
@@ -67,17 +63,17 @@ jobs:
                   ...context.issue,
                   pull_number: issue2.number,
                 })
-                console.log("pr2: " + JSON.stringify(pullRequest2))
+                // console.log("pr2: " + JSON.stringify(pullRequest2))
 
                 if (changedFiles2.filter(function(el) {
                     return changedFiles.indexOf(el) >= 0
                 }).length > 0) {
                   console.log(issue.number + " conflicts with " + issue2.number)
                   // TODO: fetch and check magic url
-                  // `https://github.com/${context.issue.owner}/${context.issue.repo}/branches/pre_mergeable/a-test-conflicts...c-test-conflicts`
-                  // const diff_url = context.payload.pull_request.diff_url
-                  // const result = await github.request(diff_url)
-                  // console.log(result)
+                  const magic_url = "https://github.com/${context.issue.owner}/${context.issue.repo}/branches/pre_mergeable/${pullRequest.head.label}...${pullRequest2.head.label}"
+                  console.log(magic_url)
+                  const result = await github.request(magic_url)
+                  console.log(result)
                 }
               }
             }
