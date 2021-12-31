@@ -45,7 +45,7 @@ jobs:
               // console.log("pr: " + JSON.stringify(pullRequest))
 
               for (const issue2 of issues) {
-                if (!issue.pull_request || issue.number == issue2.number) {
+                if (!issue2.pull_request || issue.number == issue2.number) {
                   continue
                 }
 
