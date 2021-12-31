@@ -54,8 +54,8 @@ jobs:
                 for (const file2 of changedFiles2) {
                   console.log("  " + file2)
                 }
-                if (listFilesResponse2.filter(function(el) {
-                    return listFilesResponse.indexOf(el) >= 0
+                if (changedFiles2.filter(function(el) {
+                    return changedFiles.indexOf(el) >= 0
                 }).length > 0) {
                   console.log(issue.number + " conflicts with " + issue2.number)
                 }
