@@ -2,7 +2,7 @@ name: confliact
 on: [pull_request]
 
 jobs:
-  welcome:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v5
@@ -12,6 +12,7 @@ jobs:
             // See: https://octokit.github.io/rest.js/#pagination
             const opts = github.rest.issues.listForRepo.endpoint.merge({
               ...context.issue,
+              pulls: true,
               state: 'open'
             })
             const issues = await github.paginate(opts)
@@ -35,6 +36,13 @@ jobs:
               for (const file of changedFiles) {
                 console.log("  " + file)
               }
+
+              const { data: pullRequest } = await github.rest.pulls.get({
+                ...context.issue,
+                pull_number: issue.number,
+              })
+              console.log("pr: " + JSON.stringify(pullRequest))
+
               for (const issue2 of issues) {
                 if (!issue2.pull_request || issue.number == issue2.number) {
                   continue
@@ -54,10 +62,22 @@ jobs:
                 for (const file2 of changedFiles2) {
                   console.log("  " + file2)
                 }
+
+                const { data: pullRequest2 } = await github.rest.pulls.get({
+                  ...context.issue,
+                  pull_number: issue2.number,
+                })
+                console.log("pr2: " + JSON.stringify(pullRequest2))
+
                 if (changedFiles2.filter(function(el) {
                     return changedFiles.indexOf(el) >= 0
                 }).length > 0) {
                   console.log(issue.number + " conflicts with " + issue2.number)
+                  // TODO: fetch and check magic url
+                  // `https://github.com/${context.issue.owner}/${context.issue.repo}/branches/pre_mergeable/a-test-conflicts...c-test-conflicts`
+                  // const diff_url = context.payload.pull_request.diff_url
+                  // const result = await github.request(diff_url)
+                  // console.log(result)
                 }
               }
             }
@@ -66,13 +86,3 @@ jobs:
               // console.log("item  " + JSON.stringify(item))
               return item.filename
             }
-
-  diff:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/github-script@v5
-        with:
-          script: |
-            const diff_url = context.payload.pull_request.diff_url
-            const result = await github.request(diff_url)
-            console.log(result)
