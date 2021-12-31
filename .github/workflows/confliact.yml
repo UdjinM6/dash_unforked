@@ -73,11 +73,15 @@ jobs:
                 if (changedFiles2.filter(function(el) {
                     return changedFiles.indexOf(el) >= 0
                 }).length > 0) {
-                  console.log(issue.number + " conflicts with " + issue2.number)
+                  console.log("potential conflict: " + issue.number + " vs " + issue2.number)
                   // TODO: fetch and check magic url
                   const magic_url = "https://github.com/" + context.issue.owner + "/" + context.issue.repo + "/branches/pre_mergeable/" +pullRequest.head.label + "..." + pullRequest2.head.label
                   console.log(magic_url)
-                  const result = await github.request(magic_url)
+                  const result = await github.request(magic_url, {
+                    headers: {
+                      accept: "text/html"
+                    }
+                  })
                   console.log(result)
                 }
               }
