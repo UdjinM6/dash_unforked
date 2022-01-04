@@ -157,7 +157,7 @@ public:
     {
         return CCoinJoin::IsDenominatedAmount(nAmount);
     }
-    std::array<CAmount, 5> getStandardDenominations() override
+    CJDenomArr getStandardDenominations() override
     {
         return CCoinJoin::GetStandardDenominations();
     }

@@ -32,6 +32,8 @@ static constexpr int COINJOIN_SIGNING_TIMEOUT = 15;
 
 static constexpr size_t COINJOIN_ENTRY_MAX_SIZE = 9;
 
+using CJDenomArr = std::array<CAmount, 5>;
+
 // pool responses
 enum PoolMessage : int32_t {
     ERR_ALREADY_HAVE,
@@ -363,7 +365,7 @@ private:
     CCoinJoin& operator=(CCoinJoin const&) = delete;
 
     // static members
-    static constexpr std::array<CAmount, 5> vecStandardDenominations{
+    static constexpr CJDenomArr vecStandardDenominations{
             (10 * COIN) + 10000,
             (1 * COIN) + 1000,
             (COIN / 10) + 100,
@@ -378,7 +380,7 @@ private:
     static void CheckDSTXes(const CBlockIndex* pindex);
 
 public:
-    static constexpr std::array<CAmount, 5> GetStandardDenominations() { return vecStandardDenominations; }
+    static constexpr CJDenomArr GetStandardDenominations() { return vecStandardDenominations; }
     static constexpr CAmount GetSmallestDenomination() { return vecStandardDenominations.back(); }
 
     static constexpr bool IsDenominatedAmount(CAmount nInputAmount) { return AmountToDenomination(nInputAmount) > 0; }

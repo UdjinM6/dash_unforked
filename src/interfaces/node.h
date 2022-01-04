@@ -7,6 +7,7 @@
 
 #include <addrdb.h>     // For banmap_t
 #include <amount.h>     // For CAmount
+#include <coinjoin/coinjoin.h> // For CJDenomArr
 #include <net.h>        // For CConnman::NumConnections
 #include <netaddress.h> // For Network
 
@@ -92,7 +93,7 @@ public:
     virtual CAmount getMaxCollateralAmount() = 0;
     virtual CAmount getSmallestDenomination() = 0;
     virtual bool isDenominated(CAmount nAmount) = 0;
-    virtual std::array<CAmount, 5> getStandardDenominations() = 0;
+    virtual CJDenomArr getStandardDenominations() = 0;
 };
 }
 
