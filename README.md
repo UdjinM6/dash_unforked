@@ -1,4 +1,4 @@
-Dash Core staging tree 0.17
+Dash Core staging tree 0.17-debug
 ===========================
 
 |CI|master|develop|
