@@ -6,7 +6,7 @@
 #include <script/script.h>
 #include <script/script_error.h>
 #include <script/standard.h>
-#include <test/setup_common.h>
+#include <test/util/setup_common.h>
 #include <wallet/ismine.h>
 #include <wallet/wallet.h>
 
