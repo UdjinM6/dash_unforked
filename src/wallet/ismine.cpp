@@ -8,6 +8,7 @@
 #include <key.h>
 #include <script/script.h>
 #include <wallet/wallet.h>
+
 typedef std::vector<unsigned char> valtype;
 
 namespace {

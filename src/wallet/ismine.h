@@ -48,4 +48,4 @@ struct CachableAmount
     }
 };
 
-#endif // BITCOIN_SCRIPT_ISMINE_H
+#endif // BITCOIN_WALLET_ISMINE_H
