@@ -8,7 +8,7 @@
 #include <chain.h>
 #include <interfaces/wallet.h>
 #include <interfaces/node.h>
-
+#include <wallet/ismine.h>
 #include <stdint.h>
 
 #include <QDateTime>
