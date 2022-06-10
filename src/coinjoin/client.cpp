@@ -32,7 +32,7 @@ std::map<const std::string, std::shared_ptr<CCoinJoinClientManager>> coinJoinCli
 CCoinJoinClientQueueManager coinJoinClientQueueManager;
 
 
-void CCoinJoinClientQueueManager::ProcessMessage(CNode* pfrom, const std::string& msg_type, CDataStream& vRecv, CConnman& connman, bool enable_bip61)
+void CCoinJoinClientQueueManager::ProcessMessage(CNode* pfrom, const std::string& msg_type, CDataStream& vRecv, CConnman& connman)
 {
     if (fMasternodeMode) return;
     if (!CCoinJoinClientOptions::IsEnabled()) return;
@@ -44,11 +44,11 @@ void CCoinJoinClientQueueManager::ProcessMessage(CNode* pfrom, const std::string
     }
 
     if (msg_type == NetMsgType::DSQUEUE) {
-        CCoinJoinClientQueueManager::ProcessDSQueue(pfrom, msg_type, vRecv, connman, enable_bip61);
+        CCoinJoinClientQueueManager::ProcessDSQueue(pfrom, msg_type, vRecv, connman);
     }
 }
 
-void CCoinJoinClientQueueManager::ProcessDSQueue(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman, bool enable_bip61)
+void CCoinJoinClientQueueManager::ProcessDSQueue(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman)
 {
     CCoinJoinQueue dsq;
     vRecv >> dsq;
@@ -113,7 +113,7 @@ void CCoinJoinClientQueueManager::ProcessDSQueue(CNode* pfrom, const std::string
     }
 }
 
-void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& msg_type, CDataStream& vRecv, CConnman& connman, bool enable_bip61)
+void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& msg_type, CDataStream& vRecv, CConnman& connman)
 {
     if (fMasternodeMode) return;
     if (!CCoinJoinClientOptions::IsEnabled()) return;
@@ -132,12 +132,12 @@ void CCoinJoinClientManager::ProcessMessage(CNode* pfrom, const std::string& msg
         AssertLockNotHeld(cs_deqsessions);
         LOCK(cs_deqsessions);
         for (auto& session : deqSessions) {
-            session.ProcessMessage(pfrom, msg_type, vRecv, connman, enable_bip61);
+            session.ProcessMessage(pfrom, msg_type, vRecv, connman);
         }
     }
 }
 
-void CCoinJoinClientSession::ProcessMessage(CNode* pfrom, const std::string& msg_type, CDataStream& vRecv, CConnman& connman, bool enable_bip61)
+void CCoinJoinClientSession::ProcessMessage(CNode* pfrom, const std::string& msg_type, CDataStream& vRecv, CConnman& connman)
 {
     if (fMasternodeMode) return;
     if (!CCoinJoinClientOptions::IsEnabled()) return;

@@ -26,26 +26,26 @@
 CCoinJoinServer coinJoinServer;
 constexpr static CAmount DEFAULT_MAX_RAW_TX_FEE{COIN / 10};
 
-void CCoinJoinServer::ProcessMessage(CNode* pfrom, const std::string& msg_type, CDataStream& vRecv, CConnman& connman, bool enable_bip61)
+void CCoinJoinServer::ProcessMessage(CNode* pfrom, const std::string& msg_type, CDataStream& vRecv, CConnman& connman)
 {
     if (!fMasternodeMode) return;
     if (!masternodeSync.IsBlockchainSynced()) return;
 
     if (msg_type == NetMsgType::DSACCEPT) {
-        ProcessDSACCEPT(pfrom, msg_type, vRecv, connman, enable_bip61);
+        ProcessDSACCEPT(pfrom, msg_type, vRecv, connman);
         return;
     } else if (msg_type == NetMsgType::DSQUEUE) {
-        ProcessDSQUEUE(pfrom, msg_type, vRecv, connman, enable_bip61);
+        ProcessDSQUEUE(pfrom, msg_type, vRecv, connman);
         return;
     } else if (msg_type == NetMsgType::DSVIN) {
-        ProcessDSVIN(pfrom, msg_type, vRecv, connman, enable_bip61);
+        ProcessDSVIN(pfrom, msg_type, vRecv, connman);
         return;
     } else if (msg_type == NetMsgType::DSSIGNFINALTX) {
-        ProcessDSSIGNFINALTX(pfrom, msg_type, vRecv, connman, enable_bip61);
+        ProcessDSSIGNFINALTX(pfrom, msg_type, vRecv, connman);
     }
 }
 
-void CCoinJoinServer::ProcessDSACCEPT(CNode* pfrom, const std::string& msg_type, CDataStream& vRecv, CConnman& connman, bool enable_bip61)
+void CCoinJoinServer::ProcessDSACCEPT(CNode* pfrom, const std::string& msg_type, CDataStream& vRecv, CConnman& connman)
 {
     if (IsSessionReady()) {
         // too many users in this session already, reject new ones
@@ -110,7 +110,7 @@ void CCoinJoinServer::ProcessDSACCEPT(CNode* pfrom, const std::string& msg_type,
     }
 }
 
-void CCoinJoinServer::ProcessDSQUEUE(CNode* pfrom, const std::string& msg_type, CDataStream& vRecv, CConnman& connman, bool enable_bip61)
+void CCoinJoinServer::ProcessDSQUEUE(CNode* pfrom, const std::string& msg_type, CDataStream& vRecv, CConnman& connman)
 {
     CCoinJoinQueue dsq;
     vRecv >> dsq;
@@ -166,7 +166,7 @@ void CCoinJoinServer::ProcessDSQUEUE(CNode* pfrom, const std::string& msg_type, 
     }
 }
 
-void CCoinJoinServer::ProcessDSVIN(CNode* pfrom, const std::string& msg_type, CDataStream& vRecv, CConnman& connman, bool enable_bip61)
+void CCoinJoinServer::ProcessDSVIN(CNode* pfrom, const std::string& msg_type, CDataStream& vRecv, CConnman& connman)
 {
     //do we have enough users in the current session?
     if (!IsSessionReady()) {
@@ -193,7 +193,7 @@ void CCoinJoinServer::ProcessDSVIN(CNode* pfrom, const std::string& msg_type, CD
     }
 }
 
-void CCoinJoinServer::ProcessDSSIGNFINALTX(CNode* pfrom, const std::string& msg_type, CDataStream& vRecv, CConnman& connman, bool enable_bip61)
+void CCoinJoinServer::ProcessDSSIGNFINALTX(CNode* pfrom, const std::string& msg_type, CDataStream& vRecv, CConnman& connman)
 {
     std::vector<CTxIn> vecTxIn;
     vRecv >> vecTxIn;

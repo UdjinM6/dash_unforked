@@ -182,7 +182,7 @@ TestingSetup::TestingSetup(const std::string& chainName, const std::vector<const
     m_node.mempool->setSanityCheck(1.0);
     m_node.banman = MakeUnique<BanMan>(GetDataDir() / "banlist.dat", nullptr, DEFAULT_MISBEHAVING_BANTIME);
     m_node.connman = MakeUnique<CConnman>(0x1337, 0x1337); // Deterministic randomness for tests.
-    m_node.peer_logic = MakeUnique<PeerLogicValidation>(m_node.connman.get(), m_node.banman.get(), *m_node.scheduler, *m_node.chainman, *m_node.mempool, false);
+    m_node.peer_logic = MakeUnique<PeerLogicValidation>(m_node.connman.get(), m_node.banman.get(), *m_node.scheduler, *m_node.chainman, *m_node.mempool);
 
     deterministicMNManager.reset(new CDeterministicMNManager(*evoDb, *m_node.connman));
     llmq::InitLLMQSystem(*evoDb, *m_node.mempool, *m_node.connman, true);
