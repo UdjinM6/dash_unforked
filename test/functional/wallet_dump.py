@@ -86,6 +86,7 @@ class WalletDumpTest(BitcoinTestFramework):
         self.skip_if_no_wallet()
 
     def setup_network(self):
+        self.disable_mocktime()
         self.add_nodes(self.num_nodes, extra_args=self.extra_args)
         self.start_nodes()
 
