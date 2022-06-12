@@ -28,11 +28,7 @@ enum class ValidationInvalidReason {
     NONE,                    //!< not actually invalid
     CONSENSUS,               //!< invalid by consensus rules (excluding any below reasons)
     /**
-     * Invalid by a change to consensus rules more recent than SegWit.
-     * Currently unused as there are no such consensus rule changes, and any download
-     * sources realistically need to support SegWit in order to provide useful data,
-     * so differentiating between always-invalid and invalid-by-pre-SegWit-soft-fork
-     * is uninteresting.
+     * Invalid by a change to consensus rules more recent than some major deployment.
      */
     RECENT_CONSENSUS_CHANGE,
     // Only blocks (or headers):
@@ -41,26 +37,20 @@ enum class ValidationInvalidReason {
     BLOCK_MUTATED,           //!< the block's data didn't match the data committed to by the PoW
     BLOCK_MISSING_PREV,      //!< We don't have the previous block the checked one is built on
     BLOCK_INVALID_PREV,      //!< A block this one builds on is invalid
-    BLOCK_TIME_FUTURE,          //!< block timestamp was > 2 hours in the future (or our clock is bad)
+    BLOCK_TIME_FUTURE,       //!< block timestamp was > 2 hours in the future (or our clock is bad)
     BLOCK_CHECKPOINT,        //!< the block failed to meet one of our checkpoints
+    BLOCK_CHAINLOCK,         //!< the block conflicts with the ChainLock
     // Only loose txn:
     TX_NOT_STANDARD,          //!< didn't meet our local policy rules
     TX_MISSING_INPUTS,        //!< a transaction was missing some of its inputs
     TX_PREMATURE_SPEND,       //!< transaction spends a coinbase too early, or violates locktime/sequence locks
     /**
-     * Transaction might be missing a witness, have a witness prior to SegWit
-     * activation, or witness may have been malleated (which includes
-     * non-standard witnesses).
-     */
-    TX_WITNESS_MUTATED,
-    /**
      * Tx already in mempool or conflicts with a tx in the chain
-     * (if it conflicts with another tx in mempool, we use MEMPOOL_POLICY as it failed to reach the RBF threshold)
      * TODO: Currently this is only used if the transaction already exists in the mempool or on chain,
      * TODO: ATMP's fMissingInputs and a valid CValidationState being used to indicate missing inputs
      */
     TX_CONFLICT,
-    TX_MEMPOOL_POLICY,        //!< violated mempool's fee/size/descendant/RBF/etc limits
+    TX_MEMPOOL_POLICY,        //!< violated mempool's fee/size/descendant/etc limits
 };
 
 inline bool IsTransactionReason(ValidationInvalidReason r)
@@ -71,7 +61,6 @@ inline bool IsTransactionReason(ValidationInvalidReason r)
            r == ValidationInvalidReason::TX_NOT_STANDARD ||
            r == ValidationInvalidReason::TX_PREMATURE_SPEND ||
            r == ValidationInvalidReason::TX_MISSING_INPUTS ||
-           r == ValidationInvalidReason::TX_WITNESS_MUTATED ||
            r == ValidationInvalidReason::TX_CONFLICT ||
            r == ValidationInvalidReason::TX_MEMPOOL_POLICY;
 }
@@ -87,7 +76,8 @@ inline bool IsBlockReason(ValidationInvalidReason r)
            r == ValidationInvalidReason::BLOCK_MISSING_PREV ||
            r == ValidationInvalidReason::BLOCK_INVALID_PREV ||
            r == ValidationInvalidReason::BLOCK_TIME_FUTURE ||
-           r == ValidationInvalidReason::BLOCK_CHECKPOINT;
+           r == ValidationInvalidReason::BLOCK_CHECKPOINT ||
+           r == ValidationInvalidReason::BLOCK_CHAINLOCK;
 }
 
 /** Capture information about block/transaction validation */

@@ -1994,7 +1994,7 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     }
 
     if (pindex->pprev && pindex->phashBlock && llmq::chainLocksHandler->HasConflictingChainLock(pindex->nHeight, pindex->GetBlockHash())) {
-        return state.Invalid(ValidationInvalidReason::CONSENSUS, error("%s: conflicting with chainlock", __func__), REJECT_INVALID, "bad-chainlock");
+        return state.Invalid(ValidationInvalidReason::BLOCK_CHAINLOCK, error("%s: conflicting with chainlock", __func__), REJECT_INVALID, "bad-chainlock");
     }
 
     // verify that the view's current state corresponds to the previous block
@@ -2336,14 +2336,16 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     LogPrint(BCLog::BENCHMARK, "      - GetBlockSubsidy: %.2fms [%.2fs (%.2fms/blk)]\n", MILLI * (nTime5_2 - nTime5_1), nTimeSubsidy * MICRO, nTimeSubsidy * MILLI / nBlocksTotal);
 
     if (!IsBlockValueValid(block, pindex->nHeight, blockReward, strError)) {
-        return state.Invalid(ValidationInvalidReason::CONSENSUS, error("ConnectBlock(DASH): %s", strError), REJECT_INVALID, "bad-cb-amount");
+        // NOTE: Do not punish, the node might be missing governance data
+        return state.Invalid(ValidationInvalidReason::NONE, error("ConnectBlock(DASH): %s", strError), REJECT_INVALID, "bad-cb-amount");
     }
 
     int64_t nTime5_3 = GetTimeMicros(); nTimeValueValid += nTime5_3 - nTime5_2;
     LogPrint(BCLog::BENCHMARK, "      - IsBlockValueValid: %.2fms [%.2fs (%.2fms/blk)]\n", MILLI * (nTime5_3 - nTime5_2), nTimeValueValid * MICRO, nTimeValueValid * MILLI / nBlocksTotal);
 
     if (!IsBlockPayeeValid(*block.vtx[0], pindex->nHeight, blockReward)) {
-        return state.Invalid(ValidationInvalidReason::CONSENSUS, error("ConnectBlock(DASH): couldn't find masternode or superblock payments"), REJECT_INVALID, "bad-cb-payee");
+        // NOTE: Do not punish, the node might be missing governance data
+        return state.Invalid(ValidationInvalidReason::NONE, error("ConnectBlock(DASH): couldn't find masternode or superblock payments"), REJECT_INVALID, "bad-cb-payee");
     }
 
     int64_t nTime5_4 = GetTimeMicros(); nTimePayeeValid += nTime5_4 - nTime5_3;
@@ -3941,7 +3943,7 @@ bool BlockManager::AcceptBlockHeader(const CBlockHeader& block, CValidationState
             if (pindex->nStatus & BLOCK_FAILED_MASK)
                 return state.Invalid(ValidationInvalidReason::CACHED_INVALID, error("%s: block %s is marked invalid", __func__, hash.ToString()), 0, "duplicate");
             if (pindex->nStatus & BLOCK_CONFLICT_CHAINLOCK)
-                return state.Invalid(ValidationInvalidReason::CACHED_INVALID, error("%s: block %s is marked conflicting", __func__, hash.ToString()), 0, "duplicate");
+                return state.Invalid(ValidationInvalidReason::BLOCK_CHAINLOCK, error("%s: block %s is marked conflicting", __func__, hash.ToString()), 0, "duplicate");
             return true;
         }
 
@@ -3961,7 +3963,7 @@ bool BlockManager::AcceptBlockHeader(const CBlockHeader& block, CValidationState
 
         if (pindexPrev->nStatus & BLOCK_CONFLICT_CHAINLOCK)
             // it's ok-ish, the other node is probably missing the latest chainlock
-            return state.Invalid(ValidationInvalidReason::BLOCK_INVALID_PREV, error("%s: prev block %s conflicts with chainlock", __func__, block.hashPrevBlock.ToString()), REJECT_INVALID, "bad-prevblk-chainlock");
+            return state.Invalid(ValidationInvalidReason::BLOCK_CHAINLOCK, error("%s: prev block %s conflicts with chainlock", __func__, block.hashPrevBlock.ToString()), REJECT_INVALID, "bad-prevblk-chainlock");
 
         if (!ContextualCheckBlockHeader(block, state, chainparams, pindexPrev, GetAdjustedTime()))
             return error("%s: Consensus::ContextualCheckBlockHeader: %s, %s", __func__, hash.ToString(), FormatStateMessage(state));
@@ -4008,7 +4010,7 @@ bool BlockManager::AcceptBlockHeader(const CBlockHeader& block, CValidationState
             if (pindex == nullptr) {
                 AddToBlockIndex(block, BLOCK_CONFLICT_CHAINLOCK);
             }
-            return state.Invalid(ValidationInvalidReason::BLOCK_INVALID_PREV, error("%s: header %s conflicts with chainlock", __func__, hash.ToString()), REJECT_INVALID, "bad-chainlock");
+            return state.Invalid(ValidationInvalidReason::BLOCK_CHAINLOCK, error("%s: header %s conflicts with chainlock", __func__, hash.ToString()), REJECT_INVALID, "bad-chainlock");
         }
     }
     if (pindex == nullptr)

@@ -1219,10 +1219,10 @@ static bool MaybePunishNode(NodeId nodeid, const CValidationState& state, bool v
         return true;
     case ValidationInvalidReason::RECENT_CONSENSUS_CHANGE:
     case ValidationInvalidReason::BLOCK_TIME_FUTURE:
+    case ValidationInvalidReason::BLOCK_CHAINLOCK:
     case ValidationInvalidReason::TX_NOT_STANDARD:
     case ValidationInvalidReason::TX_MISSING_INPUTS:
     case ValidationInvalidReason::TX_PREMATURE_SPEND:
-    case ValidationInvalidReason::TX_WITNESS_MUTATED:
     case ValidationInvalidReason::TX_CONFLICT:
     case ValidationInvalidReason::TX_MEMPOOL_POLICY:
         break;
@@ -2187,10 +2187,8 @@ void static ProcessOrphanTx(CConnman* connman, CTxMemPool& mempool, std::set<uin
             // Probably non-standard or insufficient fee
             LogPrint(BCLog::MEMPOOL, "   removed orphan tx %s\n", orphanHash.ToString());
             assert(IsTransactionReason(orphan_state.GetReason()));
-            if (/* !orphanTx.HasWitness() && */ orphan_state.GetReason() != ValidationInvalidReason::TX_WITNESS_MUTATED) {
-                assert(recentRejects);
-                recentRejects->insert(orphanHash);
-            }
+            assert(recentRejects);
+            recentRejects->insert(orphanHash);
             EraseOrphanTx(orphanHash);
             done = true;
         }
@@ -3313,12 +3311,10 @@ bool ProcessMessage(CNode* pfrom, const std::string& msg_type, CDataStream& vRec
             }
         } else {
             assert(IsTransactionReason(state.GetReason()));
-            if (/* !tx.HasWitness() && */ state.GetReason() != ValidationInvalidReason::TX_WITNESS_MUTATED) {
-                assert(recentRejects);
-                recentRejects->insert(tx.GetHash());
-                if (RecursiveDynamicUsage(*ptx) < 100000) {
-                    AddToCompactExtraTransactions(ptx);
-                }
+            assert(recentRejects);
+            recentRejects->insert(tx.GetHash());
+            if (RecursiveDynamicUsage(*ptx) < 100000) {
+                AddToCompactExtraTransactions(ptx);
             }
 
             if (pfrom->HasPermission(PF_FORCERELAY)) {
@@ -3397,14 +3393,8 @@ bool ProcessMessage(CNode* pfrom, const std::string& msg_type, CDataStream& vRec
         const CBlockIndex *pindex = nullptr;
         CValidationState state;
         if (!chainman.ProcessNewBlockHeaders({cmpctblock.header}, state, chainparams, &pindex)) {
-            int nDoS;
             if (state.IsInvalid()) {
-                if (nDoS > 0) {
-                    LOCK(cs_main);
-                    Misbehaving(pfrom->GetId(), nDoS, strprintf("Peer %d sent us invalid header via cmpctblock", pfrom->GetId()));
-                } else {
-                    LogPrint(BCLog::NET, "Peer %d sent us invalid header via cmpctblock\n", pfrom->GetId());
-                }
+                MaybePunishNode(pfrom->GetId(), state, /*via_compact_block*/ true, "invalid header via cmpctblock");
                 return true;
             }
         }
