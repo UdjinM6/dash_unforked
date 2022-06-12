@@ -670,7 +670,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         unsigned int nSize = entry.GetTxSize();
 
         if (nSigOps > MAX_STANDARD_TX_SIGOPS)
-            return state.Invalid(ValidationInvalidReason::CONSENSUS, false, REJECT_NONSTANDARD, "bad-txns-too-many-sigops",
+            return state.Invalid(ValidationInvalidReason::TX_NOT_STANDARD, false, REJECT_NONSTANDARD, "bad-txns-too-many-sigops",
                 strprintf("%d", nSigOps));
 
         CAmount mempoolRejectFee = pool.GetMinFee(gArgs.GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000).GetFee(nSize);

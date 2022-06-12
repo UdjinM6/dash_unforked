@@ -3538,7 +3538,7 @@ bool ProcessMessage(CNode* pfrom, const std::string& msg_type, CDataStream& vRec
             // the peer if the header turns out to be for an invalid block.
             // Note that if a peer tries to build on an invalid chain, that
             // will be detected and the peer will be disconnected/discouraged.
-            return ProcessHeadersMessage(pfrom, connman, chainman, mempool, {cmpctblock.header}, chainparams, /*punish_duplicate_invalid=*/false);
+            return ProcessHeadersMessage(pfrom, connman, chainman, mempool, {cmpctblock.header}, chainparams, /*via_compact_block=*/true);
         }
 
         if (fBlockReconstructed) {
@@ -3691,12 +3691,7 @@ bool ProcessMessage(CNode* pfrom, const std::string& msg_type, CDataStream& vRec
             }
         }
 
-        // Headers received via a HEADERS message should be valid, and reflect
-        // the chain the peer is on. If we receive a known-invalid header,
-        // disconnect the peer if it is using one of our outbound connection
-        // slots.
-        bool should_punish = !pfrom->fInbound && !pfrom->m_manual_connection;
-        return ProcessHeadersMessage(pfrom, connman, chainman, mempool, headers, chainparams, should_punish);
+        return ProcessHeadersMessage(pfrom, connman, chainman, mempool, headers, chainparams, /*via_compact_block=*/false);
     }
 
     if (msg_type == NetMsgType::BLOCK)
