@@ -58,7 +58,7 @@ class BadTxTemplate:
 
 class OutputMissing(BadTxTemplate):
     reject_reason = "bad-txns-vout-empty"
-    expect_disconnect = False
+    expect_disconnect = True
 
     def get_tx(self):
         tx = CTransaction()
@@ -69,7 +69,7 @@ class OutputMissing(BadTxTemplate):
 
 class InputMissing(BadTxTemplate):
     reject_reason = "bad-txns-vin-empty"
-    expect_disconnect = False
+    expect_disconnect = True
 
     def get_tx(self):
         tx = CTransaction()
@@ -167,7 +167,7 @@ class InvalidOPIFConstruction(BadTxTemplate):
 class TooManySigops(BadTxTemplate):
     reject_reason = "bad-txns-too-many-sigops"
     block_reject_reason = "bad-blk-sigops, out-of-bounds SigOpCount"
-    expect_disconnect = False
+    expect_disconnect = True
 
     def get_tx(self):
         lotsa_checksigs = sc.CScript([sc.OP_CHECKSIG] * (MAX_BLOCK_SIGOPS))
