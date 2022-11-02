@@ -34,6 +34,9 @@
 #include <util/translation.h>
 #include <util/validation.h>
 #include <validation.h>
+#ifdef USE_BDB
+#include <wallet/bdb.h>
+#endif
 #include <wallet/coincontrol.h>
 #include <wallet/coinselection.h>
 #include <wallet/fees.h>
@@ -4692,6 +4695,7 @@ bool CWallet::AutoBackupWallet(const fs::path& wallet_path, bilingual_str& error
             return false;
         }
     } else {
+#ifdef USE_BDB
         // ... strWalletName file
         std::string strSourceFile;
         std::shared_ptr<BerkeleyEnvironment> env = GetWalletEnv(wallet_path, strSourceFile);
@@ -4716,6 +4720,7 @@ bool CWallet::AutoBackupWallet(const fs::path& wallet_path, bilingual_str& error
                 return false;
             }
         }
+#endif
     }
 
     // Keep only the last 10 backups, including the new one of course
