@@ -4697,9 +4697,9 @@ bool CWallet::AutoBackupWallet(const fs::path& wallet_path, bilingual_str& error
     } else {
 #ifdef USE_BDB
         // ... strWalletName file
-        std::string strSourceFile;
-        std::shared_ptr<BerkeleyEnvironment> env = GetWalletEnv(wallet_path, strSourceFile);
-        fs::path sourceFile = env->Directory() / strSourceFile;
+        fs::path strSourceFile = BDBDataFile(wallet_path);
+        std::shared_ptr<BerkeleyEnvironment> env = GetBerkeleyEnv(strSourceFile.parent_path());
+        fs::path sourceFile = env->Directory() / strSourceFile.filename().string();
         fs::path backupFile = backupsDir / (strWalletName + dateTimeStr);
         sourceFile.make_preferred();
         backupFile.make_preferred();
