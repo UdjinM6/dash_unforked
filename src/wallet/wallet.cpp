@@ -34,6 +34,9 @@
 #include <util/translation.h>
 #include <util/validation.h>
 #include <validation.h>
+#ifdef USE_BDB
+#include <wallet/bdb.h>
+#endif
 #include <wallet/coincontrol.h>
 #include <wallet/coinselection.h>
 #include <wallet/fees.h>
@@ -229,6 +232,7 @@ std::shared_ptr<CWallet> LoadWalletInternal(interfaces::Chain& chain, const std:
         std::shared_ptr<CWallet> wallet = CWallet::Create(chain, name, std::move(database), options.create_flags, error, warnings);
         if (!wallet) {
             error = Untranslated("Wallet loading failed.") + Untranslated(" ") + error;
+            status = DatabaseStatus::FAILED_LOAD;
             return nullptr;
         }
         AddWallet(wallet);
@@ -240,6 +244,7 @@ std::shared_ptr<CWallet> LoadWalletInternal(interfaces::Chain& chain, const std:
         return wallet;
     } catch (const std::runtime_error& e) {
         error = Untranslated(e.what());
+        status = DatabaseStatus::FAILED_LOAD;
         return nullptr;
     }
 }
@@ -250,6 +255,7 @@ std::shared_ptr<CWallet> LoadWallet(interfaces::Chain& chain, const std::string&
     auto result = WITH_LOCK(g_loading_wallet_mutex, return g_loading_wallet_set.insert(name));
     if (!result.second) {
         error = Untranslated("Wallet already being loading.");
+        status = DatabaseStatus::FAILED_LOAD;
         return nullptr;
     }
     auto wallet = LoadWalletInternal(chain, name, load_on_start, options, status, error, warnings);
@@ -814,7 +820,7 @@ bool CWallet::AddToWallet(const CWalletTx& wtxIn, bool fFlushOnClose)
 {
     LOCK(cs_wallet);
 
-    WalletBatch batch(*database, "r+", fFlushOnClose);
+    WalletBatch batch(*database, fFlushOnClose);
 
     uint256 hash = wtxIn.GetHash();
 
@@ -1043,7 +1049,7 @@ bool CWallet::AbandonTransaction(const uint256& hashTx)
 {
     LOCK(cs_wallet);
 
-    WalletBatch batch(*database, "r+");
+    WalletBatch batch(*database);
 
     std::set<uint256> todo;
     std::set<uint256> done;
@@ -1121,7 +1127,7 @@ void CWallet::MarkConflicted(const uint256& hashBlock, int conflicting_height, c
         return;
 
     // Do not flush the wallet here for performance reasons
-    WalletBatch batch(*database, "r+", false);
+    WalletBatch batch(*database, false);
 
     std::set<uint256> todo;
     std::set<uint256> done;
@@ -3584,7 +3590,7 @@ DBErrors CWallet::LoadWallet(bool& fFirstRunRet)
     LOCK(cs_wallet);
 
     fFirstRunRet = false;
-    DBErrors nLoadWalletRet = WalletBatch(*database,"cr+").LoadWallet(this);
+    DBErrors nLoadWalletRet = WalletBatch(*database).LoadWallet(this);
     if (nLoadWalletRet == DBErrors::NEED_REWRITE)
     {
         if (database->Rewrite("\x04pool"))
@@ -3645,7 +3651,7 @@ void CWallet::AutoLockMasternodeCollaterals()
 DBErrors CWallet::ZapSelectTx(std::vector<uint256>& vHashIn, std::vector<uint256>& vHashOut)
 {
     AssertLockHeld(cs_wallet);
-    DBErrors nZapSelectTxRet = WalletBatch(*database, "cr+").ZapSelectTx(vHashIn, vHashOut);
+    DBErrors nZapSelectTxRet = WalletBatch(*database).ZapSelectTx(vHashIn, vHashOut);
     for (uint256 hash : vHashOut) {
         const auto& it = mapWallet.find(hash);
         wtxOrdered.erase(it->second.m_it_wtxOrdered);
@@ -4689,10 +4695,11 @@ bool CWallet::AutoBackupWallet(const fs::path& wallet_path, bilingual_str& error
             return false;
         }
     } else {
+#ifdef USE_BDB
         // ... strWalletName file
-        std::string strSourceFile;
-        std::shared_ptr<BerkeleyEnvironment> env = GetWalletEnv(wallet_path, strSourceFile);
-        fs::path sourceFile = env->Directory() / strSourceFile;
+        fs::path strSourceFile = BDBDataFile(wallet_path);
+        std::shared_ptr<BerkeleyEnvironment> env = GetBerkeleyEnv(strSourceFile.parent_path());
+        fs::path sourceFile = env->Directory() / strSourceFile.filename().string();
         fs::path backupFile = backupsDir / (strWalletName + dateTimeStr);
         sourceFile.make_preferred();
         backupFile.make_preferred();
@@ -4713,6 +4720,7 @@ bool CWallet::AutoBackupWallet(const fs::path& wallet_path, bilingual_str& error
                 return false;
             }
         }
+#endif
     }
 
     // Keep only the last 10 backups, including the new one of course
