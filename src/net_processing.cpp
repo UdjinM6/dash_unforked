@@ -1780,8 +1780,8 @@ void static ProcessGetData(CNode* pfrom, const CChainParams& chainparams, CConnm
     // mempool entries added before this time have likely expired from mapRelay
     const std::chrono::seconds longlived_mempool_time = GetTime<std::chrono::seconds>() - RELAY_TX_CACHE_TIME;
     // Get last mempool request time
-    const std::chrono::seconds mempool_req = pfrom->m_tx_relay != nullptr ? pfrom->m_tx_relay->m_last_mempool_req.load()
-                                                                          : std::chrono::seconds::min();
+    const std::chrono::seconds mempool_req = pfrom->m_block_relay_only_peer ? pfrom->m_tx_relay->m_last_mempool_req.load()
+                                                                            : std::chrono::seconds::min();
 
     {
         LOCK(cs_main);
@@ -1797,10 +1797,17 @@ void static ProcessGetData(CNode* pfrom, const CChainParams& chainparams, CConnm
             if (pfrom->fPauseSend)
                 break;
 
-            const CInv &inv = *it++;
+            const CInv &inv = *it;
 
-            if (pfrom->m_tx_relay == nullptr) {
-                // Ignore GETDATA requests for transactions from blocks-only peers.
+            if (inv.type == MSG_BLOCK || inv.type == MSG_FILTERED_BLOCK || inv.type == MSG_CMPCT_BLOCK) {
+                break;
+            }
+            ++it;
+
+            if (pfrom->m_block_relay_only_peer && NetMessageViolatesBlocksOnly(inv.GetCommand())) {
+                // Note that if we receive a getdata for non-block messages
+                // from a block-relay-only outbound peer that violate the policy,
+                // we skip such getdata messages from this peer
                 continue;
             }
 
