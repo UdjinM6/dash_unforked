@@ -1332,6 +1332,14 @@ static bool CheckPlatformFields(const ProTx& proTx, CValidationState& state)
         }
     }
 
+    static int mainnetDefaultP2PPort = CreateChainParams(CBaseChainParams::MAIN)->GetDefaultPort();
+    if (proTx.platformP2PPort == mainnetDefaultP2PPort) {
+        return state.Invalid(ValidationInvalidReason::TX_BAD_SPECIAL, false, REJECT_INVALID, "bad-protx-platform-p2p-port");
+    }
+    if (proTx.platformHTTPPort == mainnetDefaultP2PPort) {
+        return state.Invalid(ValidationInvalidReason::TX_BAD_SPECIAL, false, REJECT_INVALID, "bad-protx-platform-http-port");
+    }
+
     if (proTx.platformP2PPort == proTx.platformHTTPPort ||
         proTx.platformP2PPort == proTx.addr.GetPort() ||
         proTx.platformHTTPPort == proTx.addr.GetPort()) {
