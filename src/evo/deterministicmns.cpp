@@ -955,8 +955,8 @@ bool CDeterministicMNManager::BuildNewListFromBlock(const CBlock& block, const C
             }
         }
         newList.UpdateMN(payee->proTxHash, newState);
-        dmn = newList.GetMN(payee->proTxHash);
         if (debugLogs) {
+            dmn = newList.GetMN(payee->proTxHash);
             LogPrintf("CDeterministicMNManager::%s -- MN %s, nConsecutivePayments=%d\n",
                       __func__, dmn->proTxHash.ToString(), dmn->pdmnState->nConsecutivePayments);
         }
