@@ -199,15 +199,14 @@ CDeterministicMNCPtr CDeterministicMNList::GetMNPayee(const CBlockIndex* pIndex)
             return;
         });
 
-        if (best)
-            return best;
+        if (best != nullptr) return best;
 
         // Note: If the last payee was a regular MN or if the payee is a HPMN that was removed from the mnList then that's fine.
         // We can proceed with classic MN payee selection
     }
 
     ForEachMNShared(true, [&](const CDeterministicMNCPtr& dmn) {
-        if (!best || CompareByLastPaid(dmn.get(), best.get())) {
+        if (best == nullptr || CompareByLastPaid(dmn.get(), best.get())) {
             best = dmn;
         }
     });
