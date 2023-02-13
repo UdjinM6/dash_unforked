@@ -196,7 +196,6 @@ CDeterministicMNCPtr CDeterministicMNList::GetMNPayee(const CBlockIndex* pIndex)
                     best = dmn;
                 }
             }
-            return;
         });
 
         if (best != nullptr) return best;
