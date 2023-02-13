@@ -45,81 +45,100 @@ static RPCArg GetRpcArg(const std::string& strParamName)
 {
     static const std::map<std::string, RPCArg> mapParamHelp = {
         {"collateralAddress",
-         {"collateralAddress", RPCArg::Type::STR, RPCArg::Optional::NO,
-          "The dash address to send the collateral to."}},
+            {"collateralAddress", RPCArg::Type::STR, RPCArg::Optional::NO,
+                "The dash address to send the collateral to."}
+        },
         {"collateralHash",
-         {"collateralHash", RPCArg::Type::STR, RPCArg::Optional::NO,
-          "The collateral transaction hash."}},
+            {"collateralHash", RPCArg::Type::STR, RPCArg::Optional::NO,
+                "The collateral transaction hash."}
+        },
         {"collateralIndex",
-         {"collateralIndex", RPCArg::Type::NUM, RPCArg::Optional::NO,
-          "The collateral transaction output index."}},
+            {"collateralIndex", RPCArg::Type::NUM, RPCArg::Optional::NO,
+                "The collateral transaction output index."}
+        },
         {"feeSourceAddress",
-         {"feeSourceAddress", RPCArg::Type::STR, /* default */ "",
-          "If specified wallet will only use coins from this address to fund ProTx.\n"
-          "If not specified, payoutAddress is the one that is going to be used.\n"
-          "The private key belonging to this address must be known in your wallet."}},
+            {"feeSourceAddress", RPCArg::Type::STR, /* default */ "",
+                "If specified wallet will only use coins from this address to fund ProTx.\n"
+                "If not specified, payoutAddress is the one that is going to be used.\n"
+                "The private key belonging to this address must be known in your wallet."}
+        },
         {"fundAddress",
-         {"fundAddress", RPCArg::Type::STR, /* default */ "",
-          "If specified wallet will only use coins from this address to fund ProTx.\n"
-          "If not specified, payoutAddress is the one that is going to be used.\n"
-          "The private key belonging to this address must be known in your wallet."}},
+            {"fundAddress", RPCArg::Type::STR, /* default */ "",
+                "If specified wallet will only use coins from this address to fund ProTx.\n"
+                "If not specified, payoutAddress is the one that is going to be used.\n"
+                "The private key belonging to this address must be known in your wallet."}
+        },
         {"ipAndPort",
-         {"ipAndPort", RPCArg::Type::STR, RPCArg::Optional::NO,
-          "IP and port in the form \"IP:PORT\".\n"
-          "Must be unique on the network. Can be set to 0, which will require a ProUpServTx afterwards."}},
+            {"ipAndPort", RPCArg::Type::STR, RPCArg::Optional::NO,
+                "IP and port in the form \"IP:PORT\".\n"
+                "Must be unique on the network. Can be set to 0, which will require a ProUpServTx afterwards."}
+        },
         {"operatorKey",
-         {"operatorKey", RPCArg::Type::STR, RPCArg::Optional::NO,
-          "The operator BLS private key associated with the\n"
-          "registered operator public key."}},
+            {"operatorKey", RPCArg::Type::STR, RPCArg::Optional::NO,
+                "The operator BLS private key associated with the\n"
+                "registered operator public key."}
+        },
         {"operatorPayoutAddress",
-         {"operatorPayoutAddress", RPCArg::Type::STR, /* default */ "",
-          "The address used for operator reward payments.\n"
-          "Only allowed when the ProRegTx had a non-zero operatorReward value.\n"
-          "If set to an empty string, the currently active payout address is reused."}},
+            {"operatorPayoutAddress", RPCArg::Type::STR, /* default */ "",
+                "The address used for operator reward payments.\n"
+                "Only allowed when the ProRegTx had a non-zero operatorReward value.\n"
+                "If set to an empty string, the currently active payout address is reused."}
+        },
         {"operatorPubKey_register",
-         {"operatorPubKey_register", RPCArg::Type::STR, RPCArg::Optional::NO,
-          "The operator BLS public key. The BLS private key does not have to be known.\n"
-          "It has to match the BLS private key which is later used when operating the masternode."}},
+            {"operatorPubKey_register", RPCArg::Type::STR, RPCArg::Optional::NO,
+                "The operator BLS public key. The BLS private key does not have to be known.\n"
+                "It has to match the BLS private key which is later used when operating the masternode."}
+        },
         {"operatorPubKey_update",
-         {"operatorPubKey_update", RPCArg::Type::STR, RPCArg::Optional::NO,
-          "The operator BLS public key. The BLS private key does not have to be known.\n"
-          "It has to match the BLS private key which is later used when operating the masternode.\n"
-          "If set to an empty string, the currently active operator BLS public key is reused."}},
+            {"operatorPubKey_update", RPCArg::Type::STR, RPCArg::Optional::NO,
+                "The operator BLS public key. The BLS private key does not have to be known.\n"
+                "It has to match the BLS private key which is later used when operating the masternode.\n"
+                "If set to an empty string, the currently active operator BLS public key is reused."}
+        },
         {"operatorReward",
-         {"operatorReward", RPCArg::Type::STR, RPCArg::Optional::NO,
-          "The fraction in %% to share with the operator. The value must be\n"
-          "between 0.00 and 100.00."}},
+            {"operatorReward", RPCArg::Type::STR, RPCArg::Optional::NO,
+                "The fraction in %% to share with the operator. The value must be\n"
+                "between 0.00 and 100.00."}
+        },
         {"ownerAddress",
-         {"ownerAddress", RPCArg::Type::STR, RPCArg::Optional::NO,
-          "The dash address to use for payee updates and proposal voting.\n"
-          "The corresponding private key does not have to be known by your wallet.\n"
-          "The address must be unused and must differ from the collateralAddress."}},
+            {"ownerAddress", RPCArg::Type::STR, RPCArg::Optional::NO,
+                "The dash address to use for payee updates and proposal voting.\n"
+                "The corresponding private key does not have to be known by your wallet.\n"
+                "The address must be unused and must differ from the collateralAddress."}
+        },
         {"payoutAddress_register",
-         {"payoutAddress_register", RPCArg::Type::STR, RPCArg::Optional::NO,
-          "The dash address to use for masternode reward payments."}},
+            {"payoutAddress_register", RPCArg::Type::STR, RPCArg::Optional::NO,
+                "The dash address to use for masternode reward payments."}
+        },
         {"payoutAddress_update",
-         {"payoutAddress_update", RPCArg::Type::STR, RPCArg::Optional::NO,
-          "The dash address to use for masternode reward payments.\n"
-          "If set to an empty string, the currently active payout address is reused."}},
+            {"payoutAddress_update", RPCArg::Type::STR, RPCArg::Optional::NO,
+                "The dash address to use for masternode reward payments.\n"
+                "If set to an empty string, the currently active payout address is reused."}
+        },
         {"proTxHash",
-         {"proTxHash", RPCArg::Type::STR, RPCArg::Optional::NO,
-          "The hash of the initial ProRegTx."}},
+            {"proTxHash", RPCArg::Type::STR, RPCArg::Optional::NO,
+                "The hash of the initial ProRegTx."}
+        },
         {"reason",
-         {"reason", RPCArg::Type::NUM, /* default */ "",
-          "The reason for masternode service revocation."}},
+            {"reason", RPCArg::Type::NUM, /* default */ "",
+                "The reason for masternode service revocation."}
+        },
         {"submit",
-         {"submit", RPCArg::Type::BOOL, /* default */ "true",
-          "If true, the resulting transaction is sent to the network."}},
+            {"submit", RPCArg::Type::BOOL, /* default */ "true",
+                "If true, the resulting transaction is sent to the network."}
+        },
         {"votingAddress_register",
-         {"votingAddress_register", RPCArg::Type::STR, RPCArg::Optional::NO,
-          "The voting key address. The private key does not have to be known by your wallet.\n"
-          "It has to match the private key which is later used when voting on proposals.\n"
-          "If set to an empty string, ownerAddress will be used."}},
+            {"votingAddress_register", RPCArg::Type::STR, RPCArg::Optional::NO,
+                "The voting key address. The private key does not have to be known by your wallet.\n"
+                "It has to match the private key which is later used when voting on proposals.\n"
+                "If set to an empty string, ownerAddress will be used."}
+        },
         {"votingAddress_update",
-         {"votingAddress_update", RPCArg::Type::STR, RPCArg::Optional::NO,
-          "The voting key address. The private key does not have to be known by your wallet.\n"
-          "It has to match the private key which is later used when voting on proposals.\n"
-          "If set to an empty string, the currently active voting key address is reused."}},
+            {"votingAddress_update", RPCArg::Type::STR, RPCArg::Optional::NO,
+                "The voting key address. The private key does not have to be known by your wallet.\n"
+                "It has to match the private key which is later used when voting on proposals.\n"
+                "If set to an empty string, the currently active voting key address is reused."}
+        },
         {"platformNodeID",
          {"platformNodeID", RPCArg::Type::STR, RPCArg::Optional::NO,
           "Platform P2P node ID, derived from P2P public key."}},
@@ -1471,8 +1490,7 @@ static UniValue protx_diff(const JSONRPCRequest& request)
         },
         RPCResults{},
         RPCExamples{""},
-    }
-        .Throw();
+    }.Throw();
 }
 
 static UniValue protx(const JSONRPCRequest& request)
@@ -1503,7 +1521,7 @@ static UniValue protx(const JSONRPCRequest& request)
         return protx_revoke_legacy(new_request);
     } else
 #endif
-        if (command == "protxlist") {
+    if (command == "protxlist") {
         return protx_list(new_request);
     } else if (command == "protxinfo") {
         return protx_info(new_request);
