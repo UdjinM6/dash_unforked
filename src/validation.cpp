@@ -1241,7 +1241,7 @@ void CChainState::CheckForkWarningConditions()
         return;
     }
 
-    if (pindexBestInvalid && pindexBestInvalid->nChainWork > ::ChainActive().Tip()->nChainWork + (GetBlockProof(*::ChainActive().Tip()) * 6)) {
+    if (pindexBestInvalid && pindexBestInvalid->nChainWork > m_chain.Tip()->nChainWork + (GetBlockProof(*m_chain.Tip()) * 6)) {
         LogPrintf("%s: Warning: Found invalid chain which has higher work (at least ~6 blocks worth of work) than our best chain.\nChain state database corruption likely.\n", __func__);
         SetfLargeWorkInvalidChainFound(true);
     } else {
@@ -1265,10 +1265,10 @@ void CChainState::InvalidChainFound(CBlockIndex* pindexNew)
     LogPrintf("%s: invalid block=%s  height=%d  log2_work=%.8f  date=%s\n", __func__,
       pindexNew->GetBlockHash().ToString(), pindexNew->nHeight,
       log(pindexNew->nChainWork.getdouble())/log(2.0), FormatISO8601DateTime(pindexNew->GetBlockTime()));
-    CBlockIndex *tip = ::ChainActive().Tip();
+    CBlockIndex *tip = m_chain.Tip();
     assert (tip);
     LogPrintf("%s:  current best=%s  height=%d  log2_work=%.8f  date=%s\n", __func__,
-      tip->GetBlockHash().ToString(), ::ChainActive().Height(), log(tip->nChainWork.getdouble())/log(2.0),
+      tip->GetBlockHash().ToString(), m_chain.Height(), log(tip->nChainWork.getdouble())/log(2.0),
       FormatISO8601DateTime(tip->GetBlockTime()));
     CheckForkWarningConditions();
 }
@@ -3320,10 +3320,11 @@ void CChainState::EnforceBlock(CValidationState& state, const CChainParams& chai
     AssertLockNotHeld(::cs_main);
 
     LOCK2(m_cs_chainstate, ::cs_main);
+    assert(std::addressof(::ChainstateActive()) == std::addressof(*this));
 
     const CBlockIndex* pindex_walk = pindex;
 
-    while (pindex_walk && !::ChainActive().Contains(pindex_walk)) {
+    while (pindex_walk && !m_chain.Contains(pindex_walk)) {
         // Mark all blocks that have the same prevBlockHash but are not equal to blockHash as conflicting
         auto itp = g_chainman.PrevBlockIndex().equal_range(pindex_walk->pprev->GetBlockHash());
         for (auto jt = itp.first; jt != itp.second; ++jt) {
@@ -3349,6 +3350,7 @@ void CChainState::EnforceBlock(CValidationState& state, const CChainParams& chai
 bool CChainState::MarkConflictingBlock(CValidationState& state, const CChainParams& chainparams, CBlockIndex *pindex)
 {
     AssertLockHeld(cs_main);
+    assert(std::addressof(::ChainstateActive()) == std::addressof(*this));
 
     // We first disconnect backwards and then mark the blocks as conflicting.
 
@@ -3370,7 +3372,7 @@ bool CChainState::MarkConflictingBlock(CValidationState& state, const CChainPara
         if (!DisconnectTip(state, chainparams, &disconnectpool)) {
             // It's probably hopeless to try to make the mempool consistent
             // here if DisconnectTip failed, but we can try.
-            UpdateMempoolForReorg(::ChainstateActive(), m_mempool, disconnectpool, false);
+            UpdateMempoolForReorg(*this, m_mempool, disconnectpool, false);
             return false;
         }
         if (pindexOldTip == pindexBestHeader) {
@@ -3392,7 +3394,7 @@ bool CChainState::MarkConflictingBlock(CValidationState& state, const CChainPara
 
     // DisconnectTip will add transactions to disconnectpool; try to add these
     // back to the mempool.
-    UpdateMempoolForReorg(::ChainstateActive(), m_mempool, disconnectpool, true);
+    UpdateMempoolForReorg(*this, m_mempool, disconnectpool, true);
     } // m_mempool.cs
 
     // The resulting new best tip may not be in setBlockIndexCandidates anymore, so
