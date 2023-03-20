@@ -1963,6 +1963,11 @@ QScrollBar:right-arrow { /* Arrows Icon */
     height: 18px;
 }
 
+QDialog#CreateWalletDialog {
+    min-width: 407px;
+    min-height: 317px;
+}
+
 QDialog#HelpMessageDialog QScrollBar:vertical,
 QDialog#HelpMessageDialog QScrollBar:horizontal {
     border: 0;

@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>CreateWalletDialog</class>
  <widget class="QDialog" name="CreateWalletDialog">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>407</width>
-    <height>316</height>
-   </rect>
-  </property>
   <property name="windowTitle">
    <string>Create Wallet</string>
   </property>
