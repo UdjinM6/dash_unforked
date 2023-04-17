@@ -1909,9 +1909,10 @@ class DashTestFramework(BitcoinTestFramework):
         stop_time = time.time() + 10 * self.options.timeout_scale
         while time.time() < stop_time:
             try:
+                self.bump_mocktime(1)
                 return node.quorum('getrecsig', llmq_type, rec_sig_id, rec_sig_msg_hash)
             except JSONRPCException:
-                time.sleep(0.1)
+                time.sleep(1)
         assert False
 
     def get_quorum_masternodes(self, q, llmq_type=100):
