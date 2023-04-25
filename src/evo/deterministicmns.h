@@ -30,7 +30,7 @@ class CBlockIndex;
 class TxValidationState;
 class CSimplifiedMNListDiff;
 
-extern CCriticalSection cs_main;
+extern RecursiveMutex cs_main;
 
 namespace llmq
 {

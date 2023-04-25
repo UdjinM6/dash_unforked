@@ -60,9 +60,9 @@ void PreComputeQuorumMembers(const CBlockIndex* pQuorumBaseBlockIndex, bool rese
 
 std::vector<CDeterministicMNCPtr> GetAllQuorumMembers(Consensus::LLMQType llmqType, const CBlockIndex* pQuorumBaseBlockIndex, bool reset_cache)
 {
-    static CCriticalSection cs_members;
+    static RecursiveMutex cs_members;
     static std::map<Consensus::LLMQType, unordered_lru_cache<uint256, std::vector<CDeterministicMNCPtr>, StaticSaltedHasher>> mapQuorumMembers GUARDED_BY(cs_members);
-    static CCriticalSection cs_indexed_members;
+    static RecursiveMutex cs_indexed_members;
     static std::map<Consensus::LLMQType, unordered_lru_cache<std::pair<uint256, int>, std::vector<CDeterministicMNCPtr>, StaticSaltedHasher>> mapIndexedQuorumMembers GUARDED_BY(cs_indexed_members);
     if (!IsQuorumTypeEnabled(llmqType, *llmq::quorumManager, pQuorumBaseBlockIndex->pprev)) {
         return {};
@@ -795,7 +795,7 @@ std::set<size_t> CalcDeterministicWatchConnections(Consensus::LLMQType llmqType,
 {
     static uint256 qwatchConnectionSeed;
     static std::atomic<bool> qwatchConnectionSeedGenerated{false};
-    static CCriticalSection qwatchConnectionSeedCs;
+    static RecursiveMutex qwatchConnectionSeedCs;
     if (!qwatchConnectionSeedGenerated) {
         LOCK(qwatchConnectionSeedCs);
         qwatchConnectionSeed = GetRandHash();
