@@ -69,6 +69,9 @@ class DIP3V19Test(DashTestFramework):
         self.activate_v19(expected_activation_height=900)
         self.log.info("Activated v19 at height:" + str(self.nodes[0].getblockcount()))
 
+        b_0 = self.nodes[0].getbestblockhash()
+        self.test_getmnlistdiff(null_hash, b_0, {}, [], expected_updated)
+
         self.move_to_next_cycle()
         self.log.info("Cycle H height:" + str(self.nodes[0].getblockcount()))
         self.move_to_next_cycle()
@@ -172,6 +175,13 @@ class DIP3V19Test(DashTestFramework):
         assert_equal(set([int(e["proRegTxHash"], 16) for e in d2["mnList"]]), set([e.proRegTxHash for e in d.mnList]))
         assert_equal(set([QuorumId(e["llmqType"], int(e["quorumHash"], 16)) for e in d2["deletedQuorums"]]), set(d.deletedQuorums))
         assert_equal(set([QuorumId(e["llmqType"], int(e["quorumHash"], 16)) for e in d2["newQuorums"]]), set([QuorumId(e.llmqType, e.quorumHash) for e in d.newQuorums]))
+        assert_equal(d2["v19activationHeight"], d.v19activationHeight)
+
+        blockchain_info = self.nodes[0].getblockchaininfo()
+        if blockchain_info["softforks"]["v19"]["active"]:
+            assert_equal(blockchain_info["softforks"]["v19"]["height"], d.v19activationHeight)
+        else:
+            assert_equal(d.v19activationHeight, -1)
 
         return d
 
