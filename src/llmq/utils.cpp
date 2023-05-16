@@ -65,6 +65,7 @@ void PreComputeQuorumMembers(const CBlockIndex* pQuorumBaseBlockIndex, bool rese
 
 uint256 GetHashModifier(const Consensus::LLMQParams& llmqParams, const CBlockIndex* pQuorumBaseBlockIndex)
 {
+    assert(pQuorumBaseBlockIndex->nHeight % llmqParams.dkgInterval == 0);
     const CBlockIndex* pWorkBlockIndex = pQuorumBaseBlockIndex->GetAncestor(pQuorumBaseBlockIndex->nHeight - 8);
 
     if (IsV20Active(pWorkBlockIndex)) {
@@ -167,6 +168,7 @@ std::vector<CDeterministicMNCPtr> ComputeQuorumMembers(Consensus::LLMQType llmqT
     const auto& llmq_params_opt = GetLLMQParams(llmqType);
     assert(llmq_params_opt.has_value());
     assert(!llmq_params_opt->useRotation);
+    assert(pQuorumBaseBlockIndex->nHeight % llmq_params_opt->dkgInterval == 0);
 
     const CBlockIndex* pWorkBlockIndex = IsV20Active(pQuorumBaseBlockIndex) ?
             pQuorumBaseBlockIndex->GetAncestor(pQuorumBaseBlockIndex->nHeight - 8) :
@@ -291,6 +293,9 @@ std::vector<std::vector<CDeterministicMNCPtr>> BuildNewQuorumQuarterMembers(cons
                                                                                         const CBlockIndex* pCycleQuorumBaseBlockIndex,
                                                                                         const PreviousQuorumQuarters& previousQuarters)
 {
+    assert(llmqParams.useRotation);
+    assert(pCycleQuorumBaseBlockIndex->nHeight % llmqParams.dkgInterval == 0);
+
     size_t nQuorums = static_cast<size_t>(llmqParams.signingActiveQuorumCount);
     std::vector<std::vector<CDeterministicMNCPtr>> quarterQuorumMembers{nQuorums};
 
@@ -446,6 +451,9 @@ void BuildQuorumSnapshot(const Consensus::LLMQParams& llmqParams, const CDetermi
                                      const CDeterministicMNList& mnUsedAtH, std::vector<CDeterministicMNCPtr>& sortedCombinedMns,
                                      CQuorumSnapshot& quorumSnapshot, int nHeight, std::vector<int>& skipList, const CBlockIndex* pCycleQuorumBaseBlockIndex)
 {
+    assert(llmqParams.useRotation);
+    assert(pCycleQuorumBaseBlockIndex->nHeight % llmqParams.dkgInterval == 0);
+
     quorumSnapshot.activeQuorumMembers.resize(allMns.GetAllMNsCount());
     const auto modifier = GetHashModifier(llmqParams, pCycleQuorumBaseBlockIndex);
     auto sortedAllMns = allMns.CalculateQuorum(allMns.GetAllMNsCount(), modifier);
@@ -477,6 +485,9 @@ std::vector<std::vector<CDeterministicMNCPtr>> GetQuorumQuarterMembersBySnapshot
                                                                                              const llmq::CQuorumSnapshot& snapshot,
                                                                                              int nHeight)
 {
+    assert(llmqParams.useRotation);
+    assert(pCycleQuorumBaseBlockIndex->nHeight % llmqParams.dkgInterval == 0);
+
     std::vector<CDeterministicMNCPtr> sortedCombinedMns;
     {
         const auto modifier = GetHashModifier(llmqParams, pCycleQuorumBaseBlockIndex);
@@ -567,6 +578,9 @@ std::pair<CDeterministicMNList, CDeterministicMNList> GetMNUsageBySnapshot(const
                                                                                        const llmq::CQuorumSnapshot& snapshot,
                                                                                        int nHeight)
 {
+    assert(llmqParams.useRotation);
+    assert(pCycleQuorumBaseBlockIndex->nHeight % llmqParams.dkgInterval == 0);
+
     CDeterministicMNList usedMNs;
     CDeterministicMNList nonUsedMNs;
 
