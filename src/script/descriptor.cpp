@@ -549,7 +549,7 @@ public:
             out = Merge(out, subprovider);
         }
     }
-    std::optional<OutputType> GetOutputType() const override { return OutputType::LEGACY; }
+    std::optional<OutputType> GetOutputType() const override { return std::nullopt; }
 };
 
 /** A parsed addr(A) descriptor. */
@@ -605,6 +605,7 @@ protected:
     std::vector<CScript> MakeScripts(const std::vector<CPubKey>& keys, const CScript*, FlatSigningProvider&) const override { return Vector(GetScriptForRawPubKey(keys[0])); }
 public:
     PKDescriptor(std::unique_ptr<PubkeyProvider> prov) : DescriptorImpl(Vector(std::move(prov)), {}, "pk") {}
+    std::optional<OutputType> GetOutputType() const override { return OutputType::LEGACY; }
 };
 
 /** A parsed pkh(P) descriptor. */
