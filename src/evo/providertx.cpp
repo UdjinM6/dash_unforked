@@ -27,7 +27,7 @@ maybe_error CProRegTx::IsTriviallyValid(bool is_bls_legacy_scheme) const
         return {ValidationInvalidReason::TX_BAD_SPECIAL, "bad-protx-key-null"};
     }
     if (pubKeyOperator.IsLegacy() != (nVersion == LEGACY_BLS_VERSION)) {
-        return state.Invalid(TxValidationResult::TX_BAD_SPECIAL, "bad-protx-operator-pubkey");
+        return {ValidationInvalidReason::TX_BAD_SPECIAL, "bad-protx-operator-pubkey"};
     }
     if (!scriptPayout.IsPayToPublicKeyHash() && !scriptPayout.IsPayToScriptHash()) {
         return {ValidationInvalidReason::TX_BAD_SPECIAL, "bad-protx-payee"};
@@ -121,7 +121,7 @@ maybe_error CProUpRegTx::IsTriviallyValid(bool is_bls_legacy_scheme) const
         return {ValidationInvalidReason::TX_BAD_SPECIAL, "bad-protx-key-null"};
     }
     if (pubKeyOperator.IsLegacy() != (nVersion == LEGACY_BLS_VERSION)) {
-        return state.Invalid(TxValidationResult::TX_BAD_SPECIAL, "bad-protx-operator-pubkey");
+        return {ValidationInvalidReason::TX_BAD_SPECIAL, "bad-protx-operator-pubkey"};
     }
     if (!scriptPayout.IsPayToPublicKeyHash() && !scriptPayout.IsPayToScriptHash()) {
         return {ValidationInvalidReason::TX_BAD_SPECIAL, "bad-protx-payee"};
