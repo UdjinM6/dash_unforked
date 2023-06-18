@@ -149,6 +149,10 @@ public:
             // unknown version, bail out early
             return;
         }
+        if (obj.nVersion != BASIC_BLS_VERSION && obj.nType == MnType::HighPerformance) {
+            // for HPMN should be only BASIC bls, bail out early
+            return;
+        }
         if (obj.nVersion == BASIC_BLS_VERSION) {
             READWRITE(
                 obj.nType);
@@ -159,7 +163,7 @@ public:
                 obj.scriptOperatorPayout,
                 obj.inputsHash
         );
-        if (obj.nVersion == BASIC_BLS_VERSION && obj.nType == MnType::HighPerformance) {
+        if (obj.nType == MnType::HighPerformance) {
             READWRITE(
                 obj.platformNodeID,
                 obj.platformP2PPort,
