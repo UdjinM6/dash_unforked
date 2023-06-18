@@ -991,11 +991,11 @@ void CDKGSession::SendCommitment(CDKGPendingMessages& pendingMessages)
 
     const bool is_bls_legacy = bls::bls_legacy_scheme.load();
     if (lieType == 3) {
-        std::vector<uint8_t> buf = qc.sig.ToByteVector();
+        std::vector<uint8_t> buf = qc.sig.ToByteVector(is_bls_legacy);
         buf[5]++;
         qc.sig.SetByteVector(buf, is_bls_legacy);
     } else if (lieType == 4) {
-        std::vector<uint8_t> buf = qc.quorumSig.ToByteVector();
+        std::vector<uint8_t> buf = qc.quorumSig.ToByteVector(is_bls_legacy);
         buf[5]++;
         qc.quorumSig.SetByteVector(buf, is_bls_legacy);
     }
