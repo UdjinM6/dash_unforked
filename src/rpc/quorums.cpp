@@ -886,26 +886,18 @@ static UniValue verifychainlock(const JSONRPCRequest& request)
     } else {
         nBlockHeight = ParseInt32V(request.params[2], "blockHeight");
         LOCK(cs_main);
-        if (nBlockHeight < 0) {
+        if (nBlockHeight < 0 || nBlockHeight > ::ChainActive().Height()) {
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
         }
-        if (nBlockHeight <= ::ChainActive().Height()) {
-            pIndex = ::ChainActive()[nBlockHeight];
-        }
+        pIndex = ::ChainActive()[nBlockHeight];
     }
 
+    CHECK_NONFATAL(pIndex != nullptr);
+
     CBLSSignature sig;
-    if (pIndex) {
-        bool use_legacy_signature = !llmq::utils::IsV19Active(pIndex);
-        if (!sig.SetHexStr(request.params[1].get_str(), use_legacy_signature)) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "invalid signature format");
-        }
-    } else {
-        if (!sig.SetHexStr(request.params[1].get_str(), false) &&
-                !sig.SetHexStr(request.params[1].get_str(), true)
-        ) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "invalid signature format");
-        }
+    bool use_legacy_signature = !llmq::utils::IsV19Active(pIndex);
+    if (!sig.SetHexStr(request.params[1].get_str(), use_legacy_signature)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "invalid signature format");
     }
 
     LLMQContext& llmq_ctx = EnsureLLMQContext(request.context);
@@ -961,7 +953,7 @@ static UniValue verifyislock(const JSONRPCRequest& request)
         signHeight = pindexMined->nHeight;
     }
 
-    CBlockIndex* pBlockIndex;
+    CBlockIndex* pBlockIndex{nullptr};
     {
         LOCK(cs_main);
         if (signHeight == -1) {
@@ -971,17 +963,12 @@ static UniValue verifyislock(const JSONRPCRequest& request)
         }
     }
 
+    CHECK_NONFATAL(pBlockIndex != nullptr);
+
     CBLSSignature sig;
-    if (pindexMined != nullptr) {
-        const bool use_bls_legacy = !llmq::utils::IsV19Active(pindexMined);
-        if (!sig.SetHexStr(request.params[2].get_str(), use_bls_legacy)) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "invalid signature format");
-        }
-    } else {
-        if (!sig.SetHexStr(request.params[2].get_str(), false) &&
-                !sig.SetHexStr(request.params[2].get_str(), true)) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "invalid signature format");
-        }
+    const bool use_bls_legacy = !llmq::utils::IsV19Active(pBlockIndex);
+    if (!sig.SetHexStr(request.params[2].get_str(), use_bls_legacy)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "invalid signature format");
     }
 
     LLMQContext& llmq_ctx = EnsureLLMQContext(request.context);
