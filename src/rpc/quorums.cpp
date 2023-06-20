@@ -886,18 +886,26 @@ static UniValue verifychainlock(const JSONRPCRequest& request)
     } else {
         nBlockHeight = ParseInt32V(request.params[2], "blockHeight");
         LOCK(cs_main);
-        if (nBlockHeight < 0 || nBlockHeight > ::ChainActive().Height()) {
+        if (nBlockHeight < 0) {
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
         }
-        pIndex = ::ChainActive()[nBlockHeight];
+        if (nBlockHeight <= ::ChainActive().Height()) {
+            pIndex = ::ChainActive()[nBlockHeight];
+        }
     }
 
-    CHECK_NONFATAL(pIndex != nullptr);
-
     CBLSSignature sig;
-    bool use_legacy_signature = !llmq::utils::IsV19Active(pIndex);
-    if (!sig.SetHexStr(request.params[1].get_str(), use_legacy_signature)) {
-        throw JSONRPCError(RPC_INVALID_PARAMETER, "invalid signature format");
+    if (pIndex) {
+        bool use_legacy_signature = !llmq::utils::IsV19Active(pIndex);
+        if (!sig.SetHexStr(request.params[1].get_str(), use_legacy_signature)) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "invalid signature format");
+        }
+    } else {
+        if (!sig.SetHexStr(request.params[1].get_str(), false) &&
+                !sig.SetHexStr(request.params[1].get_str(), true)
+        ) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "invalid signature format");
+        }
     }
 
     LLMQContext& llmq_ctx = EnsureLLMQContext(request.context);
