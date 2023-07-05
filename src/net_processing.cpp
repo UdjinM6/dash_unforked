@@ -1783,7 +1783,6 @@ bool PeerManagerImpl::AlreadyHave(const CInv& inv)
     {
     case MSG_TX:
     case MSG_DSTX:
-    case MSG_LEGACY_TXLOCK_REQUEST: // we treat legacy IX messages as TX messages
         {
             assert(recentRejects);
             if (m_chainman.ActiveChain().Tip()->GetBlockHash() != hashRecentRejectsChainTip)

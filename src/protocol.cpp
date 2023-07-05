@@ -312,7 +312,6 @@ const char* CInv::GetCommandInternal() const
         case MSG_TX:                            return NetMsgType::TX;
         case MSG_BLOCK:                         return NetMsgType::BLOCK;
         case MSG_FILTERED_BLOCK:                return NetMsgType::MERKLEBLOCK;
-        case MSG_LEGACY_TXLOCK_REQUEST:         return NetMsgType::LEGACYTXLOCKREQUEST;
         case MSG_CMPCT_BLOCK:                   return NetMsgType::CMPCTBLOCK;
         case MSG_SPORK:                         return NetMsgType::SPORK;
         case MSG_DSTX:                          return NetMsgType::DSTX;
