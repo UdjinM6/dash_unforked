@@ -304,7 +304,7 @@ bool CMasternodePayments::GetBlockTxOuts(int nBlockHeight, CAmount blockReward, 
 
 bool CMasternodePayments::IsTransactionValid(const CTransaction& txNew, int nBlockHeight, CAmount blockReward)
 {
-    if (!deterministicMNManager->IsDIP3Enforced(nBlockHeight)) {
+    if (!CDeterministicMNManager::IsDIP3Enforced(nBlockHeight)) {
         // can't verify historical blocks here
         return true;
     }

@@ -160,7 +160,7 @@ void CDKGSessionManager::UpdatedBlockTip(const CBlockIndex* pindexNew, bool fIni
 
     if (fInitialDownload)
         return;
-    if (!deterministicMNManager->IsDIP3Enforced(pindexNew->nHeight))
+    if (!CDeterministicMNManager::IsDIP3Enforced(pindexNew->nHeight))
         return;
     if (!IsQuorumDKGEnabled(spork_manager))
         return;

@@ -1121,16 +1121,7 @@ bool CDeterministicMNManager::IsProTxWithCollateral(const CTransactionRef& tx, u
 
 bool CDeterministicMNManager::IsDIP3Enforced(int nHeight)
 {
-    if (nHeight == -1) {
-        LOCK(cs);
-        if (tipIndex == nullptr) {
-            // Since EnforcementHeight can be set to block 1, we shouldn't just return false here
-            nHeight = 1;
-        } else {
-            nHeight = tipIndex->nHeight;
-        }
-    }
-
+    assert(nHeight >= 0);
     return nHeight >= Params().GetConsensus().DIP0003EnforcementHeight;
 }
 
@@ -1561,7 +1552,7 @@ bool CheckProRegTx(const CTransaction& tx, const CBlockIndex* pindexPrev, TxVali
             }
         }
 
-        if (!deterministicMNManager->IsDIP3Enforced(pindexPrev->nHeight)) {
+        if (!CDeterministicMNManager::IsDIP3Enforced(pindexPrev->nHeight)) {
             if (ptx.keyIDOwner != ptx.keyIDVoting) {
                 return state.Invalid(TxValidationResult::TX_BAD_SPECIAL, "bad-protx-key-not-same");
             }
@@ -1715,7 +1706,7 @@ bool CheckProUpRegTx(const CTransaction& tx, const CBlockIndex* pindexPrev, TxVa
             }
         }
 
-        if (!deterministicMNManager->IsDIP3Enforced(pindexPrev->nHeight)) {
+        if (!CDeterministicMNManager::IsDIP3Enforced(pindexPrev->nHeight)) {
             if (dmn->pdmnState->keyIDOwner != ptx.keyIDVoting) {
                 return state.Invalid(TxValidationResult::TX_BAD_SPECIAL, "bad-protx-key-not-same");
             }

@@ -146,7 +146,7 @@ BOOST_FIXTURE_TEST_CASE(block_reward_reallocation, TestChainBRRBeforeActivationS
     const auto& consensus_params = Params().GetConsensus();
     CScript coinbasePubKey = CScript() <<  ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
 
-    BOOST_ASSERT(deterministicMNManager->IsDIP3Enforced(WITH_LOCK(cs_main, return ::ChainActive().Height())));
+    BOOST_ASSERT(CDeterministicMNManager::IsDIP3Enforced(WITH_LOCK(cs_main, return ::ChainActive().Height())));
 
     // Register one MN
     CKey ownerKey;

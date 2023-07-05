@@ -166,7 +166,7 @@ bool CDKGSessionHandler::InitNewQuorum(const CBlockIndex* pQuorumBaseBlockIndex)
 {
     curSession = std::make_unique<CDKGSession>(params, blsWorker, dkgManager, dkgDebugManager, connman);
 
-    if (!deterministicMNManager->IsDIP3Enforced(pQuorumBaseBlockIndex->nHeight)) {
+    if (!CDeterministicMNManager::IsDIP3Enforced(pQuorumBaseBlockIndex->nHeight)) {
         return false;
     }
 

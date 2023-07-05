@@ -68,7 +68,7 @@ void CActiveMasternodeManager::Init(const CBlockIndex* pindex)
 
     if (!fMasternodeMode) return;
 
-    if (!deterministicMNManager->IsDIP3Enforced(pindex->nHeight)) return;
+    if (!CDeterministicMNManager::IsDIP3Enforced(pindex->nHeight)) return;
 
     // Check that our local network configuration is correct
     if (!fListen && Params().RequireRoutableExternalIP()) {
@@ -141,7 +141,7 @@ void CActiveMasternodeManager::UpdatedBlockTip(const CBlockIndex* pindexNew, con
 
     if (!fMasternodeMode) return;
 
-    if (!deterministicMNManager->IsDIP3Enforced(pindexNew->nHeight)) return;
+    if (!CDeterministicMNManager::IsDIP3Enforced(pindexNew->nHeight)) return;
 
     if (state == MasternodeState::READY) {
         auto oldMNList = deterministicMNManager->GetListForBlock(pindexNew->pprev);
