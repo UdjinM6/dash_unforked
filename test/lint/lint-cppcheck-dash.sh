@@ -72,7 +72,6 @@ FILES=$(git ls-files -- "src/batchedlogger.*" \
                         "src/governance/*.cpp" \
                         "src/governance/*.h" \
                         "src/hdchain.*" \
-                        "src/keepass.*" \
                         "src/llmq/*.cpp" \
                         "src/llmq/*.h" \
                         "src/masternode/*.cpp" \
@@ -81,6 +80,7 @@ FILES=$(git ls-files -- "src/batchedlogger.*" \
                         "src/netfulfilledman.*" \
                         "src/qt/governancelist.*" \
                         "src/qt/masternodelist.*" \
+                        "src/qt/trafficgraphdata.*" \
                         "src/rpc/coinjoin.cpp" \
                         "src/rpc/evo.cpp" \
                         "src/rpc/governance.cpp" \
@@ -90,12 +90,17 @@ FILES=$(git ls-files -- "src/batchedlogger.*" \
                         "src/saltedhasher.*" \
                         "src/stacktraces.*" \
                         "src/statsd_client.*" \
+                        "src/test/bip39_tests.cpp" \
                         "src/test/block_reward_reallocation_tests.cpp" \
                         "src/test/bls_tests.cpp" \
+                        "src/test/cachemap_tests.cpp" \
+                        "src/test/cachemultimap_tests.cpp" \
                         "src/test/dip0020opcodes_tests.cpp" \
-                        "src/test/dynamic_activation*.cpp" \
+                        "src/test/dynamic_activation_thresholds_tests.cpp" \
                         "src/test/evo*.cpp" \
                         "src/test/governance*.cpp" \
+                        "src/test/llmq_dkg_tests.cpp" \
+                        "src/test/specialtx_tests.cpp" \
                         "src/unordered_lru_cache.h")
 
 
