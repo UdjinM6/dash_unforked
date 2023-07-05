@@ -144,6 +144,14 @@ void CDKGSessionHandler::ProcessMessage(const CNode& pfrom, const std::string& m
     }
 }
 
+bool CDKGSessionHandler::AlreadyHave(const CInv& inv) const
+{
+    return  pendingContributions.HasSeen(inv.hash) ||
+            pendingComplaints.HasSeen(inv.hash) ||
+            pendingJustifications.HasSeen(inv.hash) ||
+            pendingPrematureCommitments.HasSeen(inv.hash);
+}
+
 void CDKGSessionHandler::StartThread()
 {
     if (phaseHandlerThread.joinable()) {

@@ -267,10 +267,7 @@ bool CDKGSessionManager::AlreadyHave(const CInv& inv) const
 
     for (const auto& p : dkgSessionHandlers) {
         const auto& dkgType = p.second;
-        if (dkgType.pendingContributions.HasSeen(inv.hash)
-            || dkgType.pendingComplaints.HasSeen(inv.hash)
-            || dkgType.pendingJustifications.HasSeen(inv.hash)
-            || dkgType.pendingPrematureCommitments.HasSeen(inv.hash)) {
+        if (dkgType.AlreadyHave(inv)) {
             return true;
         }
     }

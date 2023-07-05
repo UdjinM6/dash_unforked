@@ -141,6 +141,7 @@ public:
 
     void UpdatedBlockTip(const CBlockIndex *pindexNew);
     void ProcessMessage(const CNode& pfrom, const std::string& msg_type, CDataStream& vRecv);
+    bool AlreadyHave(const CInv& inv) const;
 
     void StartThread();
     void StopThread();
