@@ -39,7 +39,7 @@ static UniValue coinjoin(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_INTERNAL_ERROR, "Client-side mixing is not supported on masternodes");
 
     if (!CCoinJoinClientOptions::IsEnabled()) {
-        if (!gArgs.GetBoolArg("-enablecoinjoin", true)) {
+        if (!gArgs.GetBoolArg("-enablecoinjoin", DEFAULT_ENABLE_COINJOIN)) {
             // otherwise it's on by default, unless cmd line option says otherwise
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Mixing is disabled via -enablecoinjoin=0 command line option, remove it to enable mixing again");
         } else {

@@ -27,6 +27,7 @@ static constexpr int DEFAULT_COINJOIN_AMOUNT = 1000;
 static constexpr int DEFAULT_COINJOIN_DENOMS_GOAL = 50;
 static constexpr int DEFAULT_COINJOIN_DENOMS_HARDCAP = 300;
 
+static constexpr bool DEFAULT_ENABLE_COINJOIN = true;
 static constexpr bool DEFAULT_COINJOIN_AUTOSTART = false;
 static constexpr bool DEFAULT_COINJOIN_MULTISESSION = false;
 

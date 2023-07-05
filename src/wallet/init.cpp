@@ -91,7 +91,7 @@ void WalletInit::AddWalletOptions(ArgsManager& argsman) const
     argsman.AddArg("-mnemonicpassphrase=<text>", "User defined mnemonic passphrase for HD wallet (BIP39). Only has effect during wallet creation/first start (default: empty string)", ArgsManager::ALLOW_ANY | ArgsManager::SENSITIVE, OptionsCategory::WALLET_HD);
     argsman.AddArg("-usehd", strprintf("Use hierarchical deterministic key generation (HD) after BIP39/BIP44. Only has effect during wallet creation/first start (default: %u)", DEFAULT_USE_HD_WALLET), ArgsManager::ALLOW_ANY, OptionsCategory::WALLET_HD);
 
-    argsman.AddArg("-enablecoinjoin", strprintf("Enable use of CoinJoin for funds stored in this wallet (0-1, default: %u)", 0), ArgsManager::ALLOW_ANY, OptionsCategory::WALLET_COINJOIN);
+    argsman.AddArg("-enablecoinjoin", strprintf("Enable use of CoinJoin for funds stored in this wallet (0-1, default: %u)", DEFAULT_ENABLE_COINJOIN), ArgsManager::ALLOW_ANY, OptionsCategory::WALLET_COINJOIN);
     argsman.AddArg("-coinjoinamount=<n>", strprintf("Target CoinJoin balance (%u-%u, default: %u)", MIN_COINJOIN_AMOUNT, MAX_COINJOIN_AMOUNT, DEFAULT_COINJOIN_AMOUNT), ArgsManager::ALLOW_ANY, OptionsCategory::WALLET_COINJOIN);
     argsman.AddArg("-coinjoinautostart", strprintf("Start CoinJoin automatically (0-1, default: %u)", DEFAULT_COINJOIN_AUTOSTART), ArgsManager::ALLOW_ANY, OptionsCategory::WALLET_COINJOIN);
     argsman.AddArg("-coinjoindenomsgoal=<n>", strprintf("Try to create at least N inputs of each denominated amount (%u-%u, default: %u)", MIN_COINJOIN_DENOMS_GOAL, MAX_COINJOIN_DENOMS_GOAL, DEFAULT_COINJOIN_DENOMS_GOAL), ArgsManager::ALLOW_ANY, OptionsCategory::WALLET_COINJOIN);
@@ -201,7 +201,7 @@ void WalletInit::AutoLockMasternodeCollaterals() const
 
 void WalletInit::InitCoinJoinSettings() const
 {
-    CCoinJoinClientOptions::SetEnabled(!GetWallets().empty() ? gArgs.GetBoolArg("-enablecoinjoin", true) : false);
+    CCoinJoinClientOptions::SetEnabled(!GetWallets().empty() ? gArgs.GetBoolArg("-enablecoinjoin", DEFAULT_ENABLE_COINJOIN) : false);
     if (!CCoinJoinClientOptions::IsEnabled()) {
         return;
     }
