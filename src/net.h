@@ -152,11 +152,11 @@ public:
         CONNECTIONS_VERIFIED_OUT = (CONNECTIONS_VERIFIED | CONNECTIONS_OUT),
     };
 
-    enum SocketEventsMode {
-        SOCKETEVENTS_SELECT = 0,
-        SOCKETEVENTS_POLL = 1,
-        SOCKETEVENTS_EPOLL = 2,
-        SOCKETEVENTS_KQUEUE = 3,
+    enum class SocketEventsMode {
+        SELECT = 0,
+        POLL = 1,
+        EPOLL = 2,
+        KQUEUE = 3,
     };
 
     struct Options
@@ -182,7 +182,7 @@ public:
         bool m_use_addrman_outgoing = true;
         std::vector<std::string> m_specified_outgoing;
         std::vector<std::string> m_added_nodes;
-        SocketEventsMode socketEventsMode = SOCKETEVENTS_SELECT;
+        SocketEventsMode socketEventsMode = SocketEventsMode::SELECT;
         std::vector<bool> m_asmap;
     };
 

@@ -2592,18 +2592,18 @@ bool AppInitMain(const CoreContext& context, NodeContext& node, interfaces::Bloc
 
     std::string strSocketEventsMode = args.GetArg("-socketevents", DEFAULT_SOCKETEVENTS);
     if (strSocketEventsMode == "select") {
-        connOptions.socketEventsMode = CConnman::SOCKETEVENTS_SELECT;
+        connOptions.socketEventsMode = CConnman::SocketEventsMode::SELECT;
 #ifdef USE_POLL
     } else if (strSocketEventsMode == "poll") {
-        connOptions.socketEventsMode = CConnman::SOCKETEVENTS_POLL;
+        connOptions.socketEventsMode = CConnman::SocketEventsMode::POLL;
 #endif
 #ifdef USE_EPOLL
     } else if (strSocketEventsMode == "epoll") {
-        connOptions.socketEventsMode = CConnman::SOCKETEVENTS_EPOLL;
+        connOptions.socketEventsMode = CConnman::SocketEventsMode::EPOLL;
 #endif
 #ifdef USE_KQUEUE
     } else if (strSocketEventsMode == "kqueue") {
-        connOptions.socketEventsMode = CConnman::SOCKETEVENTS_KQUEUE;
+        connOptions.socketEventsMode = CConnman::SocketEventsMode::KQUEUE;
 #endif
     } else {
         return InitError(strprintf(_("Invalid -socketevents ('%s') specified. Only these modes are supported: %s"), strSocketEventsMode, GetSupportedSocketEventsStr()));

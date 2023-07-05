@@ -559,16 +559,16 @@ static UniValue getnetworkinfo(const JSONRPCRequest& request)
         obj.pushKV("outboundmnconnections",   (int)node.connman->GetNodeCount(CConnman::CONNECTIONS_VERIFIED_OUT));
         std::string strSocketEvents;
         switch (node.connman->GetSocketEventsMode()) {
-            case CConnman::SOCKETEVENTS_SELECT:
+            case CConnman::SocketEventsMode::SELECT:
                 strSocketEvents = "select";
                 break;
-            case CConnman::SOCKETEVENTS_POLL:
+            case CConnman::SocketEventsMode::POLL:
                 strSocketEvents = "poll";
                 break;
-            case CConnman::SOCKETEVENTS_EPOLL:
+            case CConnman::SocketEventsMode::EPOLL:
                 strSocketEvents = "epoll";
                 break;
-            case CConnman::SOCKETEVENTS_KQUEUE:
+            case CConnman::SocketEventsMode::KQUEUE:
                 strSocketEvents = "kqueue";
                 break;
             default:
