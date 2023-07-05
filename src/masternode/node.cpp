@@ -21,19 +21,19 @@ std::unique_ptr<CActiveMasternodeManager> activeMasternodeManager;
 std::string CActiveMasternodeManager::GetStateString() const
 {
     switch (state) {
-    case MASTERNODE_WAITING_FOR_PROTX:
+    case MasternodeState::WAITING_FOR_PROTX:
         return "WAITING_FOR_PROTX";
-    case MASTERNODE_POSE_BANNED:
+    case MasternodeState::POSE_BANNED:
         return "POSE_BANNED";
-    case MASTERNODE_REMOVED:
+    case MasternodeState::REMOVED:
         return "REMOVED";
-    case MASTERNODE_OPERATOR_KEY_CHANGED:
+    case MasternodeState::OPERATOR_KEY_CHANGED:
         return "OPERATOR_KEY_CHANGED";
-    case MASTERNODE_PROTX_IP_CHANGED:
+    case MasternodeState::PROTX_IP_CHANGED:
         return "PROTX_IP_CHANGED";
-    case MASTERNODE_READY:
+    case MasternodeState::READY:
         return "READY";
-    case MASTERNODE_ERROR:
+    case MasternodeState::ERROR:
         return "ERROR";
     default:
         return "UNKNOWN";
@@ -43,19 +43,19 @@ std::string CActiveMasternodeManager::GetStateString() const
 std::string CActiveMasternodeManager::GetStatus() const
 {
     switch (state) {
-    case MASTERNODE_WAITING_FOR_PROTX:
+    case MasternodeState::WAITING_FOR_PROTX:
         return "Waiting for ProTx to appear on-chain";
-    case MASTERNODE_POSE_BANNED:
+    case MasternodeState::POSE_BANNED:
         return "Masternode was PoSe banned";
-    case MASTERNODE_REMOVED:
+    case MasternodeState::REMOVED:
         return "Masternode removed from list";
-    case MASTERNODE_OPERATOR_KEY_CHANGED:
+    case MasternodeState::OPERATOR_KEY_CHANGED:
         return "Operator key changed or revoked";
-    case MASTERNODE_PROTX_IP_CHANGED:
+    case MasternodeState::PROTX_IP_CHANGED:
         return "IP address specified in ProTx changed";
-    case MASTERNODE_READY:
+    case MasternodeState::READY:
         return "Ready";
-    case MASTERNODE_ERROR:
+    case MasternodeState::ERROR:
         return "Error. " + strError;
     default:
         return "Unknown";
@@ -73,14 +73,14 @@ void CActiveMasternodeManager::Init(const CBlockIndex* pindex)
     // Check that our local network configuration is correct
     if (!fListen && Params().RequireRoutableExternalIP()) {
         // listen option is probably overwritten by something else, no good
-        state = MASTERNODE_ERROR;
+        state = MasternodeState::ERROR;
         strError = "Masternode must accept connections from outside. Make sure listen configuration option is not overwritten by some another parameter.";
         LogPrintf("CActiveMasternodeManager::Init -- ERROR: %s\n", strError);
         return;
     }
 
     if (!GetLocalAddress(activeMasternodeInfo.service)) {
-        state = MASTERNODE_ERROR;
+        state = MasternodeState::ERROR;
         return;
     }
 
@@ -94,9 +94,9 @@ void CActiveMasternodeManager::Init(const CBlockIndex* pindex)
 
     if (!mnList.IsMNValid(dmn->proTxHash)) {
         if (mnList.IsMNPoSeBanned(dmn->proTxHash)) {
-            state = MASTERNODE_POSE_BANNED;
+            state = MasternodeState::POSE_BANNED;
         } else {
-            state = MASTERNODE_REMOVED;
+            state = MasternodeState::REMOVED;
         }
         return;
     }
@@ -104,7 +104,7 @@ void CActiveMasternodeManager::Init(const CBlockIndex* pindex)
     LogPrintf("CActiveMasternodeManager::Init -- proTxHash=%s, proTx=%s\n", dmn->proTxHash.ToString(), dmn->ToString());
 
     if (activeMasternodeInfo.service != dmn->pdmnState->addr) {
-        state = MASTERNODE_ERROR;
+        state = MasternodeState::ERROR;
         strError = "Local address does not match the address from ProTx";
         LogPrintf("CActiveMasternodeManager::Init -- ERROR: %s\n", strError);
         return;
@@ -114,7 +114,7 @@ void CActiveMasternodeManager::Init(const CBlockIndex* pindex)
     LogPrintf("CActiveMasternodeManager::Init -- Checking inbound connection to '%s'\n", activeMasternodeInfo.service.ToString());
     std::unique_ptr<Sock> sock = CreateSock(activeMasternodeInfo.service);
     if (!sock) {
-        state = MASTERNODE_ERROR;
+        state = MasternodeState::ERROR;
         strError = "Could not create socket to connect to " + activeMasternodeInfo.service.ToString();
         LogPrintf("CActiveMasternodeManager::Init -- ERROR: %s\n", strError);
         return;
@@ -123,7 +123,7 @@ void CActiveMasternodeManager::Init(const CBlockIndex* pindex)
     sock->Reset();
 
     if (!fConnected && Params().RequireRoutableExternalIP()) {
-        state = MASTERNODE_ERROR;
+        state = MasternodeState::ERROR;
         strError = "Could not connect to " + activeMasternodeInfo.service.ToString();
         LogPrintf("CActiveMasternodeManager::Init -- ERROR: %s\n", strError);
         return;
@@ -132,7 +132,7 @@ void CActiveMasternodeManager::Init(const CBlockIndex* pindex)
     activeMasternodeInfo.proTxHash = dmn->proTxHash;
     activeMasternodeInfo.outpoint = dmn->collateralOutpoint;
     activeMasternodeInfo.legacy = dmn->pdmnState->nVersion == CProRegTx::LEGACY_BLS_VERSION;
-    state = MASTERNODE_READY;
+    state = MasternodeState::READY;
 }
 
 void CActiveMasternodeManager::UpdatedBlockTip(const CBlockIndex* pindexNew, const CBlockIndex* pindexFork, bool fInitialDownload)
@@ -143,12 +143,12 @@ void CActiveMasternodeManager::UpdatedBlockTip(const CBlockIndex* pindexNew, con
 
     if (!deterministicMNManager->IsDIP3Enforced(pindexNew->nHeight)) return;
 
-    if (state == MASTERNODE_READY) {
+    if (state == MasternodeState::READY) {
         auto oldMNList = deterministicMNManager->GetListForBlock(pindexNew->pprev);
         auto newMNList = deterministicMNManager->GetListForBlock(pindexNew);
         if (!newMNList.IsMNValid(activeMasternodeInfo.proTxHash)) {
             // MN disappeared from MN list
-            state = MASTERNODE_REMOVED;
+            state = MasternodeState::REMOVED;
             activeMasternodeInfo.proTxHash = uint256();
             activeMasternodeInfo.outpoint.SetNull();
             // MN might have reappeared in same block with a new ProTx
@@ -160,7 +160,7 @@ void CActiveMasternodeManager::UpdatedBlockTip(const CBlockIndex* pindexNew, con
         auto newDmn = newMNList.GetMN(activeMasternodeInfo.proTxHash);
         if (newDmn->pdmnState->pubKeyOperator != oldDmn->pdmnState->pubKeyOperator) {
             // MN operator key changed or revoked
-            state = MASTERNODE_OPERATOR_KEY_CHANGED;
+            state = MasternodeState::OPERATOR_KEY_CHANGED;
             activeMasternodeInfo.proTxHash = uint256();
             activeMasternodeInfo.outpoint.SetNull();
             // MN might have reappeared in same block with a new ProTx
@@ -170,7 +170,7 @@ void CActiveMasternodeManager::UpdatedBlockTip(const CBlockIndex* pindexNew, con
 
         if (newDmn->pdmnState->addr != oldDmn->pdmnState->addr) {
             // MN IP changed
-            state = MASTERNODE_PROTX_IP_CHANGED;
+            state = MasternodeState::PROTX_IP_CHANGED;
             activeMasternodeInfo.proTxHash = uint256();
             activeMasternodeInfo.outpoint.SetNull();
             Init(pindexNew);
