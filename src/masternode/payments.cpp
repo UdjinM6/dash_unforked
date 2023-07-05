@@ -283,7 +283,7 @@ bool CMasternodePayments::GetBlockTxOuts(int nBlockHeight, CAmount blockReward, 
     }
 
     CAmount operatorReward = 0;
-    CAmount masternodeReward = GetMasternodePayment(nBlockHeight, blockReward, Params().GetConsensus().BRRHeight);
+    CAmount masternodeReward = GetMasternodePayment(nBlockHeight, blockReward);
 
     if (dmnPayee->nOperatorReward != 0 && dmnPayee->pdmnState->scriptOperatorPayout != CScript()) {
         // This calculation might eventually turn out to result in 0 even if an operator reward percentage is given.
