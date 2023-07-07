@@ -336,6 +336,7 @@ public:
     inline void Unserialize(Stream& s) {
         obj.Unserialize(s, legacy);
     }
+    CBLSPublicKey Get() const { return obj; }
 };
 
 class CBLSSignature : public CBLSWrapper<bls::G2Element, BLS_CURVE_SIG_SIZE, CBLSSignature>
