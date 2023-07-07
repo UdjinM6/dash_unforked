@@ -363,7 +363,12 @@ bool CDKGSessionManager::GetPrematureCommitment(const uint256& hash, CDKGPrematu
 
 void CDKGSessionManager::WriteVerifiedVvecContribution(Consensus::LLMQType llmqType, const CBlockIndex* pQuorumBaseBlockIndex, const uint256& proTxHash, const BLSVerificationVectorPtr& vvec)
 {
-    db->Write(std::make_tuple(DB_VVEC, llmqType, pQuorumBaseBlockIndex->GetBlockHash(), proTxHash), *vvec);
+    CDataStream s(SER_DISK, CLIENT_VERSION);
+    WriteCompactSize(s, vvec->size());
+    for (auto& pubkey : *vvec) {
+        s << CBLSPublicKeyVersionWrapper(pubkey, false);
+    }
+    db->Write(std::make_tuple(DB_VVEC, llmqType, pQuorumBaseBlockIndex->GetBlockHash(), proTxHash), s);
 }
 
 void CDKGSessionManager::WriteVerifiedSkContribution(Consensus::LLMQType llmqType, const CBlockIndex* pQuorumBaseBlockIndex, const uint256& proTxHash, const CBLSSecretKey& skContribution)
@@ -393,11 +398,21 @@ bool CDKGSessionManager::GetVerifiedContributions(Consensus::LLMQType llmqType, 
             ContributionsCacheKey cacheKey = {llmqType, pQuorumBaseBlockIndex->GetBlockHash(), proTxHash};
             auto it = contributionsCache.find(cacheKey);
             if (it == contributionsCache.end()) {
-                auto vvecPtr = std::make_shared<BLSVerificationVector>();
-                CBLSSecretKey skContribution;
-                if (!db->Read(std::make_tuple(DB_VVEC, llmqType, pQuorumBaseBlockIndex->GetBlockHash(), proTxHash), *vvecPtr)) {
+                CDataStream s(SER_DISK, CLIENT_VERSION);
+                if (!db->ReadDataStream(std::make_tuple(DB_VVEC, llmqType, pQuorumBaseBlockIndex->GetBlockHash(), proTxHash), s)) {
                     return false;
                 }
+                size_t vvec_size = ReadCompactSize(s);
+                CBLSPublicKey pubkey;
+                CBLSPublicKeyVersionWrapper pubkey_wrapped(pubkey, false);
+                BLSVerificationVector qv;
+                for ([[maybe_unused]] size_t _ : irange::range(vvec_size)) {
+                    s >> pubkey_wrapped;
+                    qv.emplace_back(pubkey_wrapped.Get());
+                }
+                auto vvecPtr = std::make_shared<BLSVerificationVector>(std::move(qv));
+
+                CBLSSecretKey skContribution;
                 db->Read(std::make_tuple(DB_SKCONTRIB, llmqType, pQuorumBaseBlockIndex->GetBlockHash(), proTxHash), skContribution);
 
                 it = contributionsCache.emplace(cacheKey, ContributionsCacheEntry{GetTimeMillis(), vvecPtr, skContribution}).first;
