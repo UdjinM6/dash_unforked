@@ -156,7 +156,7 @@ int CQuorum::GetMemberIndex(const uint256& proTxHash) const
     return -1;
 }
 
-void CQuorum::WriteContributions(CEvoDB& evoDb) const
+void CQuorum::WriteContributions(const std::unique_ptr<CDBWrapper>& db) const
 {
     uint256 dbKey = MakeQuorumKey(*this);
 
@@ -167,19 +167,19 @@ void CQuorum::WriteContributions(CEvoDB& evoDb) const
         for (auto& pubkey : *quorumVvec) {
             s << CBLSPublicKeyVersionWrapper(pubkey, false);
         }
-        evoDb.GetRawDB().Write(std::make_pair(DB_QUORUM_QUORUM_VVEC, dbKey), s);
+        db->Write(std::make_pair(DB_QUORUM_QUORUM_VVEC, dbKey), s);
     }
     if (skShare.IsValid()) {
-        evoDb.GetRawDB().Write(std::make_pair(DB_QUORUM_SK_SHARE, dbKey), skShare);
+        db->Write(std::make_pair(DB_QUORUM_SK_SHARE, dbKey), skShare);
     }
 }
 
-bool CQuorum::ReadContributions(CEvoDB& evoDb)
+bool CQuorum::ReadContributions(const std::unique_ptr<CDBWrapper>& db)
 {
     uint256 dbKey = MakeQuorumKey(*this);
     CDataStream s(SER_DISK, CLIENT_VERSION);
 
-    if (!evoDb.GetRawDB().ReadDataStream(std::make_pair(DB_QUORUM_QUORUM_VVEC, dbKey), s)) {
+    if (!db->ReadDataStream(std::make_pair(DB_QUORUM_QUORUM_VVEC, dbKey), s)) {
         return false;
     }
 
@@ -196,16 +196,16 @@ bool CQuorum::ReadContributions(CEvoDB& evoDb)
     quorumVvec = std::make_shared<BLSVerificationVector>(std::move(qv));
     // We ignore the return value here as it is ok if this fails. If it fails, it usually means that we are not a
     // member of the quorum but observed the whole DKG process to have the quorum verification vector.
-    evoDb.GetRawDB().Read(std::make_pair(DB_QUORUM_SK_SHARE, dbKey), skShare);
+    db->Read(std::make_pair(DB_QUORUM_SK_SHARE, dbKey), skShare);
 
     return true;
 }
 
 CQuorumManager::CQuorumManager(CEvoDB& _evoDb, CConnman& _connman, CBLSWorker& _blsWorker, CQuorumBlockProcessor& _quorumBlockProcessor,
                                CDKGSessionManager& _dkgManager, const std::unique_ptr<CMasternodeSync>& mn_sync,
-                               const std::unique_ptr<PeerManager>& peerman) :
-    m_evoDb(_evoDb),
+                               const std::unique_ptr<PeerManager>& peerman, bool unit_tests, bool wipe) :
     connman(_connman),
+    db(std::make_unique<CDBWrapper>(unit_tests ? "" : (GetDataDir() / "llmq/quorumdb"), 1 << 20, unit_tests, wipe)),
     blsWorker(_blsWorker),
     dkgManager(_dkgManager),
     quorumBlockProcessor(_quorumBlockProcessor),
@@ -216,6 +216,7 @@ CQuorumManager::CQuorumManager(CEvoDB& _evoDb, CConnman& _connman, CBLSWorker& _
     utils::InitQuorumsCache(scanQuorumsCache);
 
     quorumThreadInterrupt.reset();
+    EraseOldQuorumDB(_evoDb);
 }
 
 void CQuorumManager::Start()
@@ -397,11 +398,11 @@ CQuorumPtr CQuorumManager::BuildQuorumFromCommitment(const Consensus::LLMQType l
     quorum->Init(std::move(qc), pQuorumBaseBlockIndex, minedBlockHash, members);
 
     bool hasValidVvec = false;
-    if (quorum->ReadContributions(m_evoDb)) {
+    if (WITH_LOCK(cs_db, return quorum->ReadContributions(db))) {
         hasValidVvec = true;
     } else {
         if (BuildQuorumContributions(quorum->qc, quorum)) {
-            quorum->WriteContributions(m_evoDb);
+            WITH_LOCK(cs_db, quorum->WriteContributions(db));
             hasValidVvec = true;
         } else {
             LogPrint(BCLog::LLMQ, "CQuorumManager::%s -- llmqType[%d] quorumIndex[%d] quorum.ReadContributions and BuildQuorumContributions for quorumHash[%s] failed\n", __func__, ToUnderlying(llmqType), quorum->qc->quorumIndex, quorum->qc->quorumHash.ToString());
@@ -823,7 +824,7 @@ void CQuorumManager::ProcessMessage(CNode& pfrom, const std::string& msg_type, C
                 return;
             }
         }
-        pQuorum->WriteContributions(m_evoDb);
+        WITH_LOCK(cs_db, pQuorum->WriteContributions(db));
         return;
     }
 }
@@ -1030,7 +1031,25 @@ void CQuorumManager::CleanupOldQuorumData(const CBlockIndex* pIndex) const
         }
     }
 
-    DataCleanupHelper(m_evoDb.GetRawDB(), dbKeys);
+    LOCK(cs_db);
+    DataCleanupHelper(*db, dbKeys);
+
+    LogPrint(BCLog::LLMQ, "CQuorumManager::%d -- done\n", __func__);
+}
+
+void CQuorumManager::EraseOldQuorumDB(CEvoDB& evoDb) const
+{
+    // NOTE: We do not migrate old data here because we have no idea
+    // which bls scheme was used to store it originally. This is ok
+    // cause the data can be re-requested from other nodes, see
+    // TriggerQuorumDataRecoveryThreads.
+
+    if (WITH_LOCK(cs_db, return !db->IsEmpty())) return;
+
+    LogPrint(BCLog::LLMQ, "CQuorumManager::%d -- start\n", __func__);
+
+    DataCleanupHelper(evoDb.GetRawDB(), {});
+    evoDb.CommitRootTransaction();
 
     LogPrint(BCLog::LLMQ, "CQuorumManager::%d -- done\n", __func__);
 }
