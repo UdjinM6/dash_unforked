@@ -402,6 +402,74 @@ class WalletTest(BitcoinTestFramework):
         self.nodes[0].generate(1)
         self.sync_all(self.nodes[0:3])
 
+        # send with explicit dash/kb fee
+        self.log.info("test explicit fee (sendtoaddress as dash/kb)")
+        self.nodes[0].generate(1)
+        self.sync_all(self.nodes[0:3])
+        prebalance = self.nodes[2].getbalance()
+        assert prebalance > 2
+        address = self.nodes[1].getnewaddress()
+        # Throw if no conf_target provided
+        assert_raises_rpc_error(-8, "Selected estimate_mode requires a fee rate",
+            self.nodes[2].sendtoaddress,
+            address=address,
+            amount=1.0,
+            estimate_mode='dash/Kb')
+        # Throw if negative feerate
+        assert_raises_rpc_error(-3, "Amount out of range",
+            self.nodes[2].sendtoaddress,
+            address=address,
+            amount=1.0,
+            conf_target=-1,
+            estimate_mode='dash/kb')
+        txid = self.nodes[2].sendtoaddress(
+            address=address,
+            amount=1.0,
+            conf_target=0.00002500,
+            estimate_mode='dash/kb',
+        )
+        tx_size = self.get_vsize(self.nodes[2].gettransaction(txid)['hex'])
+        self.sync_all(self.nodes[0:3])
+        self.nodes[0].generate(1)
+        self.sync_all(self.nodes[0:3])
+        postbalance = self.nodes[2].getbalance()
+        fee = prebalance - postbalance - Decimal('1')
+        assert_fee_amount(fee, tx_size, Decimal('0.00002500'))
+
+        # send with explicit duff/b fee
+        self.sync_all(self.nodes[0:3])
+        self.log.info("test explicit fee (sendtoaddress as duff/b)")
+        self.nodes[0].generate(1)
+        prebalance = self.nodes[2].getbalance()
+        assert prebalance > 2
+        address = self.nodes[1].getnewaddress()
+        # Throw if no conf_target provided
+        assert_raises_rpc_error(-8, "Selected estimate_mode requires a fee rate",
+            self.nodes[2].sendtoaddress,
+            address=address,
+            amount=1.0,
+            estimate_mode='duff/b')
+        # Throw if negative feerate
+        assert_raises_rpc_error(-3, "Amount out of range",
+            self.nodes[2].sendtoaddress,
+            address=address,
+            amount=1.0,
+            conf_target=-1,
+            estimate_mode='duff/b')
+        txid = self.nodes[2].sendtoaddress(
+            address=address,
+            amount=1.0,
+            conf_target=2,
+            estimate_mode='duff/B',
+        )
+        tx_size = self.get_vsize(self.nodes[2].gettransaction(txid)['hex'])
+        self.sync_all(self.nodes[0:3])
+        self.nodes[0].generate(1)
+        self.sync_all(self.nodes[0:3])
+        postbalance = self.nodes[2].getbalance()
+        fee = prebalance - postbalance - Decimal('1')
+        assert_fee_amount(fee, tx_size, Decimal('0.00002000'))
+
         # 2. Import address from node2 to node1
         self.nodes[1].importaddress(address_to_import)
 
