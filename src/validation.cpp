@@ -981,6 +981,8 @@ static bool AcceptToMemoryPoolWithTime(const CChainParams& chainparams, CTxMemPo
                         const CAmount nAbsurdFee, bool test_accept) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     std::vector<COutPoint> coins_to_uncache;
+    // Let Asset Unlock tx into mempool ignoring all the limits
+    bypass_limits = bypass_limits || (tx->nVersion == 3 && tx->nType == TRANSACTION_ASSET_UNLOCK);
     MemPoolAccept::ATMPArgs args { chainparams, state, nAcceptTime, bypass_limits, nAbsurdFee, coins_to_uncache, test_accept };
 
     assert(std::addressof(::ChainstateActive()) == std::addressof(active_chainstate));

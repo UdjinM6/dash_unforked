@@ -300,11 +300,13 @@ class AssetLocksTest(DashTestFramework):
         asset_unlock_tx_too_late = self.create_assetunlock(103, COIN, pubkey)
         asset_unlock_tx_too_big_fee = self.create_assetunlock(104, COIN, pubkey, fee=int(Decimal("0.1") * COIN))
         asset_unlock_tx_zero_fee = self.create_assetunlock(105, COIN, pubkey, fee=0)
+        asset_unlock_tx_low_fee = self.create_assetunlock(106, COIN, pubkey, fee=1)
         asset_unlock_tx_duplicate_index = copy.deepcopy(asset_unlock_tx)
         asset_unlock_tx_duplicate_index.vout[0].nValue += COIN
         too_late_height = node.getblock(node.getbestblockhash())["height"] + 48
 
         self.check_mempool_result(tx=asset_unlock_tx, result_expected={'allowed': True})
+        self.check_mempool_result(tx=asset_unlock_tx_low_fee, result_expected={'allowed': True})
         self.check_mempool_result(tx=asset_unlock_tx_too_big_fee,
                 result_expected={'allowed': False, 'reject-reason' : 'absurdly-high-fee'})
         self.check_mempool_result(tx=asset_unlock_tx_zero_fee,
