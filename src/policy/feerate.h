@@ -20,7 +20,7 @@ enum class FeeEstimateMode {
     ECONOMICAL,   //!< Force estimateSmartFee to use non-conservative estimates
     CONSERVATIVE, //!< Force estimateSmartFee to use conservative estimates
     DASH_KB,      //!< Use explicit DASH/kB fee given in coin control
-    DUFFS_B,      //!< Use explicit duff/B fee given in coin control
+    DUFF_B,       //!< Use explicit duff/B fee given in coin control
 };
 
 /**

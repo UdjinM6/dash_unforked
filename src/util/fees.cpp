@@ -41,7 +41,7 @@ const std::vector<std::pair<std::string, FeeEstimateMode>>& FeeModeMap()
         {"economical", FeeEstimateMode::ECONOMICAL},
         {"conservative", FeeEstimateMode::CONSERVATIVE},
         {(CURRENCY_UNIT + "/kB"), FeeEstimateMode::DASH_KB},
-        {(CURRENCY_ATOM + "/B"), FeeEstimateMode::DUFFS_B},
+        {(CURRENCY_ATOM + "/B"), FeeEstimateMode::DUFF_B},
     };
     return FEE_MODES;
 }
