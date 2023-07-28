@@ -27,6 +27,7 @@ class DIP3Test(BitcoinTestFramework):
         self.extra_args = ["-budgetparams=10:10:10"]
         self.extra_args += ["-sporkkey=cP4EKFyJsHT39LDqgdcB43Y3YXjNyjb5Fuas1GQSeAtjnZWmZEQK"]
         self.extra_args += ["-dip3params=135:150"]
+        self.extra_args += ["-debugexclude=bench"]
 
 
     def skip_test_if_missing_module(self):

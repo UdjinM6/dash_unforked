@@ -49,7 +49,7 @@ blocks_in_one_day = 576
 
 class AssetLocksTest(DashTestFramework):
     def set_test_params(self):
-        self.set_dash_test_params(5, 3)
+        self.set_dash_test_params(5, 3, extra_args=[["-debugexclude=bench"]] * 5)
 
     def skip_test_if_missing_module(self):
         self.skip_if_no_wallet()

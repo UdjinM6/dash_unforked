@@ -46,7 +46,7 @@ class TestP2PConn(P2PInterface):
 
 class LLMQHPMNTest(DashTestFramework):
     def set_test_params(self):
-        self.set_dash_test_params(5, 4, fast_dip3_enforcement=True, hpmn_count=7)
+        self.set_dash_test_params(5, 4, extra_args=[["-debugexclude=bench"]] * 5, fast_dip3_enforcement=True, hpmn_count=7)
         self.set_dash_llmq_test_params(4, 4)
 
     def run_test(self):

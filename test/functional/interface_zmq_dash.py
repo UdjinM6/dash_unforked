@@ -107,7 +107,7 @@ class DashZMQTest (DashTestFramework):
         node0_extra_args.append("-whitelist=127.0.0.1")
         node0_extra_args.append("-watchquorums")  # have to watch quorums to receive recsigs and trigger zmq
 
-        extra_args = [[]] * 5
+        extra_args = [["-debugexclude=bench"]] * 5
         extra_args[0] = node0_extra_args
         self.set_dash_test_params(5, 4, fast_dip3_enforcement=True, extra_args=extra_args)
         self.set_dash_llmq_test_params(4, 4)
