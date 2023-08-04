@@ -12,45 +12,35 @@ CRangesSet::Range::Range(uint64_t begin, uint64_t end) :
 {
 }
 
-bool CRangesSet::Add(uint64_t value) {
-    auto ret = ranges.insert({value, value+ 1});
+bool CRangesSet::Add(uint64_t value)
+{
+    if (Contains(value)) return false;
 
-    // Check if there's already range that starts from `value`
-    if (ret.second == false) return false;
+    auto it = ranges.lower_bound({value, value});
+    Range new_range{value, value + 1};
 
-    if (ret.first != ranges.begin()) {
-        auto prev = ret.first;
+    if (it != ranges.begin()) {
+        auto prev = it;
         --prev;
-
-        // It is already included - remove freshly inserted as a duplicate
-        if (prev->end > value) {
-            ranges.erase(ret.first);
-            return false;
-        }
-
         if (prev->end == value) {
-            Range replacement{prev->begin, value + 1};
-            ranges.erase(ret.first);
-            ranges.erase(prev);
-            ret = ranges.insert(replacement);
-            assert(ret.second);
+            new_range = {prev->begin, new_range.end};
+            it = ranges.erase(prev);
         }
     }
-    auto next = ret.first;
-    ++next;
+    const auto next = it;
     if (next != ranges.end()) {
         if (next->begin == value + 1) {
-            Range replacement{ret.first->begin, next->end};
-            ranges.erase(ret.first);
-            ranges.erase(next);
-            ret = ranges.insert(replacement);
-            assert(ret.second);
+            new_range = {new_range.begin, next->end};
+            it = ranges.erase(next);
         }
     }
+    const auto ret = ranges.insert(new_range);
+    assert(ret.second);
     return true;
 }
 
-bool CRangesSet::Remove(uint64_t value) {
+bool CRangesSet::Remove(uint64_t value)
+{
     if (!Contains(value)) return false;
 
     // If element is in CRangesSet, there's possible 2 cases:
@@ -62,7 +52,8 @@ bool CRangesSet::Remove(uint64_t value) {
         Range replacement{value + 1, it->end};
         ranges.erase(it);
         if (replacement.begin != replacement.end) {
-            ranges.insert(replacement);
+            const auto ret = ranges.insert(replacement);
+            assert(ret.second);
         }
         return true;
     }
@@ -74,21 +65,23 @@ bool CRangesSet::Remove(uint64_t value) {
     Range current = *prev;
     ranges.erase(prev);
     if (current.begin != value) {
-        auto ret = ranges.insert({current.begin, value});
-        if (!ret.second) throw "something wrong";
+        const auto ret = ranges.insert({current.begin, value});
+        assert(ret.second);
     }
     if (value + 1 != current.end) {
-        auto ret = ranges.insert({value + 1, current.end});
-        if (!ret.second) throw "something wrong";
+        const auto ret = ranges.insert({value + 1, current.end});
+        assert(ret.second);
     }
     return true;
 }
 
-bool CRangesSet::IsEmpty() const noexcept {
+bool CRangesSet::IsEmpty() const noexcept
+{
     return ranges.empty();
 }
 
-size_t CRangesSet::Size() const noexcept {
+size_t CRangesSet::Size() const noexcept
+{
     size_t result{0};
     for (auto i : ranges) {
         result += i.end - i.begin;
@@ -96,7 +89,8 @@ size_t CRangesSet::Size() const noexcept {
     return result;
 }
 
-bool CRangesSet::Contains(uint64_t value) const noexcept {
+bool CRangesSet::Contains(uint64_t value) const noexcept
+{
     const auto it = ranges.lower_bound({value, value});
     if (it != ranges.end() && it->begin == value) return true;
     if (it == ranges.begin()) return false;

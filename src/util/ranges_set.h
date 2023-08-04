@@ -5,6 +5,8 @@
 #ifndef BITCOIN_UTIL_RANGES_SET_H
 #define BITCOIN_UTIL_RANGES_SET_H
 
+#include <hash.h>
+#include <saltedhasher.h>
 #include <serialize.h>
 #include <set>
 
@@ -24,7 +26,7 @@ class CRangesSet
         Range(uint64_t begin, uint64_t end);
         bool operator<(const Range& other) const
         {
-            return begin < other.begin;
+            return begin < other.begin || (begin == other.begin && end < other.end);
         }
 
         SERIALIZE_METHODS(Range, obj)
@@ -46,24 +48,24 @@ public:
     /**
      * this function returns true if `value` exists in the datastructure
      */
-    bool Contains(uint64_t value) const noexcept;
+    [[nodiscard]] bool Contains(uint64_t value) const noexcept;
 
     /**
      * this function removes `value` from the datastructure.
      * it returns `false` if element didn't existed or removing failed by any reason
      */
-    bool Remove(uint64_t value);
+    [[nodiscard]] bool Remove(uint64_t value);
 
     /**
      * Size() works with complexity O(N) times, avoid calling it without a good reason
      * Instead prefer to use IsEmpty()
      */
-    size_t Size() const noexcept;
+    [[nodiscard]] size_t Size() const noexcept;
 
     /**
      * IsEmpty() returns true if there's no any elements added
      */
-    bool IsEmpty() const noexcept;
+    [[nodiscard]] bool IsEmpty() const noexcept;
 
     SERIALIZE_METHODS(CRangesSet, obj)
     {
