@@ -152,8 +152,8 @@ void CDKGSessionHandler::StartThread()
         throw std::runtime_error("Tried to start an already started CDKGSessionHandler thread.");
     }
 
-    std::string threadName = strprintf("llmq-%d-%d", ToUnderlying(params.type), quorumIndex);
-    phaseHandlerThread = std::thread(util::TraceThread, threadName.c_str(), [this] { PhaseHandlerThread(); });
+    m_thread_name = strprintf("llmq-%d-%d", ToUnderlying(params.type), quorumIndex);
+    phaseHandlerThread = std::thread(util::TraceThread, m_thread_name.c_str(), [this] { PhaseHandlerThread(); });
 }
 
 void CDKGSessionHandler::StopThread()
