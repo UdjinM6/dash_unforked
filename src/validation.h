@@ -207,7 +207,7 @@ double ConvertBitsToDouble(unsigned int nBits);
  * When pindex points to a genesis block GetBlockSubsidy() returns a pre-calculated value.
  * For other blocks it calls GetBlockSubsidyInner() using nBits and nHeight of a pindex->pprev block.
  */
-CAmount GetBlockSubsidyInner(int nPrevBits, int nPrevHeight, const Consensus::Params& consensusParams, bool fMNRewardReallocated, bool fSuperblockPartOnly = false);
+CAmount GetBlockSubsidyInner(int nPrevBits, int nPrevHeight, const Consensus::Params& consensusParams, bool fV20Active, bool fMNRewardReallocated, bool fSuperblockPartOnly = false);
 CAmount GetBlockSubsidy(const CBlockIndex* const pindex, const Consensus::Params& consensusParams);
 /** nReallocActivationHeight refers to BRR (Block Reward Reallocation) activation height. */
 /** fMNRewardReallocated refers to Masternode Reward Location Reallocation activation. */

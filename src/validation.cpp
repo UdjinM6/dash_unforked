@@ -1119,7 +1119,7 @@ NOTE:   unlike bitcoin we are using PREVIOUS block height here,
         might be a good idea to change this to use prev bits
         but current height to avoid confusion.
 */
-CAmount GetBlockSubsidyInner(int nPrevBits, int nPrevHeight, const Consensus::Params& consensusParams, bool fMNRewardReallocated, bool fSuperblockPartOnly)
+CAmount GetBlockSubsidyInner(int nPrevBits, int nPrevHeight, const Consensus::Params& consensusParams, bool fV20Active, bool fMNRewardReallocated, bool fSuperblockPartOnly)
 {
     double dDiff;
     CAmount nSubsidyBase;
@@ -1140,9 +1140,15 @@ CAmount GetBlockSubsidyInner(int nPrevBits, int nPrevHeight, const Consensus::Pa
     } else if (nPrevHeight < 17000 || (dDiff <= 75 && nPrevHeight < 24000)) {
         // CPU mining era
         // 11111/(((x+51)/6)^2)
-        nSubsidyBase = (11111.0 / (pow((dDiff+51.0)/6.0,2.0)));
-        if(nSubsidyBase > 500) nSubsidyBase = 500;
-        else if(nSubsidyBase < 25) nSubsidyBase = 25;
+        nSubsidyBase = (11111.0 / (pow((dDiff + 51.0) / 6.0, 2.0)));
+        if (nSubsidyBase > 500) nSubsidyBase = 500;
+        else if (nSubsidyBase < 25) nSubsidyBase = 25;
+    } else if (fV20Active) {
+        // Starting from V20 Activation, subsidybase should be stable.
+        // Currently, nSubsidyBase calculate relies on difficulty.
+        // Once Platform is live, it must constantly get blocks difficulty in order to calculate platformReward.
+        // This can not be continued so we set the nSubsidyBase to a fixed value.
+        nSubsidyBase = 5;
     } else {
         // GPU/ASIC mining era
         // 2222222/(((x+2600)/9)^2)
@@ -1177,7 +1183,7 @@ CAmount GetBlockSubsidyInner(int nPrevBits, int nPrevHeight, const Consensus::Pa
 CAmount GetBlockSubsidy(const CBlockIndex* const pindex, const Consensus::Params& consensusParams)
 {
     if (pindex->pprev == nullptr) return Params().GenesisBlock().vtx[0]->GetValueOut();
-    return GetBlockSubsidyInner(pindex->pprev->nBits, pindex->pprev->nHeight, consensusParams, llmq::utils::IsMNRewardReallocationActive(pindex->pprev));
+    return GetBlockSubsidyInner(pindex->pprev->nBits, pindex->pprev->nHeight, consensusParams, llmq::utils::IsV20Active(pindex->pprev), llmq::utils::IsMNRewardReallocationActive(pindex->pprev));
 }
 
 CAmount GetMasternodePayment(int nHeight, CAmount blockValue, int nReallocActivationHeight, bool fMNRewardReallocated)
