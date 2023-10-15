@@ -31,9 +31,14 @@
     const CBlockIndex* pindex = WITH_LOCK(cs_main, return ::ChainActive()[nBlockHeight - 1]);
     bool fMNRewardReallocated =  llmq::utils::IsMNRewardReallocationActive(pindex);
 
-    CAmount masternodeReward = GetMasternodePayment(nBlockHeight, blockSubsidy, Params().GetConsensus().BRRHeight, fMNRewardReallocated);
+    CAmount masternodeReward = GetMasternodePayment(nBlockHeight, blockSubsidy + feeReward, Params().GetConsensus().BRRHeight, fMNRewardReallocated);
     if (fMNRewardReallocated) {
-        const CAmount platformReward = MasternodePayments::PlatformShare(masternodeReward);
+        CAmount masternodeSubsidyReward = GetMasternodePayment(nBlockHeight, blockSubsidy, Params().GetConsensus().BRRHeight, fMNRewardReallocated);
+        // TODO remove this when we re-organize testnet
+        if (Params().NetworkIDString() == CBaseChainParams::TESTNET) {
+            masternodeSubsidyReward = masternodeReward;
+        }
+        const CAmount platformReward = MasternodePayments::PlatformShare(masternodeSubsidyReward);
         masternodeReward -= platformReward;
 
         assert(MoneyRange(masternodeReward));
@@ -41,8 +46,6 @@
         LogPrint(BCLog::MNPAYMENTS, "CMasternodePayments::%s -- MN reward %lld reallocated to credit pool\n", __func__, platformReward);
         voutMasternodePaymentsRet.emplace_back(platformReward, CScript() << OP_RETURN);
     }
-    CAmount masternodeFeeReward = GetMasternodePayment(nBlockHeight, feeReward, Params().GetConsensus().BRRHeight, fMNRewardReallocated);
-    masternodeReward += masternodeFeeReward;
 
     auto dmnPayee = deterministicMNManager->GetListForBlock(pindex).GetMNPayee(pindex);
     if (!dmnPayee) {

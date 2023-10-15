@@ -194,8 +194,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     // NOTE: unlike in bitcoin, we need to pass PREVIOUS block height here
     bool fMNRewardReallocated = llmq::utils::IsMNRewardReallocationActive(pindexPrev);
     CAmount blockSubsidy = GetBlockSubsidyInner(pindexPrev->nBits, pindexPrev->nHeight, Params().GetConsensus(), fMNRewardReallocated, /*fSuperblockPartOnly=*/ false);
-    CAmount feeReward = nFees;
-    CAmount blockReward = blockSubsidy + feeReward;
+    CAmount blockReward = blockSubsidy + nFees;
 
     // Compute regular coinbase transaction.
     coinbaseTx.vout[0].nValue = blockReward;
@@ -252,7 +251,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 
     // Update coinbase transaction with additional info about masternode and governance payments,
     // get some info back to pass to getblocktemplate
-    MasternodePayments::FillBlockPayments(spork_manager, governance_manager, coinbaseTx, nHeight, blockSubsidy, feeReward, pblocktemplate->voutMasternodePayments, pblocktemplate->voutSuperblockPayments);
+    MasternodePayments::FillBlockPayments(spork_manager, governance_manager, coinbaseTx, nHeight, blockSubsidy, nFees, pblocktemplate->voutMasternodePayments, pblocktemplate->voutSuperblockPayments);
 
     pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
     pblocktemplate->vTxFees[0] = -nFees;
