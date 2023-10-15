@@ -322,6 +322,7 @@ BITCOIN_CORE_H = \
   util/system.h \
   util/asmap.h \
   util/getuniquepath.h \
+  util/lazy_optional.h \
   util/macros.h \
   util/message.h \
   util/moneystr.h \
