@@ -46,6 +46,7 @@
 #include <util/strencodings.h>
 #include <util/translation.h>
 #include <util/system.h>
+#include <util/lazy_optional.h>
 #include <validationinterface.h>
 #include <warnings.h>
 
@@ -3566,13 +3567,13 @@ void CChainState::ResetBlockFailureFlags(CBlockIndex *pindex) {
     }
 }
 
-CBlockIndex* BlockManager::AddToBlockIndex(const CBlockHeader& block, enum BlockStatus nStatus)
+CBlockIndex* BlockManager::AddToBlockIndex(const CBlockHeader& block, std::optional<uint256> cached_hash, enum BlockStatus nStatus)
 {
     assert(!(nStatus & BLOCK_FAILED_MASK)); // no failed blocks allowed
     AssertLockHeld(cs_main);
 
     // Check for duplicate
-    uint256 hash = block.GetHash();
+    uint256 hash = lazy_value_or(cached_hash, [&block](){ return block.GetHash(); });
     BlockMap::iterator it = m_block_index.find(hash);
     if (it != m_block_index.end())
         return it->second;
@@ -3737,16 +3738,18 @@ static bool FindUndoPos(BlockValidationState &state, int nFile, FlatFilePos &pos
     return true;
 }
 
-static bool CheckBlockHeader(const CBlockHeader& block, BlockValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true)
+static bool CheckBlockHeader(const CBlockHeader& block, BlockValidationState& state,
+                             const Consensus::Params& consensusParams, std::optional<uint256> cached_hash=std::nullopt,
+                             bool fCheckPOW = true)
 {
     // Check proof of work matches claimed amount
-    if (fCheckPOW && !CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
+    if (fCheckPOW && !CheckProofOfWork(lazy_value_or(cached_hash, [&block](){ return block.GetHash(); }), block.nBits, consensusParams))
         return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash", "proof of work failed");
 
     // Check DevNet
     if (!consensusParams.hashDevnetGenesisBlock.IsNull() &&
             block.hashPrevBlock == consensusParams.hashGenesisBlock &&
-            block.GetHash() != consensusParams.hashDevnetGenesisBlock) {
+            lazy_value_or(cached_hash, [&block](){ return block.GetHash(); }) != consensusParams.hashDevnetGenesisBlock) {
         LogPrintf("ERROR: CheckBlockHeader(): wrong devnet genesis\n");
         return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "devnet-genesis");
     }
@@ -3754,7 +3757,8 @@ static bool CheckBlockHeader(const CBlockHeader& block, BlockValidationState& st
     return true;
 }
 
-bool CheckBlock(const CBlock& block, BlockValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW, bool fCheckMerkleRoot)
+bool CheckBlock(const CBlock& block, BlockValidationState& state, const Consensus::Params& consensusParams,
+                bool fCheckPOW, bool fCheckMerkleRoot, std::optional<uint256> cached_hash)
 {
     // These are checks that are independent of context.
 
@@ -3765,7 +3769,7 @@ bool CheckBlock(const CBlock& block, BlockValidationState& state, const Consensu
 
     // Check that the header is valid (particularly PoW).  This is mostly
     // redundant with the call in AcceptBlockHeader.
-    if (!CheckBlockHeader(block, state, consensusParams, fCheckPOW))
+    if (!CheckBlockHeader(block, state, consensusParams, cached_hash, fCheckPOW))
         return false;
 
     // Check the merkle root.
@@ -3979,11 +3983,13 @@ static bool ContextualCheckBlock(const CBlock& block, BlockValidationState& stat
     return true;
 }
 
-bool BlockManager::AcceptBlockHeader(const CBlockHeader& block, BlockValidationState& state, const CChainParams& chainparams, CBlockIndex** ppindex)
+bool BlockManager::AcceptBlockHeader(const CBlockHeader& block, BlockValidationState& state,
+                                     const CChainParams& chainparams, CBlockIndex** ppindex,
+                                     std::optional<uint256> cached_hash)
 {
     AssertLockHeld(cs_main);
     // Check for duplicate
-    uint256 hash = block.GetHash();
+    uint256 hash = lazy_value_or(cached_hash, [&block](){ return block.GetHash(); });
     BlockMap::iterator miSelf = m_block_index.find(hash);
     CBlockIndex *pindex = nullptr;
 
@@ -4005,7 +4011,7 @@ bool BlockManager::AcceptBlockHeader(const CBlockHeader& block, BlockValidationS
             return true;
         }
 
-        if (!CheckBlockHeader(block, state, chainparams.GetConsensus())) {
+        if (!CheckBlockHeader(block, state, chainparams.GetConsensus(), hash)) {
             LogPrint(BCLog::VALIDATION, "%s: Consensus::CheckBlockHeader: %s, %s\n", __func__, hash.ToString(), state.ToString());
             return false;
         }
@@ -4075,14 +4081,14 @@ bool BlockManager::AcceptBlockHeader(const CBlockHeader& block, BlockValidationS
 
         if (llmq::chainLocksHandler->HasConflictingChainLock(pindexPrev->nHeight + 1, hash)) {
             if (pindex == nullptr) {
-                AddToBlockIndex(block, BLOCK_CONFLICT_CHAINLOCK);
+                AddToBlockIndex(block, hash, BLOCK_CONFLICT_CHAINLOCK);
             }
             LogPrintf("ERROR: %s: header %s conflicts with chainlock\n", __func__, hash.ToString());
             return state.Invalid(BlockValidationResult::BLOCK_CHAINLOCK, "bad-chainlock");
         }
     }
     if (pindex == nullptr)
-        pindex = AddToBlockIndex(block);
+        pindex = AddToBlockIndex(block, hash);
 
     if (ppindex)
         *ppindex = pindex;
@@ -4126,7 +4132,8 @@ bool ChainstateManager::ProcessNewBlockHeaders(const std::vector<CBlockHeader>& 
 }
 
 /** Store block on disk. If dbp is non-nullptr, the file is known to already reside on disk */
-bool CChainState::AcceptBlock(const std::shared_ptr<const CBlock>& pblock, BlockValidationState& state, CBlockIndex** ppindex, bool fRequested, const FlatFilePos* dbp, bool* fNewBlock)
+bool CChainState::AcceptBlock(const std::shared_ptr<const CBlock>& pblock, BlockValidationState& state,
+                              CBlockIndex** ppindex, bool fRequested, const FlatFilePos* dbp, bool* fNewBlock, std::optional<uint256> cached_hash)
 {
     boost::posix_time::ptime start = boost::posix_time::microsec_clock::local_time();
 
@@ -4138,7 +4145,7 @@ bool CChainState::AcceptBlock(const std::shared_ptr<const CBlock>& pblock, Block
     CBlockIndex *pindexDummy = nullptr;
     CBlockIndex *&pindex = ppindex ? *ppindex : pindexDummy;
 
-    bool accepted_header = m_blockman.AcceptBlockHeader(block, state, m_params, &pindex);
+    bool accepted_header = m_blockman.AcceptBlockHeader(block, state, m_params, &pindex, cached_hash);
     CheckBlockIndex();
 
     if (!accepted_header)
@@ -4176,7 +4183,7 @@ bool CChainState::AcceptBlock(const std::shared_ptr<const CBlock>& pblock, Block
         if (pindex->nChainWork < nMinimumChainWork) return true;
     }
 
-    if (!CheckBlock(block, state, m_params.GetConsensus()) ||
+    if (!CheckBlock(block, state, m_params.GetConsensus(), true, true, cached_hash) ||
         !ContextualCheckBlock(block, state, m_params.GetConsensus(), pindex->pprev)) {
         if (state.IsInvalid() && state.GetResult() != BlockValidationResult::BLOCK_MUTATED) {
             pindex->nStatus |= BLOCK_FAILED_VALID;
@@ -5162,7 +5169,7 @@ void CChainState::LoadExternalBlockFile(FILE* fileIn, FlatFilePos* dbp)
                     if (!pindex || (pindex->nStatus & BLOCK_HAVE_DATA) == 0) {
                       BlockValidationState state;
                       assert(std::addressof(::ChainstateActive()) == std::addressof(*this));
-                      if (AcceptBlock(pblock, state, nullptr, true, dbp, nullptr)) {
+                      if (AcceptBlock(pblock, state, nullptr, true, dbp, nullptr, hash)) {
                           nLoaded++;
                       }
                       if (state.IsError()) {
