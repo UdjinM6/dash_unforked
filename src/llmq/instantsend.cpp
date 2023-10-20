@@ -250,7 +250,8 @@ void CInstantSendDb::RemoveArchivedInstantSendLocks(int nUntilHeight)
     db->WriteBatch(batch);
 }
 
-void CInstantSendDb::WriteBlockInstantSendLocks(const std::shared_ptr<const CBlock>& pblock, const CBlockIndex* pindexConnected)
+void CInstantSendDb::WriteBlockInstantSendLocks(const gsl::not_null<std::shared_ptr<const CBlock>>& pblock,
+                                                gsl::not_null<const CBlockIndex*> pindexConnected)
 {
     LOCK(cs_db);
     CDBBatch batch(*db);
@@ -268,7 +269,7 @@ void CInstantSendDb::WriteBlockInstantSendLocks(const std::shared_ptr<const CBlo
     db->WriteBatch(batch);
 }
 
-void CInstantSendDb::RemoveBlockInstantSendLocks(const std::shared_ptr<const CBlock>& pblock, const CBlockIndex* pindexDisconnected)
+void CInstantSendDb::RemoveBlockInstantSendLocks(const gsl::not_null<std::shared_ptr<const CBlock>>& pblock, gsl::not_null<const CBlockIndex*> pindexDisconnected)
 {
     LOCK(cs_db);
     CDBBatch batch(*db);
@@ -440,7 +441,7 @@ std::vector<uint256> CInstantSendDb::RemoveChainedInstantSendLocks(const uint256
     return result;
 }
 
-void CInstantSendDb::RemoveAndArchiveInstantSendLock(const CInstantSendLockPtr& islock, int nHeight)
+void CInstantSendDb::RemoveAndArchiveInstantSendLock(const gsl::not_null<CInstantSendLockPtr>& islock, int nHeight)
 {
     LOCK(cs_db);
 
@@ -615,13 +616,11 @@ bool CInstantSendManager::CheckCanLock(const COutPoint& outpoint, bool printDebu
         return false;
     }
 
-    const CBlockIndex* pindexMined;
-    int nTxAge;
-    {
+    auto [pindexMined, nTxAge] = [&]() {
         LOCK(cs_main);
-        pindexMined = m_chainstate.m_blockman.LookupBlockIndex(hashBlock);
-        nTxAge = m_chainstate.m_chain.Height() - pindexMined->nHeight + 1;
-    }
+        auto pindex = m_chainstate.m_blockman.LookupBlockIndex(hashBlock);
+        return std::make_pair(pindex, m_chainstate.m_chain.Height() - pindex->nHeight + 1);
+    }();
 
     if (nTxAge < nInstantSendConfirmationsRequired && !clhandler.HasChainLock(pindexMined->nHeight, pindexMined->GetBlockHash())) {
         if (printDebug) {
