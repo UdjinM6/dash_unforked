@@ -112,10 +112,6 @@ bool CheckCbTxMerkleRoots(const CBlock& block, const CBlockIndex* pindex, const 
 bool CalcCbTxMerkleRootMNList(const CBlock& block, const CBlockIndex* pindexPrev, uint256& merkleRootRet, BlockValidationState& state, const CCoinsViewCache& view)
 {
     try {
-        static int64_t nTimeDMN = 0;
-        static int64_t nTimeSMNL = 0;
-        static int64_t nTimeMerkle = 0;
-
         int64_t nTime1 = GetTimeMicros();
 
         CDeterministicMNList tmpMNList;
@@ -123,6 +119,14 @@ bool CalcCbTxMerkleRootMNList(const CBlock& block, const CBlockIndex* pindexPrev
             // pass the state returned by the function above
             return false;
         }
+
+        // protect static variables (time intervals and cached values)
+        static Mutex cs;
+        LOCK(cs);
+
+        static int64_t nTimeDMN = 0;
+        static int64_t nTimeSMNL = 0;
+        static int64_t nTimeMerkle = 0;
 
         int64_t nTime2 = GetTimeMicros(); nTimeDMN += nTime2 - nTime1;
         LogPrint(BCLog::BENCHMARK, "            - BuildNewListFromBlock: %.2fms [%.2fs]\n", 0.001 * (nTime2 - nTime1), nTimeDMN * 0.000001);
