@@ -1172,6 +1172,8 @@ static std::pair<CAmount, CAmount> GetBlockSubsidyHelper(int nPrevBits, int nPre
     // Hard fork to reduce the block reward by 10 extra percent (allowing budget/superblocks)
     if (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) {
         // Once v20 is active, the treasury is 20% instead of 10%
+        // TODO remove this when we re-organize testnet
+        if (Params().NetworkIDString() == CBaseChainParams::TESTNET) fV20Active = false;
         nSuperblockPart = nSubsidy / (fV20Active ? 5 : 10);
     }
     return {nSubsidy - nSuperblockPart, nSuperblockPart};
@@ -1229,6 +1231,8 @@ CAmount GetMasternodePayment(int nHeight, CAmount blockValue, bool fV20Active)
         return ret;
     }
 
+    // TODO remove this when we re-organize testnet
+    if (Params().NetworkIDString() == CBaseChainParams::TESTNET) fV20Active = false;
     if (fV20Active) {
         // Once MNRewardReallocated activates, block reward is 80% of block subsidy (+ tx fees) since treasury is 20%
         // Since the MN reward needs to be equal to 60% of the block subsidy (according to the proposal), MN reward is set to 75% of the block reward.
